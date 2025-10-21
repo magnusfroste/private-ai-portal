@@ -94,28 +94,12 @@ const Dashboard = () => {
 
     setIsCreatingKey(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
 
-      // Generate a random API key
-      const keyValue = `av_${Array.from(crypto.getRandomValues(new Uint8Array(32)))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('')}`;
-
-      // Set expiration to 5 days from now for trial
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 5);
-
-      const { error } = await supabase
-        .from("api_keys")
-        .insert({
-          user_id: user.id,
-          name: newKeyName,
-          key_value: keyValue,
-          expires_at: expiresAt.toISOString(),
-          trial_credits_usd: 25.00,
-          used_credits_usd: 0,
-        });
+      const { data, error } = await supabase.functions.invoke('generate-api-key', {
+        body: { keyName: newKeyName }
+      });
 
       if (error) throw error;
 
