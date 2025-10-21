@@ -97,11 +97,28 @@ const Dashboard = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase.functions.invoke('generate-api-key', {
-        body: { keyName: newKeyName }
-      });
+      const accessToken = session.access_token;
 
-      if (error) throw error;
+      console.log('Invoking function with token:', accessToken ? 'Bearer ' + accessToken.substring(0, 20) + '...' : 'none');
+      console.log('Session info:', {
+        user: session.user.email,
+        expiresAt: session.expires_at,
+        provider: session.user.app_metadata.provider
+      });
+      
+      const { data, error } = await supabase.functions.invoke('generate-api-key', {
+        body: { keyName: newKeyName },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      
+      console.log('Function response:', { data, error });
+      
+      if (error) {
+        console.error('Detailed error:', error);
+        throw error;
+      }
 
       toast.success("API key created successfully!");
       setNewKeyName("");
