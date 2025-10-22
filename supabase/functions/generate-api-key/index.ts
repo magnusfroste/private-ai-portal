@@ -11,7 +11,7 @@ interface ApiKeyResponse {
   data?: {
     key: string;
     name: string;
-    expires_at: string;
+    expires_at: string | null;
     trial_credits_usd: number;
     used_credits_usd: number;
   };
@@ -37,62 +37,56 @@ const respondWithError = (status: number, code: string, message: string): Respon
   });
 };
 
+// Function to create a new API key using LiteLLM's key management API
+async function createLiteLLMKey(keyName: string, masterKey: string): Promise<ApiKeyResponse> {
+  const response = await fetch('https://litellm.autoversio.ai/key/generate', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${masterKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      key_name: keyName,
+      spend_limit: 10.0, // Set initial trial credits
+      duration: '5d' // 5-day trial period
+    })
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to create LiteLLM key');
+  }
+
+  return {
+    success: true,
+    data: {
+      key: data.key,
+      name: keyName,
+      expires_at: data.expires_at || null,
+      trial_credits_usd: 10.0,
+      used_credits_usd: 0
+    }
+  };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Debug log for auth header and request details
     const authHeader = req.headers.get('Authorization');
-    console.log('Auth header:', authHeader);
-    console.log('Request headers:', Object.fromEntries(req.headers.entries()));
-    console.log('Environment variables present:', {
-      hasServiceRole: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
-      hasAnonKey: !!Deno.env.get('SUPABASE_ANON_KEY'),
-      hasLiteLLMKey: !!Deno.env.get('LITELLM_MASTER_KEY'),
-    });
-    
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY');
 
-    if (!supabaseUrl || !supabaseServiceRoleKey || !supabaseAnonKey) {
-      console.error('Missing required environment variables:', {
-        hasUrl: !!supabaseUrl,
-        hasServiceRole: !!supabaseServiceRoleKey,
-        hasAnonKey: !!supabaseAnonKey
-      });
-      return respondWithError(500, 'config_error', 'Missing required Supabase configuration');
+    if (!LITELLM_MASTER_KEY) {
+      console.error('Missing LiteLLM master key');
+      return respondWithError(500, 'config_error', 'LiteLLM configuration missing');
     }
 
-    // Create Supabase admin client with service role key
-    const supabaseAdmin = createClient(
-      supabaseUrl,
-      supabaseServiceRoleKey,
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-        }
-      }
-    );
-
-    // Create client with user's JWT for auth check
-    const supabaseClient = createClient(
-      supabaseUrl,
-      supabaseAnonKey,
-      {
-        global: {
-          headers: { Authorization: authHeader ?? '' },
-        },
-      }
-    );
-
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    
-    if (!user) {
-      return respondWithError(401, 'unauthorized', 'User not authenticated');
+    // Verify JWT from the auth header to ensure user is authenticated
+    if (!authHeader?.startsWith('Bearer ')) {
+      return respondWithError(401, 'unauthorized', 'Missing or invalid authorization header');
     }
 
     const body = await req.json() as Partial<GenerateKeyRequest>;
@@ -100,78 +94,25 @@ serve(async (req) => {
       return respondWithError(400, 'invalid_input', 'Key name is required');
     }
     
-    const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY');
-    const LITELLM_PROXY_URL = 'https://litellm.autoversio.ai';
+    console.log('Creating new LiteLLM key:', { keyName: body.keyName });
 
     if (!LITELLM_MASTER_KEY) {
       console.error('Missing LiteLLM configuration');
       return respondWithError(500, 'config_error', 'LiteLLM configuration missing');
     }
 
-    // Calculate expiration (5 days from now)
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 5);
+    try {
+      // Generate key through LiteLLM's API
+      const response = await createLiteLLMKey(body.keyName, LITELLM_MASTER_KEY);
 
-    console.log('Generating API key with LiteLLM for user:', user.id);
-
-    // Generate key with LiteLLM
-    const litellmResponse = await fetch(`${LITELLM_PROXY_URL}/key/generate`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LITELLM_MASTER_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user_id: user.id,
-        key_alias: body.keyName,
-        duration: '5d',
-        max_budget: 25.0, // $25 trial credit
-        metadata: {
-          user_email: user.email,
-          trial_key: true,
-        }
-      }),
-    });
-
-    if (!litellmResponse.ok) {
-      const errorText = await litellmResponse.text();
-      console.error('LiteLLM API error:', litellmResponse.status, errorText);
-      return respondWithError(502, 'litellm_error', `Failed to generate key: ${errorText}`);
+      return new Response(JSON.stringify(response), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } catch (error) {
+      console.error('Error creating LiteLLM key:', error);
+      return respondWithError(500, 'litellm_error', 'Failed to generate API key');
     }
-
-    const litellmData = await litellmResponse.json();
-    console.log('LiteLLM key generated successfully:', litellmData.key);
-
-    // Store key in our database using admin client
-    const { data: apiKey, error: dbError } = await supabaseAdmin
-      .from('api_keys')
-      .insert({
-        user_id: user.id,
-        name: body.keyName,
-        key_value: litellmData.key,
-        trial_credits_usd: 25.0,
-        used_credits_usd: 0,
-        expires_at: expiresAt.toISOString(),
-        is_active: true,
-      })
-      .select()
-      .single();
-
-    if (dbError) {
-      console.error('Database error:', dbError);
-      return respondWithError(500, 'database_error', 'Failed to store API key');
-    }
-
-    const response: ApiKeyResponse = {
-      success: true,
-      data: {
-        key: apiKey.key_value,
-        name: apiKey.name,
-        expires_at: apiKey.expires_at,
-        trial_credits_usd: apiKey.trial_credits_usd,
-        used_credits_usd: apiKey.used_credits_usd,
-      }
-    };
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
