@@ -38,14 +38,7 @@ const Dashboard = () => {
   const [isCreatingKey, setIsCreatingKey] = useState(false);
 
   const availableModels = [
-    "gpt-4o",
-    "gpt-4o-mini",
-    "gpt-4-turbo",
-    "gpt-3.5-turbo",
-    "claude-3-5-sonnet-20241022",
-    "claude-3-opus-20240229",
-    "gemini-pro",
-    "gemini-1.5-pro"
+    "all-team-models"
   ];
 
   useEffect(() => {
