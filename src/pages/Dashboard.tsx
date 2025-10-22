@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Profile {
   full_name: string | null;
@@ -32,7 +33,20 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showKey, setShowKey] = useState<Record<string, boolean>>({});
   const [newKeyName, setNewKeyName] = useState("");
+  const [newKeyTeamId, setNewKeyTeamId] = useState("");
+  const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [isCreatingKey, setIsCreatingKey] = useState(false);
+
+  const availableModels = [
+    "gpt-4o",
+    "gpt-4o-mini",
+    "gpt-4-turbo",
+    "gpt-3.5-turbo",
+    "claude-3-5-sonnet-20241022",
+    "claude-3-opus-20240229",
+    "gemini-pro",
+    "gemini-1.5-pro"
+  ];
 
   useEffect(() => {
     checkAuth();
@@ -107,7 +121,11 @@ const Dashboard = () => {
       });
       
       const { data, error } = await supabase.functions.invoke('generate-api-key', {
-        body: { keyName: newKeyName },
+        body: { 
+          keyName: newKeyName,
+          models: selectedModels.length > 0 ? selectedModels : undefined,
+          teamId: newKeyTeamId || undefined
+        },
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -122,6 +140,8 @@ const Dashboard = () => {
 
       toast.success("API key created successfully!");
       setNewKeyName("");
+      setNewKeyTeamId("");
+      setSelectedModels([]);
       fetchApiKeys();
     } catch (error) {
       console.error("Error creating API key:", error);
@@ -251,7 +271,7 @@ const Dashboard = () => {
                       Give your API key a descriptive name to help you identify it later.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-4 pt-4">
+                  <div className="space-y-4 pt-4 max-h-[60vh] overflow-y-auto">
                     <div className="space-y-2">
                       <Label htmlFor="key-name">Key Name</Label>
                       <Input
@@ -262,12 +282,58 @@ const Dashboard = () => {
                         disabled={isCreatingKey}
                       />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="team-id">Team ID (Optional)</Label>
+                      <Input
+                        id="team-id"
+                        placeholder="e.g., team-uuid"
+                        value={newKeyTeamId}
+                        onChange={(e) => setNewKeyTeamId(e.target.value)}
+                        disabled={isCreatingKey}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Leave empty for no team restriction
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Models (Optional)</Label>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Select specific models or leave empty for all models
+                      </p>
+                      <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg">
+                        {availableModels.map((model) => (
+                          <div key={model} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={model}
+                              checked={selectedModels.includes(model)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedModels([...selectedModels, model]);
+                                } else {
+                                  setSelectedModels(selectedModels.filter(m => m !== model));
+                                }
+                              }}
+                              disabled={isCreatingKey}
+                            />
+                            <Label
+                              htmlFor={model}
+                              className="text-sm font-normal cursor-pointer"
+                            >
+                              {model}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 space-y-2">
                       <p className="text-sm font-semibold">Trial Key Includes:</p>
                       <ul className="text-sm space-y-1 text-muted-foreground">
                         <li>• $25 in credits</li>
                         <li>• 5 days validity</li>
-                        <li>• Full LLM access</li>
+                        <li>• {selectedModels.length > 0 ? `Access to ${selectedModels.length} selected models` : 'Full LLM access'}</li>
                       </ul>
                     </div>
                     <Button 

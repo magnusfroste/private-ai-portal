@@ -4,6 +4,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 interface GenerateKeyRequest {
   keyName: string;
+  models?: string[];
+  teamId?: string;
 }
 
 interface ApiKeyResponse {
@@ -38,8 +40,29 @@ const respondWithError = (status: number, code: string, message: string): Respon
 };
 
 // Function to create a new API key using LiteLLM's key management API
-async function createLiteLLMKey(keyName: string, masterKey: string): Promise<any> {
+async function createLiteLLMKey(
+  keyName: string, 
+  masterKey: string,
+  models?: string[],
+  teamId?: string
+): Promise<any> {
   console.log('Calling LiteLLM API at https://litellm.autoversio.ai/key/generate');
+  
+  const requestBody: any = {
+    key_alias: keyName,
+    max_budget: 25.0,
+    duration: '5d'
+  };
+
+  if (models && models.length > 0) {
+    requestBody.models = models;
+  }
+
+  if (teamId) {
+    requestBody.team_id = teamId;
+  }
+
+  console.log('Request body:', requestBody);
   
   const response = await fetch('https://litellm.autoversio.ai/key/generate', {
     method: 'POST',
@@ -47,11 +70,7 @@ async function createLiteLLMKey(keyName: string, masterKey: string): Promise<any
       'Authorization': `Bearer ${masterKey}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      key_alias: keyName,
-      max_budget: 25.0,
-      duration: '5d'
-    })
+    body: JSON.stringify(requestBody)
   });
 
   const data = await response.json();
@@ -111,7 +130,12 @@ serve(async (req) => {
 
     try {
       // Generate key through LiteLLM's API
-      const liteLLMResponse = await createLiteLLMKey(body.keyName, LITELLM_MASTER_KEY);
+      const liteLLMResponse = await createLiteLLMKey(
+        body.keyName, 
+        LITELLM_MASTER_KEY,
+        body.models,
+        body.teamId
+      );
       
       // Calculate expiration date (5 days from now)
       const expiresAt = new Date();
