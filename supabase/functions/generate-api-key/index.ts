@@ -1,6 +1,6 @@
 /// <reference lib="deno.ns" />
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 interface GenerateKeyRequest {
   keyName: string;
@@ -38,7 +38,9 @@ const respondWithError = (status: number, code: string, message: string): Respon
 };
 
 // Function to create a new API key using LiteLLM's key management API
-async function createLiteLLMKey(keyName: string, masterKey: string): Promise<ApiKeyResponse> {
+async function createLiteLLMKey(keyName: string, masterKey: string): Promise<any> {
+  console.log('Calling LiteLLM API at https://litellm.autoversio.ai/key/generate');
+  
   const response = await fetch('https://litellm.autoversio.ai/key/generate', {
     method: 'POST',
     headers: {
@@ -46,28 +48,20 @@ async function createLiteLLMKey(keyName: string, masterKey: string): Promise<Api
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      key_name: keyName,
-      spend_limit: 10.0, // Set initial trial credits
-      duration: '5d' // 5-day trial period
+      key_alias: keyName,
+      max_budget: 25.0,
+      duration: '5d'
     })
   });
 
   const data = await response.json();
+  console.log('LiteLLM API response:', { status: response.status, data });
   
   if (!response.ok) {
-    throw new Error(data.error || 'Failed to create LiteLLM key');
+    throw new Error(data.error || `LiteLLM API error: ${response.status}`);
   }
 
-  return {
-    success: true,
-    data: {
-      key: data.key,
-      name: keyName,
-      expires_at: data.expires_at || null,
-      trial_credits_usd: 10.0,
-      used_credits_usd: 0
-    }
-  };
+  return data;
 }
 
 serve(async (req) => {
@@ -78,10 +72,17 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization');
     const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY');
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     if (!LITELLM_MASTER_KEY) {
       console.error('Missing LiteLLM master key');
       return respondWithError(500, 'config_error', 'LiteLLM configuration missing');
+    }
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Missing Supabase configuration');
+      return respondWithError(500, 'config_error', 'Supabase configuration missing');
     }
 
     // Verify JWT from the auth header to ensure user is authenticated
@@ -89,21 +90,63 @@ serve(async (req) => {
       return respondWithError(401, 'unauthorized', 'Missing or invalid authorization header');
     }
 
+    // Create Supabase client
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    
+    // Verify the user's JWT and get user ID
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      return respondWithError(401, 'unauthorized', 'Invalid authentication token');
+    }
+
     const body = await req.json() as Partial<GenerateKeyRequest>;
     if (!body.keyName?.trim()) {
       return respondWithError(400, 'invalid_input', 'Key name is required');
     }
     
-    console.log('Creating new LiteLLM key:', { keyName: body.keyName });
-
-    if (!LITELLM_MASTER_KEY) {
-      console.error('Missing LiteLLM configuration');
-      return respondWithError(500, 'config_error', 'LiteLLM configuration missing');
-    }
+    console.log('Creating new LiteLLM key for user:', { userId: user.id, keyName: body.keyName });
 
     try {
       // Generate key through LiteLLM's API
-      const response = await createLiteLLMKey(body.keyName, LITELLM_MASTER_KEY);
+      const liteLLMResponse = await createLiteLLMKey(body.keyName, LITELLM_MASTER_KEY);
+      
+      // Calculate expiration date (5 days from now)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 5);
+
+      // Store the key in the database
+      const { data: apiKey, error: dbError } = await supabase
+        .from('api_keys')
+        .insert({
+          user_id: user.id,
+          name: body.keyName,
+          key_value: liteLLMResponse.key,
+          expires_at: expiresAt.toISOString(),
+          trial_credits_usd: 25.0,
+          used_credits_usd: 0,
+          is_active: true
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        console.error('Database error:', dbError);
+        throw new Error('Failed to save API key to database');
+      }
+
+      const response: ApiKeyResponse = {
+        success: true,
+        data: {
+          key: liteLLMResponse.key,
+          name: body.keyName,
+          expires_at: expiresAt.toISOString(),
+          trial_credits_usd: 25.0,
+          used_credits_usd: 0
+        }
+      };
 
       return new Response(JSON.stringify(response), {
         status: 200,
@@ -111,12 +154,9 @@ serve(async (req) => {
       });
     } catch (error) {
       console.error('Error creating LiteLLM key:', error);
-      return respondWithError(500, 'litellm_error', 'Failed to generate API key');
+      const errorMsg = error instanceof Error ? error.message : 'Failed to generate API key';
+      return respondWithError(500, 'litellm_error', errorMsg);
     }
-
-    return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
 
   } catch (error) {
     console.error('Error in generate-api-key function:', error);
