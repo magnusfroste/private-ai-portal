@@ -33,7 +33,6 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showKey, setShowKey] = useState<Record<string, boolean>>({});
   const [newKeyName, setNewKeyName] = useState("");
-  const [newKeyTeamId, setNewKeyTeamId] = useState("");
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [isCreatingKey, setIsCreatingKey] = useState(false);
 
@@ -117,7 +116,7 @@ const Dashboard = () => {
         body: { 
           keyName: newKeyName,
           models: selectedModels.length > 0 ? selectedModels : undefined,
-          teamId: newKeyTeamId || undefined
+          teamId: 'e2e76f95-0fbf-4077-bf9c-0d16880f99b0'
         },
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -133,7 +132,6 @@ const Dashboard = () => {
 
       toast.success("API key created successfully!");
       setNewKeyName("");
-      setNewKeyTeamId("");
       setSelectedModels([]);
       fetchApiKeys();
     } catch (error) {
@@ -274,20 +272,6 @@ const Dashboard = () => {
                         onChange={(e) => setNewKeyName(e.target.value)}
                         disabled={isCreatingKey}
                       />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="team-id">Team ID (Optional)</Label>
-                      <Input
-                        id="team-id"
-                        placeholder="e.g., team-uuid"
-                        value={newKeyTeamId}
-                        onChange={(e) => setNewKeyTeamId(e.target.value)}
-                        disabled={isCreatingKey}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Leave empty for no team restriction
-                      </p>
                     </div>
 
                     <div className="space-y-2">
