@@ -228,9 +228,21 @@ const Dashboard = () => {
     toast.success("Signed out successfully");
   };
 
-  const totalCredits = apiKeys.reduce((sum, key) => sum + Number(key.trial_credits_usd), 0);
-  const usedCredits = apiKeys.reduce((sum, key) => sum + Number(key.used_credits_usd), 0);
-  const remainingCredits = totalCredits - usedCredits;
+  // Calculate totals from actual LiteLLM usage data when available
+  const totalCredits = apiKeys.reduce((sum, key) => {
+    const usage = keyUsageData[key.id];
+    return sum + (usage ? Number(usage.max_budget) : Number(key.trial_credits_usd));
+  }, 0);
+  
+  const usedCredits = apiKeys.reduce((sum, key) => {
+    const usage = keyUsageData[key.id];
+    return sum + (usage ? Number(usage.spend) : Number(key.used_credits_usd));
+  }, 0);
+  
+  const remainingCredits = apiKeys.reduce((sum, key) => {
+    const usage = keyUsageData[key.id];
+    return sum + (usage ? Number(usage.budget_remaining) : (Number(key.trial_credits_usd) - Number(key.used_credits_usd)));
+  }, 0);
 
   if (isLoading) {
     return (

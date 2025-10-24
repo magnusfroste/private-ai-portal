@@ -1,4 +1,3 @@
-/// <reference lib="deno.ns" />
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -41,14 +40,27 @@ const respondWithError = (status: number, code: string, message: string): Respon
 
 // Function to create a new API key using LiteLLM's key management API
 async function createLiteLLMKey(
-  keyName: string, 
+  keyName: string,
   masterKey: string,
   models?: string[],
   teamId?: string
-): Promise<any> {
+): Promise<{
+  key: string;
+  token: string;
+  key_alias: string;
+  max_budget: number;
+  duration: string;
+  team_id?: string;
+}> {
   console.log('Calling LiteLLM API at https://api.autoversio.ai/key/generate');
   
-  const requestBody: any = {
+  const requestBody: {
+    key_alias: string;
+    max_budget: number;
+    duration: string;
+    models?: string[];
+    team_id?: string;
+  } = {
     key_alias: keyName,
     max_budget: 25.0,
     duration: '5d'
@@ -83,16 +95,16 @@ async function createLiteLLMKey(
   return data;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const authHeader = req.headers.get('Authorization');
-    const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY');
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY') || '';
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
     if (!LITELLM_MASTER_KEY) {
       console.error('Missing LiteLLM master key');
