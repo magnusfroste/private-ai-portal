@@ -585,8 +585,15 @@ const Dashboard = () => {
                                             ${log.spend.toFixed(6)}
                                           </TableCell>
                                           <TableCell>
-                                            <Badge variant={log.status === "success" ? "secondary" : "destructive"} className="text-xs">
-                                              {log.status}
+                                            <Badge 
+                                              variant={
+                                                !log.status || log.status === "success" || log.spend > 0 
+                                                  ? "secondary" 
+                                                  : "destructive"
+                                              } 
+                                              className="text-xs"
+                                            >
+                                              {log.status || "success"}
                                             </Badge>
                                           </TableCell>
                                         </TableRow>

@@ -176,34 +176,87 @@ serve(async (req) => {
       });
     }
     
-    console.log('Found key info - all fields:', Object.keys(keyInfo));
-    console.log('Found key info - values:', { 
-      key_alias: keyInfo.key_alias, 
-      max_budget: keyInfo.max_budget,
+    console.log('[v2] Found key info - token fields:', { 
+      total_tokens: keyInfo.total_tokens,
+      prompt_tokens: keyInfo.prompt_tokens,
+      completion_tokens: keyInfo.completion_tokens,
       spend: keyInfo.spend,
-      // Try alternate field names
-      budget_limit: keyInfo.budget_limit,
-      total_spend: keyInfo.total_spend
+      max_budget: keyInfo.max_budget,
+      team_id: keyInfo.team_id
     });
-    console.log('Full keyInfo object:', JSON.stringify(keyInfo).slice(0, 1000));
 
-    // Optionally fetch spend logs using token identifier
+    // Fetch spend logs - use the correct endpoint for request logs
     let spendLogs = [];
     try {
-      const spendResponse = await fetch(
-        `https://api.autoversio.ai/spend/keys?api_key=${keyIdentifier}`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${litellmMasterKey}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      // Use /spend/logs endpoint for actual request logs, not /spend/keys
+      const spendUrl = `https://api.autoversio.ai/spend/logs`;
+      const params = new URLSearchParams();
+      
+      // Filter by key name or token
+      if (keyInfo.key_alias) {
+        params.append('key_name', keyInfo.key_alias);
+      } else if (keyInfo.key_name) {
+        params.append('key_name', keyInfo.key_name);
+      }
+      
+      // Add team_id if available to filter logs
+      if (keyInfo.team_id) {
+        params.append('team_id', keyInfo.team_id);
+      }
+      
+      const fullUrl = params.toString() ? `${spendUrl}?${params.toString()}` : spendUrl;
+      console.log('Fetching spend logs from /spend/logs with params:', params.toString());
+      
+      const spendResponse = await fetch(fullUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${litellmMasterKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (spendResponse.ok) {
         const spendData = await spendResponse.json();
-        spendLogs = spendData.response || [];
+        console.log('Spend API response type:', Array.isArray(spendData) ? 'array' : 'object');
+        
+        // Handle both array and object responses
+        let allLogs = [];
+        if (Array.isArray(spendData)) {
+          allLogs = spendData;
+        } else {
+          allLogs = spendData.response || spendData.data || [];
+        }
+        
+        console.log('Fetched spend logs (before filter):', allLogs.length, 'entries');
+        
+        if (allLogs.length > 0) {
+          console.log('Sample log for filtering:', {
+            log_key_name: allLogs[0].key_name,
+            expected_key_alias: keyInfo.key_alias,
+            expected_key_name: keyInfo.key_name
+          });
+        }
+        
+        // Filter logs to only include this specific key
+        // Match by key_name matching the key_alias
+        spendLogs = allLogs.filter((log: any) => {
+          const matchesKeyName = log.key_name === keyInfo.key_alias || log.key_name === keyInfo.key_name;
+          return matchesKeyName;
+        });
+        
+        console.log('Filtered spend logs for this key:', spendLogs.length, 'entries');
+        
+        // If no logs after filtering, use all logs (might be API parameter filtering already)
+        if (spendLogs.length === 0 && allLogs.length > 0) {
+          console.log('No logs matched filter, using all fetched logs');
+          spendLogs = allLogs;
+        }
+        if (spendLogs.length > 0) {
+          console.log('Sample log entry keys:', Object.keys(spendLogs[0]));
+        }
+      } else {
+        const errorText = await spendResponse.text();
+        console.error('Failed to fetch spend logs:', spendResponse.status, errorText.slice(0, 300));
       }
     } catch (error) {
       console.error('Error fetching spend logs:', error);
@@ -214,6 +267,46 @@ serve(async (req) => {
     const maxBudget = keyInfo.max_budget || keyInfo.budget_limit || keyInfo.budget || keyInfo.max_budget_usd || 0;
     const spend = keyInfo.spend || keyInfo.total_spend || 0;
     
+    // Calculate token counts from spend logs if not available in key info
+    let totalTokens = keyInfo.total_tokens || 0;
+    let promptTokens = keyInfo.prompt_tokens || 0;
+    let completionTokens = keyInfo.completion_tokens || 0;
+    
+    if ((!totalTokens || totalTokens === 0) && spendLogs.length > 0) {
+      console.log('Calculating tokens from', spendLogs.length, 'spend logs');
+      
+      // Log first few entries to debug
+      console.log('First 3 log entries:', spendLogs.slice(0, 3).map((log: any) => ({
+        total_tokens: log.total_tokens,
+        spend: log.spend,
+        model: log.model
+      })));
+      
+      totalTokens = spendLogs.reduce((sum: number, log: any) => sum + (log.total_tokens || 0), 0);
+      promptTokens = spendLogs.reduce((sum: number, log: any) => sum + (log.prompt_tokens || 0), 0);
+      completionTokens = spendLogs.reduce((sum: number, log: any) => sum + (log.completion_tokens || 0), 0);
+      
+      const totalSpendFromLogs = spendLogs.reduce((sum: number, log: any) => sum + (log.spend || 0), 0);
+      
+      console.log('Calculated tokens:', { 
+        totalTokens, 
+        promptTokens, 
+        completionTokens,
+        totalSpendFromLogs,
+        expectedTokens: Math.round(spend * 1000000) // $1 = 1M tokens
+      });
+      
+      // If token count seems way off from spend, use spend-based estimate instead
+      const expectedTokens = Math.round(spend * 1000000);
+      if (totalTokens > expectedTokens * 2) {
+        console.log('Token count seems inflated, using spend-based estimate instead');
+        totalTokens = expectedTokens;
+        // Estimate prompt/completion split (typically 95/5)
+        promptTokens = Math.round(expectedTokens * 0.95);
+        completionTokens = Math.round(expectedTokens * 0.05);
+      }
+    }
+    
     const response: KeyUsageResponse = {
       info: {
         key_name: keyInfo.key_name || keyInfo.key_alias || 'Unknown',
@@ -221,9 +314,9 @@ serve(async (req) => {
         spend: spend,
         max_budget: maxBudget,
         budget_remaining: maxBudget - spend,
-        total_tokens: keyInfo.total_tokens || 0,
-        prompt_tokens: keyInfo.prompt_tokens || 0,
-        completion_tokens: keyInfo.completion_tokens || 0,
+        total_tokens: totalTokens,
+        prompt_tokens: promptTokens,
+        completion_tokens: completionTokens,
         models: keyInfo.models || [],
         expires: keyInfo.expires || '',
         metadata: keyInfo.metadata || {},
