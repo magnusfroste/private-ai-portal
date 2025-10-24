@@ -46,7 +46,7 @@ async function createLiteLLMKey(
   models?: string[],
   teamId?: string
 ): Promise<any> {
-  console.log('Calling LiteLLM API at https://litellm.autoversio.ai/key/generate');
+  console.log('Calling LiteLLM API at https://api.autoversio.ai/key/generate');
   
   const requestBody: any = {
     key_alias: keyName,
@@ -64,7 +64,7 @@ async function createLiteLLMKey(
 
   console.log('Request body:', requestBody);
   
-  const response = await fetch('https://litellm.autoversio.ai/key/generate', {
+  const response = await fetch('https://api.autoversio.ai/key/generate', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${masterKey}`,
