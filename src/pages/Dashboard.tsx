@@ -3,12 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Key, BarChart, LogOut, Copy, Plus, Eye, EyeOff } from "lucide-react";
+import { Shield, Key, BarChart, LogOut, Copy, Plus, Eye, EyeOff, RefreshCw, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Profile {
   full_name: string | null;
@@ -26,6 +30,31 @@ interface ApiKey {
   is_active: boolean;
 }
 
+interface KeyUsageInfo {
+  key_name: string;
+  key_alias: string;
+  spend: number;
+  max_budget: number;
+  budget_remaining: number;
+  total_tokens: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  models: string[];
+  expires: string;
+  metadata: any;
+}
+
+interface SpendLog {
+  request_id: string;
+  startTime: string;
+  model: string;
+  total_tokens: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  spend: number;
+  status: string;
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -35,6 +64,10 @@ const Dashboard = () => {
   const [newKeyName, setNewKeyName] = useState("");
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [isCreatingKey, setIsCreatingKey] = useState(false);
+  const [keyUsageData, setKeyUsageData] = useState<Record<string, KeyUsageInfo>>({});
+  const [loadingUsage, setLoadingUsage] = useState<Record<string, boolean>>({});
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const [spendLogs, setSpendLogs] = useState<Record<string, SpendLog[]>>({});
 
   const availableModels = [
     "all-team-models"
@@ -86,10 +119,48 @@ const Dashboard = () => {
 
         if (error) throw error;
         setApiKeys(data || []);
+        
+        // Fetch usage data for all keys
+        if (data && data.length > 0) {
+          data.forEach(key => fetchKeyUsage(key.id));
+        }
       }
     } catch (error) {
       console.error("Error fetching API keys:", error);
     }
+  };
+
+  const fetchKeyUsage = async (keyId: string) => {
+    setLoadingUsage(prev => ({ ...prev, [keyId]: true }));
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data, error } = await supabase.functions.invoke('get-key-usage', {
+        body: { keyId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data && data.info) {
+        setKeyUsageData(prev => ({ ...prev, [keyId]: data.info }));
+        if (data.spend_logs) {
+          setSpendLogs(prev => ({ ...prev, [keyId]: data.spend_logs }));
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching key usage:", error);
+    } finally {
+      setLoadingUsage(prev => ({ ...prev, [keyId]: false }));
+    }
+  };
+
+  const refreshAllUsage = async () => {
+    apiKeys.forEach(key => fetchKeyUsage(key.id));
+    toast.success("Refreshing usage data...");
   };
 
   const createApiKey = async () => {
@@ -133,7 +204,7 @@ const Dashboard = () => {
       toast.success("API key created successfully!");
       setNewKeyName("");
       setSelectedModels([]);
-      fetchApiKeys();
+      await fetchApiKeys();
     } catch (error) {
       console.error("Error creating API key:", error);
       toast.error("Failed to create API key");
@@ -248,7 +319,11 @@ const Dashboard = () => {
                   Manage your API keys for accessing the LiteLLM proxy
                 </CardDescription>
               </div>
-              <Dialog>
+              <div className="flex gap-2">
+                <Button variant="outline" size="icon" onClick={refreshAllUsage}>
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+                <Dialog>
                 <DialogTrigger asChild>
                   <Button className="glow">
                     <Plus className="w-4 h-4 mr-2" />
@@ -323,6 +398,7 @@ const Dashboard = () => {
                   </div>
                 </DialogContent>
               </Dialog>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -340,13 +416,36 @@ const Dashboard = () => {
                   const daysRemaining = key.expires_at 
                     ? Math.ceil((new Date(key.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
                     : null;
-                  const creditsRemaining = Number(key.trial_credits_usd) - Number(key.used_credits_usd);
+                  const usage = keyUsageData[key.id];
+                  const loading = loadingUsage[key.id];
+                  const logs = spendLogs[key.id] || [];
+                  const isExpanded = expandedKey === key.id;
+
+                  // Calculate usage percentage
+                  const usagePercent = usage 
+                    ? ((usage.spend / usage.max_budget) * 100)
+                    : ((Number(key.used_credits_usd) / Number(key.trial_credits_usd)) * 100);
+
+                  // Determine status color
+                  const getStatusColor = () => {
+                    if (!key.is_active || (daysRemaining !== null && daysRemaining <= 0)) return "destructive";
+                    if (usagePercent >= 80) return "destructive";
+                    if (usagePercent >= 50) return "default";
+                    return "secondary";
+                  };
 
                   return (
                     <div key={key.id} className="glass-card p-4 rounded-lg space-y-3">
                       <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-semibold text-lg">{key.name}</h3>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-lg">{key.name}</h3>
+                            <Badge variant={getStatusColor()}>
+                              {!key.is_active ? "Inactive" : 
+                               daysRemaining !== null && daysRemaining <= 0 ? "Expired" :
+                               usagePercent >= 80 ? "High Usage" : "Active"}
+                            </Badge>
+                          </div>
                           <p className="text-sm text-muted-foreground">
                             Created {new Date(key.created_at).toLocaleDateString()}
                           </p>
@@ -354,12 +453,11 @@ const Dashboard = () => {
                         <div className="text-right space-y-1">
                           {daysRemaining !== null && (
                             <p className="text-sm">
-                              <span className="text-accent font-semibold">{daysRemaining}</span> days left
+                              <span className={`font-semibold ${daysRemaining <= 1 ? 'text-destructive' : 'text-accent'}`}>
+                                {daysRemaining}
+                              </span> days left
                             </p>
                           )}
-                          <p className="text-sm text-muted-foreground">
-                            ${creditsRemaining.toFixed(2)} remaining
-                          </p>
                         </div>
                       </div>
                       
@@ -383,14 +481,123 @@ const Dashboard = () => {
                         >
                           <Copy className="w-4 h-4" />
                         </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => fetchKeyUsage(key.id)}
+                          disabled={loading}
+                        >
+                          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                        </Button>
                       </div>
 
-                      <div className="w-full bg-secondary rounded-full h-2">
-                        <div
-                          className="bg-accent h-2 rounded-full transition-all"
-                          style={{ width: `${(creditsRemaining / Number(key.trial_credits_usd)) * 100}%` }}
-                        />
-                      </div>
+                      {loading ? (
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-2 w-full" />
+                        </div>
+                      ) : usage ? (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="space-y-1">
+                              <p className="text-xs text-muted-foreground">Spend</p>
+                              <p className="text-sm font-semibold">
+                                ${usage.spend.toFixed(4)} / ${usage.max_budget.toFixed(2)}
+                              </p>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-xs text-muted-foreground">Remaining</p>
+                              <p className="text-sm font-semibold text-accent">
+                                ${usage.budget_remaining.toFixed(4)}
+                              </p>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-xs text-muted-foreground">Total Tokens</p>
+                              <p className="text-sm font-semibold">
+                                {usage.total_tokens.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-xs text-muted-foreground">Models Used</p>
+                              <p className="text-sm font-semibold">
+                                {usage.models.length > 0 ? usage.models.length : "All"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>Budget Usage</span>
+                              <span>{usagePercent.toFixed(1)}%</span>
+                            </div>
+                            <Progress value={usagePercent} className="h-2" />
+                          </div>
+
+                          {logs.length > 0 && (
+                            <div className="pt-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setExpandedKey(isExpanded ? null : key.id)}
+                                className="w-full"
+                              >
+                                <Activity className="w-4 h-4 mr-2" />
+                                {isExpanded ? "Hide" : "Show"} Usage Log ({logs.length} requests)
+                              </Button>
+
+                              {isExpanded && (
+                                <div className="mt-3 border rounded-lg overflow-hidden">
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHead>Time</TableHead>
+                                        <TableHead>Model</TableHead>
+                                        <TableHead>Tokens</TableHead>
+                                        <TableHead>Cost</TableHead>
+                                        <TableHead>Status</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {logs.slice(0, 10).map((log, idx) => (
+                                        <TableRow key={log.request_id || idx}>
+                                          <TableCell className="text-xs">
+                                            {new Date(log.startTime).toLocaleString()}
+                                          </TableCell>
+                                          <TableCell className="text-xs font-mono">
+                                            {log.model}
+                                          </TableCell>
+                                          <TableCell className="text-xs">
+                                            {log.total_tokens.toLocaleString()}
+                                          </TableCell>
+                                          <TableCell className="text-xs">
+                                            ${log.spend.toFixed(6)}
+                                          </TableCell>
+                                          <TableCell>
+                                            <Badge variant={log.status === "success" ? "secondary" : "destructive"} className="text-xs">
+                                              {log.status}
+                                            </Badge>
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Estimated Usage</span>
+                            <span>{usagePercent.toFixed(1)}%</span>
+                          </div>
+                          <Progress value={usagePercent} className="h-2" />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            ${(Number(key.trial_credits_usd) - Number(key.used_credits_usd)).toFixed(4)} remaining
+                          </p>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
