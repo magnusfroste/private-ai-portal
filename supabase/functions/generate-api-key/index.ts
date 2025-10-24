@@ -137,17 +137,24 @@ serve(async (req) => {
         body.teamId
       );
       
+      console.log('LiteLLM response structure:', {
+        hasKey: !!liteLLMResponse.key,
+        hasToken: !!liteLLMResponse.token,
+        keys: Object.keys(liteLLMResponse)
+      });
+      
       // Calculate expiration date (5 days from now)
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 5);
 
-      // Store the key in the database
+      // Store the key in the database with token identifier
       const { data: apiKey, error: dbError } = await supabase
         .from('api_keys')
         .insert({
           user_id: user.id,
           name: body.keyName,
           key_value: liteLLMResponse.key,
+          litellm_token: liteLLMResponse.token || null,
           expires_at: expiresAt.toISOString(),
           trial_credits_usd: 25.0,
           used_credits_usd: 0,

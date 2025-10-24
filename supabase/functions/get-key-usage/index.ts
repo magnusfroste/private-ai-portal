@@ -77,7 +77,7 @@ serve(async (req) => {
     // Get the API key from database
     const { data: apiKeyData, error: keyError } = await supabase
       .from('api_keys')
-      .select('key_value, user_id')
+      .select('key_value, litellm_token, user_id')
       .eq('id', keyId)
       .single();
 
@@ -96,11 +96,17 @@ serve(async (req) => {
       });
     }
 
-    console.log('Fetching key info from LiteLLM API');
+    console.log('Fetching key info from LiteLLM API', {
+      hasToken: !!apiKeyData.litellm_token,
+      usingTokenId: !!apiKeyData.litellm_token
+    });
+
+    // Prefer using token identifier if available, fallback to key_value
+    const keyIdentifier = apiKeyData.litellm_token || apiKeyData.key_value;
 
     // Fetch key info from LiteLLM
     const keyInfoResponse = await fetch(
-      `https://api.autoversio.ai/key/info?key=${apiKeyData.key_value}`,
+      `https://api.autoversio.ai/key/info?key=${keyIdentifier}`,
       {
         method: 'GET',
         headers: {
@@ -121,11 +127,11 @@ serve(async (req) => {
 
     const keyInfo = await keyInfoResponse.json();
 
-    // Optionally fetch spend logs
+    // Optionally fetch spend logs using token identifier
     let spendLogs = [];
     try {
       const spendResponse = await fetch(
-        `https://api.autoversio.ai/spend/keys?api_key=${apiKeyData.key_value}`,
+        `https://api.autoversio.ai/spend/keys?api_key=${keyIdentifier}`,
         {
           method: 'GET',
           headers: {
