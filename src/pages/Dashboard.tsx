@@ -653,10 +653,10 @@ const Dashboard = () => {
             
             <div className="bg-secondary/50 rounded-lg p-4 font-mono text-sm space-y-2">
               <p className="text-muted-foreground"># Example usage with curl:</p>
-              <p>curl https://litellm.autoversio.ai/v1/chat/completions \</p>
+              <p>curl https://api.autoversio.ai/v1/chat/completions \</p>
               <p className="ml-4">-H "Authorization: Bearer YOUR_API_KEY" \</p>
               <p className="ml-4">-H "Content-Type: application/json" \</p>
-              <p className="ml-4">-d '{"{"}"model": "gpt-4", "messages": [...]{"}"}'</p>
+              <p className="ml-4">-d '{"{"}"model": "autoversio", "messages": [...]{"}"}'</p>
             </div>
             
             <p className="text-sm text-muted-foreground">
