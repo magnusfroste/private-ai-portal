@@ -637,7 +637,7 @@ const Dashboard = () => {
               <Label>Endpoint URL</Label>
               <div className="flex gap-2">
                 <Input
-                  value="https://litellm.autoversio.ai/"
+                  value="https://api.autoversio.ai/"
                   readOnly
                   className="font-mono"
                 />
