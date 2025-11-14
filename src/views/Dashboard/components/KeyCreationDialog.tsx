@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -16,9 +17,16 @@ import {
 interface KeyCreationDialogProps {
   onCreateKey: (name: string, models: string[]) => Promise<boolean>;
   isCreating: boolean;
+  canCreateMore: boolean;
+  remainingKeys: number;
 }
 
-export const KeyCreationDialog = ({ onCreateKey, isCreating }: KeyCreationDialogProps) => {
+export const KeyCreationDialog = ({ 
+  onCreateKey, 
+  isCreating, 
+  canCreateMore,
+  remainingKeys 
+}: KeyCreationDialogProps) => {
   const [open, setOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
@@ -37,7 +45,7 @@ export const KeyCreationDialog = ({ onCreateKey, isCreating }: KeyCreationDialog
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="glow">
+        <Button className="glow" disabled={!canCreateMore}>
           <Plus className="w-4 h-4 mr-2" />
           Create New Key
         </Button>
@@ -46,10 +54,24 @@ export const KeyCreationDialog = ({ onCreateKey, isCreating }: KeyCreationDialog
         <DialogHeader>
           <DialogTitle>Create New API Key</DialogTitle>
           <DialogDescription>
-            Generate a new API key for accessing the LiteLLM proxy
+            {canCreateMore 
+              ? `Generate a new trial API key (${remainingKeys} remaining)`
+              : 'Trial key limit reached. Upgrade to create more keys.'
+            }
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+
+        {!canCreateMore && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              You've used all your trial keys. Stripe payment integration coming soon!
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {canCreateMore && (
+          <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="keyName">Key Name</Label>
             <Input
@@ -85,14 +107,15 @@ export const KeyCreationDialog = ({ onCreateKey, isCreating }: KeyCreationDialog
               ))}
             </div>
           </div>
-          <Button
-            onClick={handleCreate}
-            disabled={isCreating}
-            className="w-full"
-          >
-            {isCreating ? "Creating..." : "Create Key"}
-          </Button>
-        </div>
+            <Button
+              onClick={handleCreate}
+              disabled={isCreating}
+              className="w-full"
+            >
+              {isCreating ? "Creating..." : "Create Key"}
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
