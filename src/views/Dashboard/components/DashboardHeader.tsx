@@ -1,5 +1,6 @@
 import { Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Profile } from "@/models/types/profile.types";
 
 interface DashboardHeaderProps {
@@ -24,10 +25,28 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
       </nav>
 
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-2">
-          Welcome back, {profile?.full_name || "Developer"}
-        </h1>
-        <p className="text-muted-foreground">{profile?.email}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">
+              Welcome back, {profile?.full_name || "Developer"}
+            </h1>
+            <p className="text-muted-foreground">{profile?.email}</p>
+          </div>
+          {profile && (
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-muted-foreground">
+                Trial Keys: <span className="font-semibold text-foreground">
+                  {profile.trial_keys_created}/{profile.max_trial_keys}
+                </span>
+              </div>
+              {profile.trial_keys_created >= profile.max_trial_keys && (
+                <Badge variant="outline" className="text-orange-600 border-orange-600">
+                  Limit Reached
+                </Badge>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

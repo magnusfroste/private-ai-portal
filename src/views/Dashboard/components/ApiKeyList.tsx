@@ -15,6 +15,8 @@ interface ApiKeyListProps {
   onCopy: (text: string) => void;
   onCreateKey: (name: string, models: string[]) => Promise<boolean>;
   isCreatingKey: boolean;
+  canCreateMore: boolean;
+  remainingKeys: number;
 }
 
 export const ApiKeyList = ({
@@ -27,6 +29,8 @@ export const ApiKeyList = ({
   onCopy,
   onCreateKey,
   isCreatingKey,
+  canCreateMore,
+  remainingKeys,
 }: ApiKeyListProps) => {
   return (
     <div className="container mx-auto px-4 pb-8">
@@ -46,7 +50,12 @@ export const ApiKeyList = ({
               <Button variant="outline" size="icon" onClick={onRefreshAll}>
                 <RefreshCw className="w-4 h-4" />
               </Button>
-              <KeyCreationDialog onCreateKey={onCreateKey} isCreating={isCreatingKey} />
+              <KeyCreationDialog 
+                onCreateKey={onCreateKey} 
+                isCreating={isCreatingKey}
+                canCreateMore={canCreateMore}
+                remainingKeys={remainingKeys}
+              />
             </div>
           </div>
         </CardHeader>
@@ -55,7 +64,12 @@ export const ApiKeyList = ({
             <div className="text-center py-12">
               <Key className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground mb-4">No API keys yet</p>
-              <KeyCreationDialog onCreateKey={onCreateKey} isCreating={isCreatingKey} />
+              <KeyCreationDialog 
+                onCreateKey={onCreateKey} 
+                isCreating={isCreatingKey}
+                canCreateMore={canCreateMore}
+                remainingKeys={remainingKeys}
+              />
             </div>
           ) : (
             <div className="space-y-4">

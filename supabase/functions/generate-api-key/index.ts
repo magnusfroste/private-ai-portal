@@ -140,8 +140,27 @@ serve(async (req: Request) => {
     
     console.log('Creating new LiteLLM key for user:', { userId: user.id, keyName: body.keyName });
 
+    // 1. Check trial key limit
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('trial_keys_created, max_trial_keys')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError) {
+      console.error('Profile fetch error:', profileError);
+      return respondWithError(500, 'database_error', 'Failed to fetch user profile');
+    }
+
+    if (profile.trial_keys_created >= profile.max_trial_keys) {
+      console.warn(`Trial limit reached for user ${user.id}: ${profile.trial_keys_created}/${profile.max_trial_keys}`);
+      return respondWithError(403, 'trial_limit_exceeded', 
+        `Trial key limit reached (${profile.trial_keys_created}/${profile.max_trial_keys}). Upgrade to create more keys.`
+      );
+    }
+
     try {
-      // Generate key through LiteLLM's API
+      // 2. Generate key through LiteLLM's API
       const liteLLMResponse = await createLiteLLMKey(
         body.keyName, 
         LITELLM_MASTER_KEY,
@@ -159,7 +178,7 @@ serve(async (req: Request) => {
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 5);
 
-      // Store the key in the database with token identifier
+      // 3. Store the key in the database with token identifier
       const { data: apiKey, error: dbError } = await supabase
         .from('api_keys')
         .insert({
@@ -178,6 +197,17 @@ serve(async (req: Request) => {
       if (dbError) {
         console.error('Database error:', dbError);
         throw new Error('Failed to save API key to database');
+      }
+
+      // 4. Increment trial key counter (atomic operation with optimistic locking)
+      const { error: incrementError } = await supabase.rpc('increment_trial_key_count', {
+        user_id_param: user.id
+      });
+
+      if (incrementError) {
+        console.error('Failed to increment trial key counter:', incrementError);
+        // Key was created but counter wasn't incremented - log for manual fix
+        // Don't fail the request as the key is valid
       }
 
       const response: ApiKeyResponse = {

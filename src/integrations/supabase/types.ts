@@ -57,6 +57,8 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          max_trial_keys: number
+          trial_keys_created: number
           updated_at: string
         }
         Insert: {
@@ -65,6 +67,8 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          max_trial_keys?: number
+          trial_keys_created?: number
           updated_at?: string
         }
         Update: {
@@ -73,6 +77,8 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          max_trial_keys?: number
+          trial_keys_created?: number
           updated_at?: string
         }
         Relationships: []
@@ -120,7 +126,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_trial_key_count: {
+        Args: { user_id_param: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

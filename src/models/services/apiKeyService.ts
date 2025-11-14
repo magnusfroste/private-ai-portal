@@ -1,7 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { apiKeyRepository } from "@/data/repositories/apiKeyRepository";
 import { usageRepository } from "@/data/repositories/usageRepository";
-import { ApiKey, ApiKeyWithUsage, CreateApiKeyDto, KeyUsageInfo } from "@/models/types/apiKey.types";
+import { profileRepository } from "@/data/repositories/profileRepository";
+import { ApiKey, ApiKeyWithUsage, CreateApiKeyDto, KeyUsageInfo, TrialLimitExceededError } from "@/models/types/apiKey.types";
 
 export class ApiKeyService {
   async getKeysForCurrentUser(): Promise<ApiKey[]> {
@@ -31,6 +32,20 @@ export class ApiKeyService {
   async createKey(dto: CreateApiKeyDto): Promise<void> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    // Check trial limit BEFORE calling edge function
+    const profile = await profileRepository.findById(user.id);
+    if (!profile) throw new Error("Profile not found");
+
+    if (profile.trial_keys_created >= profile.max_trial_keys) {
+      throw new TrialLimitExceededError(
+        profile.trial_keys_created, 
+        profile.max_trial_keys
+      );
+    }
 
     const { error } = await supabase.functions.invoke('generate-api-key', {
       body: {

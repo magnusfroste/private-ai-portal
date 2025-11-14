@@ -41,6 +41,13 @@ const Dashboard = () => {
   const usedCredits = apiKeyService.calculateUsedCredits(apiKeys, keyUsageData);
   const remainingCredits = apiKeyService.calculateRemainingCredits(apiKeys, keyUsageData);
 
+  const canCreateMore = profile 
+    ? profile.trial_keys_created < profile.max_trial_keys 
+    : false;
+  const remainingKeys = profile 
+    ? profile.max_trial_keys - profile.trial_keys_created 
+    : 0;
+
   if (profileLoading || keysLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -72,6 +79,8 @@ const Dashboard = () => {
         onCopy={copyToClipboard}
         onCreateKey={handleCreateKey}
         isCreatingKey={isCreatingKey}
+        canCreateMore={canCreateMore}
+        remainingKeys={remainingKeys}
       />
 
       <IntegrationGuide onCopy={copyToClipboard} />
