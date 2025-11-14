@@ -1,0 +1,99 @@
+import { useState } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+interface KeyCreationDialogProps {
+  onCreateKey: (name: string, models: string[]) => Promise<boolean>;
+  isCreating: boolean;
+}
+
+export const KeyCreationDialog = ({ onCreateKey, isCreating }: KeyCreationDialogProps) => {
+  const [open, setOpen] = useState(false);
+  const [newKeyName, setNewKeyName] = useState("");
+  const [selectedModels, setSelectedModels] = useState<string[]>([]);
+
+  const availableModels = ["all-team-models"];
+
+  const handleCreate = async () => {
+    const success = await onCreateKey(newKeyName, selectedModels);
+    if (success) {
+      setNewKeyName("");
+      setSelectedModels([]);
+      setOpen(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="glow">
+          <Plus className="w-4 h-4 mr-2" />
+          Create New Key
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create New API Key</DialogTitle>
+          <DialogDescription>
+            Generate a new API key for accessing the LiteLLM proxy
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="keyName">Key Name</Label>
+            <Input
+              id="keyName"
+              placeholder="my-api-key"
+              value={newKeyName}
+              onChange={(e) => setNewKeyName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Available Models</Label>
+            <div className="space-y-2">
+              {availableModels.map((model) => (
+                <div key={model} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={model}
+                    checked={selectedModels.includes(model)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedModels([...selectedModels, model]);
+                      } else {
+                        setSelectedModels(selectedModels.filter((m) => m !== model));
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor={model}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {model}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          <Button
+            onClick={handleCreate}
+            disabled={isCreating}
+            className="w-full"
+          >
+            {isCreating ? "Creating..." : "Create Key"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
