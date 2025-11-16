@@ -21,6 +21,7 @@ export type Database = {
           id: string
           is_active: boolean
           key_value: string
+          litellm_token: string | null
           name: string
           trial_credits_usd: number | null
           used_credits_usd: number | null
@@ -32,6 +33,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           key_value: string
+          litellm_token?: string | null
           name: string
           trial_credits_usd?: number | null
           used_credits_usd?: number | null
@@ -43,6 +45,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           key_value?: string
+          litellm_token?: string | null
           name?: string
           trial_credits_usd?: number | null
           used_credits_usd?: number | null
