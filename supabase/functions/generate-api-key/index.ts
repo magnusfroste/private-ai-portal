@@ -195,8 +195,24 @@ serve(async (req: Request) => {
         .single();
 
       if (dbError) {
-        console.error('Database error:', dbError);
-        throw new Error('Failed to save API key to database');
+        console.error('Database save failed:', {
+          error: dbError,
+          code: dbError.code,
+          message: dbError.message,
+          details: dbError.details,
+          hint: dbError.hint,
+          orphanedKey: {
+            litellm_key: liteLLMResponse.key,
+            litellm_token: liteLLMResponse.token,
+            key_alias: body.keyName,
+            user_id: user.id
+          }
+        });
+        
+        // TODO: Consider implementing LiteLLM key deletion here to rollback
+        // This would require calling DELETE on LiteLLM API with the token
+        
+        throw new Error(`Failed to save API key to database: ${dbError.message || 'Unknown database error'}`);
       }
 
       // 4. Increment trial key counter (atomic operation with optimistic locking)
