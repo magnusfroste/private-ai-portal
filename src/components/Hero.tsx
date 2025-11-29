@@ -36,17 +36,19 @@ export const Hero = () => {
             Perfect for developers who value privacy.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Link to="/auth">
-              <Button size="lg" className="glow text-lg px-8 py-6">
-                Start Free Trial
-                <span className="ml-2 text-sm opacity-80">$25 Credit • 5 Days</span>
-              </Button>
-            </Link>
-            <Button size="lg" variant="outline" className="text-lg px-8 py-6">
-              View Documentation
-            </Button>
-          </div>
+      <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+  <Link to="/auth">
+    <Button size="lg" className="glow text-lg px-8 py-6">
+      Start Free Trial
+      <span className="ml-2 text-sm opacity-80">$25 Credit • 5 Days</span>
+    </Button>
+  </Link>
+  <a href="https://www.autoversio.com" target="_blank" rel="noopener noreferrer">
+    <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+      View Documentation
+    </Button>
+  </a>
+</div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12">
             <div className="glass-card p-6 rounded-xl space-y-2 hover:scale-105 transition-transform">
