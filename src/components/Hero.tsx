@@ -22,7 +22,7 @@ export const Hero = () => {
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
             <Shield className="w-4 h-4 text-primary" />
-            <span className="text-sm text-primary">Enterprise-Grade Private LLM</span>
+            <span className="text-sm text-primary">PrivAI - The Private AI solution for Enterprise-Grade Private LLM</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold leading-tight">
