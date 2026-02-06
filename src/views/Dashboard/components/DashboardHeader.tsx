@@ -1,7 +1,10 @@
-import { Shield, LogOut } from "lucide-react";
+import { Shield, LogOut, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Profile } from "@/models/types/profile.types";
+import { adminRepository } from "@/data/repositories/adminRepository";
 
 interface DashboardHeaderProps {
   profile: Profile | null;
@@ -9,6 +12,13 @@ interface DashboardHeaderProps {
 }
 
 export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) => {
+  const navigate = useNavigate();
+
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: () => adminRepository.checkIsAdmin(),
+  });
+
   return (
     <>
       <nav className="glass-card border-b sticky top-0 z-50">
@@ -17,10 +27,18 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
             <Shield className="w-6 h-6 text-primary" />
             <span className="text-xl font-bold gradient-text">Autoversio</span>
           </div>
-          <Button variant="ghost" onClick={onSignOut}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button variant="ghost" onClick={() => navigate("/admin")}>
+                <Settings className="w-4 h-4 mr-2" />
+                Admin
+              </Button>
+            )}
+            <Button variant="ghost" onClick={onSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </nav>
 

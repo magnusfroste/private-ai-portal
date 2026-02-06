@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.get-key-usage]
 verify_jwt = true
+
+[functions.admin-users]
+verify_jwt = false
