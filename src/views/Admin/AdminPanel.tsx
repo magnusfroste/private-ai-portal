@@ -101,7 +101,6 @@ export const AdminPanel = () => {
           <UserTable
             users={users}
             onEdit={handleEdit}
-            onReset={handleReset}
             isUpdating={isUpdating}
           />
         )}
@@ -112,6 +111,7 @@ export const AdminPanel = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSave={handleSave}
+        onReset={handleReset}
         isUpdating={isUpdating}
       />
     </div>

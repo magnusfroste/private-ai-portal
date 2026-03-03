@@ -14,6 +14,8 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -71,7 +73,6 @@ serve(async (req: Request) => {
       console.error("Error fetching key counts:", keyError);
     }
 
-    // Count keys per user
     const keyCountMap: Record<string, number> = {};
     if (keyCounts) {
       for (const row of keyCounts) {
@@ -89,11 +90,25 @@ serve(async (req: Request) => {
 
   // === PATCH: Update user settings ===
   if (req.method === "PATCH") {
-    const body = await req.json();
-    const { user_id, max_trial_keys, reset_trial_keys } = body;
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      return jsonResponse({ error: "Invalid JSON body" }, 400);
+    }
+
+    const { user_id, max_trial_keys, reset_trial_keys } = body as {
+      user_id?: string;
+      max_trial_keys?: number;
+      reset_trial_keys?: boolean;
+    };
 
     if (!user_id) {
       return jsonResponse({ error: "user_id is required" }, 400);
+    }
+
+    if (!UUID_REGEX.test(user_id)) {
+      return jsonResponse({ error: "user_id must be a valid UUID" }, 400);
     }
 
     const updates: Record<string, unknown> = {};

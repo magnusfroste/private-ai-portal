@@ -9,17 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, RotateCcw, Key } from "lucide-react";
+import { Pencil, Key } from "lucide-react";
 import { format } from "date-fns";
 
 interface UserTableProps {
   users: AdminUser[];
   onEdit: (user: AdminUser) => void;
-  onReset: (userId: string) => void;
   isUpdating: boolean;
 }
 
-export const UserTable = ({ users, onEdit, onReset, isUpdating }: UserTableProps) => {
+export const UserTable = ({ users, onEdit, isUpdating }: UserTableProps) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -66,25 +65,14 @@ export const UserTable = ({ users, onEdit, onReset, isUpdating }: UserTableProps
                   {format(new Date(user.created_at), "yyyy-MM-dd")}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEdit(user)}
-                      disabled={isUpdating}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onReset(user.id)}
-                      disabled={isUpdating || user.trial_keys_created === 0}
-                      title="Nollställ trial keys"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onEdit(user)}
+                    disabled={isUpdating}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             );
