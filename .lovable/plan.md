@@ -1,134 +1,51 @@
 
 
-## Admin Panel - Hantera Anv&auml;ndare och Trial-nycklar
+## Improvements Found
 
-### Sammanfattning
-Skapa en admin-panel p&aring; `/admin` d&auml;r en admin kan:
-- Se alla anv&auml;ndare med deras profiler och nyckelstatus
-- &Auml;ndra `max_trial_keys` per anv&auml;ndare
-- Nollst&auml;lla `trial_keys_created` s&aring; anv&auml;ndare kan skapa nya nycklar
-- &Auml;ndra globalt standardv&auml;rde f&ouml;r nya anv&auml;ndare
+After reviewing the admin panel, edge function, frontend components, RLS policies, and database state, here are the issues and improvements:
 
-Ja, 5-dagars-gr&auml;nsen &auml;r satt i LiteLLM-proxyn (duration: '5d' i edge-funktionen), s&aring; den p&aring;verkas inte av admin-panelen.
+### 1. RLS Policy Bug — All Policies Are Restrictive (CRITICAL)
+All RLS policies on `user_roles` use `RESTRICTIVE` mode (indicated by `Permissive: No`). In Postgres, restrictive policies are combined with AND, meaning a user needs to pass **all** policies simultaneously. This makes the "Admins can view all roles" policy useless because it conflicts with "Users can view own roles" — an admin trying to view another user's role fails the `auth.uid() = user_id` check.
 
----
+**Fix:** Change the three `user_roles` policies to `PERMISSIVE` (the default). Drop and recreate them without `AS RESTRICTIVE`.
 
-### Steg 1: Databasschema - Roller (S&auml;kerhet)
+### 2. Same RLS Bug on `profiles`, `api_keys`, `token_usage`
+All existing policies across these tables are also restrictive. This likely causes issues if you ever add a second policy on the same operation. Not immediately broken for single-policy-per-operation cases, but should be fixed for correctness.
 
-Skapa en separat `user_roles`-tabell (roller ska aldrig lagras i profiles-tabellen av s&auml;kerhetssk&auml;l):
+**Fix:** Recreate the policies as permissive.
 
-```sql
--- Enum f&ouml;r roller
-CREATE TYPE public.app_role AS ENUM ('admin', 'user');
+### 3. Admin Edge Function — Missing `try/catch` on `req.json()`
+In the PATCH handler, `await req.json()` can throw if the body is malformed. This would result in an unhandled error and a 500 with no useful message.
 
--- Rolltabell
-CREATE TABLE public.user_roles (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  role app_role NOT NULL,
-  UNIQUE (user_id, role)
-);
+**Fix:** Wrap in try/catch with a 400 response for invalid JSON.
 
-ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+### 4. Admin Edge Function — No Validation on `user_id` Format
+The `user_id` from the PATCH body is passed directly to `.eq("id", user_id)` without UUID format validation. While not a SQL injection risk (Supabase SDK parameterizes), it could cause confusing errors.
 
--- Security definer-funktion f&ouml;r att kolla roller (undviker RLS-rekursion)
-CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role app_role)
-RETURNS boolean
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.user_roles
-    WHERE user_id = _user_id AND role = _role
-  )
-$$;
+**Fix:** Add basic UUID format validation.
 
--- RLS-policies f&ouml;r user_roles
-CREATE POLICY "Users can view own roles"
-  ON public.user_roles FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
+### 5. Frontend — `EditUserDialog` Doesn't Include Reset Option
+The dialog only lets admins change `max_trial_keys`. The reset button is separate in the table. It would be more cohesive to include a "Reset trial keys" button inside the edit dialog as well.
 
-CREATE POLICY "Admins can view all roles"
-  ON public.user_roles FOR SELECT
-  TO authenticated
-  USING (public.has_role(auth.uid(), 'admin'));
+**Fix:** Add a reset button inside `EditUserDialog`.
 
-CREATE POLICY "Admins can manage roles"
-  ON public.user_roles FOR ALL
-  TO authenticated
-  USING (public.has_role(auth.uid(), 'admin'));
-```
+### 6. Frontend — No Confirmation for Reset Action
+Clicking the reset button in `UserTable` immediately resets without confirmation. This is a destructive action.
 
-Sedan l&auml;gga till admin-rollen f&ouml;r ditt anv&auml;ndarkonto (du beh&ouml;ver manuellt ange r&auml;tt user_id).
+**Fix:** Add an `AlertDialog` confirmation before resetting.
+
+### 7. Missing Error Boundary on Admin Route
+If the admin page crashes, the whole app breaks. No error boundary wraps it.
+
+**Fix:** Add a simple error boundary or use React Router's `errorElement`.
 
 ---
 
-### Steg 2: Edge Function - Admin API
+### Implementation Priority
 
-Skapa en `admin-users` edge function som hanterar admin-&aring;tg&auml;rder server-side (med rollkontroll):
+1. **Fix RLS policies** (critical — current restrictive policies will block admin from viewing other users' roles)
+2. **Edge function hardening** (try/catch, UUID validation)
+3. **Reset confirmation dialog** (UX safety)
+4. **Move reset into EditUserDialog** (UX cohesion)
+5. **Error boundary** (resilience)
 
-**Endpoints:**
-- `GET` - H&auml;mta alla anv&auml;ndare med profiler och nyckelr&auml;knare
-- `PATCH` - Uppdatera en anv&auml;ndares `max_trial_keys` eller nollst&auml;ll `trial_keys_created`
-
-Funktionen verifierar att den som anropar har admin-roll via `has_role()`-funktionen innan n&aring;gon &aring;tg&auml;rd utf&ouml;rs.
-
----
-
-### Steg 3: Frontend - Admin-sida
-
-**Nya filer (separation of concerns):**
-
-| Lager | Fil | Ansvar |
-|-------|-----|--------|
-| Types | `src/models/types/admin.types.ts` | Typedefinitioner f&ouml;r admin-data |
-| Data | `src/data/repositories/adminRepository.ts` | API-anrop till admin edge function |
-| Model | `src/models/services/adminService.ts` | Aff&auml;rslogik f&ouml;r admin |
-| View | `src/pages/Admin.tsx` | Admin-sidans route |
-| View | `src/views/Admin/AdminPanel.tsx` | Huvudkomponent |
-| View | `src/views/Admin/components/UserTable.tsx` | Anv&auml;ndartabell |
-| View | `src/views/Admin/components/EditUserDialog.tsx` | Redigera anv&auml;ndare |
-| Hook | `src/views/Admin/hooks/useAdminData.ts` | Data-hook f&ouml;r admin |
-
-**UserTable visar:**
-- Namn, e-post, f&ouml;retag
-- Trial keys: skapade / max
-- Antal API-nycklar
-- Registreringsdatum
-- &Aring;tg&auml;rder: Redigera, Nollst&auml;ll nycklar
-
-**EditUserDialog:**
-- &Auml;ndra `max_trial_keys` (slider eller input)
-- Nollst&auml;ll `trial_keys_created` till 0
-- Visa nuvarande v&auml;rden
-
----
-
-### Steg 4: Route och Navigation
-
-- L&auml;gg till `/admin`-route i `App.tsx`
-- L&auml;gg till admin-l&auml;nk i `DashboardHeader` (visas bara f&ouml;r admin-anv&auml;ndare)
-- Admin-sidan skyddas med rollkontroll - icke-admins omdirigeras
-
----
-
-### Tekniska detaljer
-
-**S&auml;kerhet:**
-- Alla admin-&aring;tg&auml;rder g&aring;r via edge function med service role key
-- Rollkontroll sker server-side med `has_role()`
-- Frontend g&ouml;r ocks&aring; en rollkontroll f&ouml;r att d&ouml;lja admin-gr&auml;nssnittet, men det &auml;r inte s&auml;kerhetsmekanismen
-
-**Admin-roll setup:**
-- Efter migrationen beh&ouml;ver vi manuellt l&auml;gga till din anv&auml;ndar-ID som admin
-- Detta g&ouml;rs med en INSERT i `user_roles`-tabellen
-
-**Implementeringsordning:**
-1. Databasmigration (roller-tabell + funktion)
-2. S&auml;tt admin-roll p&aring; ditt konto
-3. Edge function `admin-users`
-4. Frontend-komponenter (types, repo, service, views)
-5. Routes och navigation
