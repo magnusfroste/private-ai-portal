@@ -1,8 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
-import { AvailableModelsResponse } from "@/models/types/model.types";
+import { AvailableModelsResponse, ModelInfo } from "@/models/types/model.types";
 
 export class ModelRepository {
-  async fetchAvailableModels(): Promise<string[]> {
+  async fetchAvailableModels(): Promise<ModelInfo[]> {
     const { data, error } = await supabase.functions.invoke<AvailableModelsResponse>('list-models');
     
     if (error) throw error;

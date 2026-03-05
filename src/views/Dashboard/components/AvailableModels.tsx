@@ -1,17 +1,87 @@
-import { Cpu, RefreshCw } from "lucide-react";
+import { Cpu, RefreshCw, DollarSign, Hash } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { modelService } from "@/models/services/modelService";
+import { ModelInfo } from "@/models/types/model.types";
+
+const formatTokenCount = (tokens: number | null): string => {
+  if (!tokens) return "—";
+  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(1)}M`;
+  if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(0)}K`;
+  return tokens.toString();
+};
+
+const formatCost = (cost: number | null): string => {
+  if (cost === null || cost === undefined) return "—";
+  if (cost === 0) return "$0";
+  return `$${cost}`;
+};
+
+const ModelCard = ({ model }: { model: ModelInfo }) => (
+  <div className="flex items-start gap-3 rounded-lg border border-border/50 bg-card/50 p-3 transition-colors hover:bg-accent/30">
+    <div className="flex-1 min-w-0 space-y-1.5">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="font-mono text-sm font-medium text-foreground truncate">
+          {model.id}
+        </span>
+        <Badge variant="outline" className="text-[10px] shrink-0">
+          {model.provider}
+        </Badge>
+        {model.mode && (
+          <Badge variant="secondary" className="text-[10px] shrink-0">
+            {model.mode}
+          </Badge>
+        )}
+      </div>
+
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <TooltipProvider delayDuration={200}>
+          {(model.max_input_tokens || model.max_output_tokens) && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex items-center gap-1">
+                  <Hash className="w-3 h-3" />
+                  {formatTokenCount(model.max_input_tokens)}
+                  {model.max_output_tokens && (
+                    <> → {formatTokenCount(model.max_output_tokens)}</>
+                  )}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Context: {formatTokenCount(model.max_input_tokens)} input → {formatTokenCount(model.max_output_tokens)} output</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          {(model.input_cost_per_million !== null || model.output_cost_per_million !== null) && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex items-center gap-1">
+                  <DollarSign className="w-3 h-3" />
+                  {formatCost(model.input_cost_per_million)} / {formatCost(model.output_cost_per_million)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Cost per 1M tokens: {formatCost(model.input_cost_per_million)} input / {formatCost(model.output_cost_per_million)} output</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </TooltipProvider>
+      </div>
+    </div>
+  </div>
+);
 
 export const AvailableModels = () => {
   const { data: models = [], isLoading: loading, error, refetch } = useQuery({
     queryKey: ["availableModels"],
     queryFn: () => modelService.getAvailableModels(),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes (cache time)
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const errorMessage = error ? "Could not load available models" : null;
@@ -26,10 +96,10 @@ export const AvailableModels = () => {
               Available Models
             </CardTitle>
             <CardDescription>
-              Models accessible with your API key
+              Models accessible with your API key — with pricing per 1M tokens
             </CardDescription>
           </div>
-        <Button
+          <Button
             variant="ghost"
             size="icon"
             onClick={() => refetch()}
@@ -40,9 +110,9 @@ export const AvailableModels = () => {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-7 w-28 rounded-full" />
+                <Skeleton key={i} className="h-16 rounded-lg" />
               ))}
             </div>
           ) : errorMessage ? (
@@ -50,11 +120,9 @@ export const AvailableModels = () => {
           ) : models.length === 0 ? (
             <p className="text-sm text-muted-foreground">No models available</p>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {models.map((model) => (
-                <Badge key={model} variant="secondary" className="font-mono text-xs">
-                  {model}
-                </Badge>
+                <ModelCard key={model.id} model={model} />
               ))}
             </div>
           )}
