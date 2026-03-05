@@ -29,10 +29,10 @@ export const AvailableModels = () => {
               Models accessible with your API key
             </CardDescription>
           </div>
-          <Button
+        <Button
             variant="ghost"
             size="icon"
-            onClick={fetchModels}
+            onClick={() => refetch()}
             disabled={loading}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -45,8 +45,8 @@ export const AvailableModels = () => {
                 <Skeleton key={i} className="h-7 w-28 rounded-full" />
               ))}
             </div>
-          ) : error ? (
-            <p className="text-sm text-muted-foreground">{error}</p>
+          ) : errorMessage ? (
+            <p className="text-sm text-muted-foreground">{errorMessage}</p>
           ) : models.length === 0 ? (
             <p className="text-sm text-muted-foreground">No models available</p>
           ) : (
