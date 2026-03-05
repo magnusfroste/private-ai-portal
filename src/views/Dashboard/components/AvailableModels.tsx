@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { Cpu, RefreshCw } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,27 +7,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { modelService } from "@/models/services/modelService";
 
 export const AvailableModels = () => {
-  const [models, setModels] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: models = [], isLoading: loading, error, refetch } = useQuery({
+    queryKey: ["availableModels"],
+    queryFn: () => modelService.getAvailableModels(),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes (cache time)
+  });
 
-  const fetchModels = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await modelService.getAvailableModels();
-      setModels(data);
-    } catch (err) {
-      console.error("Failed to fetch models:", err);
-      setError("Could not load available models");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchModels();
-  }, []);
+  const errorMessage = error ? "Could not load available models" : null;
 
   return (
     <div className="container mx-auto px-4 pb-8">
