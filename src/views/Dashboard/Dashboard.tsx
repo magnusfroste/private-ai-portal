@@ -9,6 +9,7 @@ import { DashboardHeader } from "./components/DashboardHeader";
 import { UsageStats } from "./components/UsageStats";
 import { ApiKeyList } from "./components/ApiKeyList";
 import { IntegrationGuide } from "./components/IntegrationGuide";
+import { AvailableModels } from "./components/AvailableModels";
 
 const Dashboard = () => {
   const { checkAuth, signOut } = useAuth();
@@ -82,6 +83,8 @@ const Dashboard = () => {
         canCreateMore={canCreateMore}
         remainingKeys={remainingKeys}
       />
+
+      <AvailableModels />
 
       <IntegrationGuide onCopy={copyToClipboard} />
     </div>
