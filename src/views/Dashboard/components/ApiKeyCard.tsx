@@ -37,6 +37,8 @@ export const ApiKeyCard = ({
   isLoadingUsage,
   onCopy,
   onRefreshUsage,
+  onRevoke,
+  isRevoking,
 }: ApiKeyCardProps) => {
   const [showKey, setShowKey] = useState(false);
   const [expanded, setExpanded] = useState(false);
