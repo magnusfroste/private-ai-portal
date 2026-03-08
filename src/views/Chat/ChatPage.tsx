@@ -119,7 +119,7 @@ export const ChatPage = () => {
       if (!activeId) {
         await createConversation(selectedModel);
       }
-      await sendMessage(input);
+      await sendMessage(input, messages);
     } finally {
       sendingRef.current = false;
     }
