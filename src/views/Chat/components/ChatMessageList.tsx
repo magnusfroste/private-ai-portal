@@ -113,13 +113,13 @@ const MarkdownContent = ({ content }: { content: string }) => (
 );
 
 export const ChatMessageList = ({ messages, isStreaming }: ChatMessageListProps) => {
+  const lastMsg = messages[messages.length - 1];
+  const showThinking = isStreaming && lastMsg?.role === "user";
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-2">
       {messages.map((msg, i) => (
-        <div
-          key={i}
-          className="py-3"
-        >
+        <div key={i} className="py-3">
           {msg.role === "user" ? (
             <div className="flex justify-end">
               <div className="bg-muted rounded-2xl rounded-br-sm px-4 py-2.5 max-w-[85%]">
@@ -136,6 +136,19 @@ export const ChatMessageList = ({ messages, isStreaming }: ChatMessageListProps)
           )}
         </div>
       ))}
+
+      {showThinking && (
+        <div className="py-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex gap-1">
+              <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+            <span className="text-xs">Modellen tänker...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
