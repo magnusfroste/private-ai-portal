@@ -74,36 +74,36 @@ export const ChatPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <ChatHeader
-        models={models}
-        selectedModel={selectedModel}
-        onSelectModel={setSelectedModel}
-        disabled={isStreaming}
+    <div className="flex h-screen bg-background">
+      {/* Sidebar - full height */}
+      <ChatSidebar
+        conversations={conversations}
+        activeId={activeId}
+        onSelect={setActiveId}
+        onNew={handleNewChat}
+        onDelete={deleteConversation}
       />
 
-      <div className="flex flex-1 min-h-0">
-        <ChatSidebar
-          conversations={conversations}
-          activeId={activeId}
-          onSelect={setActiveId}
-          onNew={handleNewChat}
-          onDelete={deleteConversation}
+      {/* Right side: header + content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <ChatHeader
+          models={models}
+          selectedModel={selectedModel}
+          onSelectModel={setSelectedModel}
+          disabled={isStreaming}
         />
 
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-auto">
-            {messages.length === 0 ? (
-              <ChatEmptyState onSelectPrompt={handleSend} />
-            ) : (
-              <ChatMessageList messages={messages} isStreaming={isStreaming} />
-            )}
-          </div>
-
-          {/* Input */}
-          <ChatInput onSend={handleSend} disabled={isStreaming} />
+        {/* Messages */}
+        <div ref={scrollRef} className="flex-1 overflow-auto">
+          {messages.length === 0 ? (
+            <ChatEmptyState onSelectPrompt={handleSend} />
+          ) : (
+            <ChatMessageList messages={messages} isStreaming={isStreaming} />
+          )}
         </div>
+
+        {/* Input */}
+        <ChatInput onSend={handleSend} disabled={isStreaming} />
       </div>
     </div>
   );
