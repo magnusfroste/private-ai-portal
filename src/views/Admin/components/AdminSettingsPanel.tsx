@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 interface AdminSettings {
   default_user_budget_usd: number;
-  default_key_duration_days: number;
+  default_key_duration_days: number | null;
 }
 
 export const AdminSettingsPanel = () => {
@@ -33,13 +33,14 @@ export const AdminSettingsPanel = () => {
       if (error) throw error;
 
       if (data) {
-        const mapped: Record<string, number> = {};
+        const mapped: Record<string, any> = {};
         data.forEach((row: { key: string; value: any }) => {
-          mapped[row.key] = Number(row.value);
+          mapped[row.key] = row.value;
         });
+        const durationVal = mapped.default_key_duration_days;
         setSettings({
-          default_user_budget_usd: mapped.default_user_budget_usd ?? 25,
-          default_key_duration_days: mapped.default_key_duration_days ?? 5,
+          default_user_budget_usd: Number(mapped.default_user_budget_usd ?? 25),
+          default_key_duration_days: durationVal === null || durationVal === 0 ? null : Number(durationVal),
         });
       }
     } catch (error) {
@@ -52,11 +53,12 @@ export const AdminSettingsPanel = () => {
   const handleSaveAll = async () => {
     setSaving(true);
     try {
-      const entries = Object.entries(settings) as [string, number][];
+      const entries = Object.entries(settings) as [string, number | null][];
       for (const [key, value] of entries) {
+        const storeValue = value === null ? 0 : value;
         const { error } = await supabase
           .from("admin_settings")
-          .update({ value: value as any, updated_at: new Date().toISOString() })
+          .update({ value: storeValue as any, updated_at: new Date().toISOString() })
           .eq("key", key);
         if (error) throw error;
       }
@@ -116,19 +118,19 @@ export const AdminSettingsPanel = () => {
             <Label htmlFor="duration">Nyckelgiltighet (dagar)</Label>
             <Input
               id="duration"
-              type="number"
-              min={1}
-              max={365}
-              value={settings.default_key_duration_days}
-              onChange={(e) =>
+              type="text"
+              placeholder="Obegränsad"
+              value={settings.default_key_duration_days === null ? "" : settings.default_key_duration_days}
+              onChange={(e) => {
+                const val = e.target.value.trim();
                 setSettings((s) => ({
                   ...s,
-                  default_key_duration_days: Number(e.target.value),
-                }))
-              }
+                  default_key_duration_days: val === "" ? null : Number(val),
+                }));
+              }}
             />
             <p className="text-xs text-muted-foreground">
-              Duration för nycklar i LiteLLM
+              Lämna tomt för obegränsad giltighet
             </p>
           </div>
         </div>
