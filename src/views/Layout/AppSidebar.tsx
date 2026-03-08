@@ -74,15 +74,6 @@ export const AppSidebar = () => {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    onClick={() => navigate("/chat")}
-                    tooltip="Chat"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    <span>Chat</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
                     isActive={isActive("/dashboard/admin")}
                     onClick={() => navigate("/dashboard/admin")}
                     tooltip="Admin"
