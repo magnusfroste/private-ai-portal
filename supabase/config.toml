@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.sync-keys]
 verify_jwt = false
+
+[functions.revoke-key]
+verify_jwt = false

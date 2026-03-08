@@ -17,6 +17,8 @@ interface ApiKeyListProps {
   isCreatingKey: boolean;
   canCreateMore: boolean;
   remainingKeys: number;
+  onRevoke?: (keyId: string) => void;
+  isRevoking?: boolean;
 }
 
 export const ApiKeyList = ({
@@ -31,6 +33,8 @@ export const ApiKeyList = ({
   isCreatingKey,
   canCreateMore,
   remainingKeys,
+  onRevoke,
+  isRevoking,
 }: ApiKeyListProps) => {
   return (
     <div className="container mx-auto px-4 pb-8">
@@ -82,6 +86,8 @@ export const ApiKeyList = ({
                   isLoadingUsage={loadingUsage[key.id] || false}
                   onCopy={onCopy}
                   onRefreshUsage={onRefreshKey}
+                  onRevoke={onRevoke}
+                  isRevoking={isRevoking}
                 />
               ))}
             </div>

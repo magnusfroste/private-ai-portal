@@ -13,6 +13,7 @@ import { toast } from "sonner";
 export const KeysPage = () => {
   const { profile, loading: profileLoading } = useProfile();
   const [syncing, setSyncing] = useState(false);
+  const [revoking, setRevoking] = useState(false);
   const {
     apiKeys,
     loading: keysLoading,
@@ -54,6 +55,29 @@ export const KeysPage = () => {
       toast.error("Failed to sync keys");
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleRevoke = async (keyId: string) => {
+    setRevoking(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase.functions.invoke('revoke-key', {
+        body: { keyId },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) throw error;
+
+      toast.success(`Key "${data.name}" has been revoked`);
+      await refetch();
+    } catch (err) {
+      console.error("Revoke error:", err);
+      toast.error("Failed to revoke key");
+    } finally {
+      setRevoking(false);
     }
   };
 
@@ -105,6 +129,8 @@ export const KeysPage = () => {
         isCreatingKey={isCreatingKey}
         canCreateMore={canCreateMore}
         remainingKeys={remainingKeys}
+        onRevoke={handleRevoke}
+        isRevoking={revoking}
       />
 
       {historicalKeys.length > 0 && (
