@@ -33,13 +33,14 @@ export const AdminSettingsPanel = () => {
       if (error) throw error;
 
       if (data) {
-        const mapped: Record<string, number> = {};
+        const mapped: Record<string, any> = {};
         data.forEach((row: { key: string; value: any }) => {
-          mapped[row.key] = Number(row.value);
+          mapped[row.key] = row.value;
         });
+        const durationVal = mapped.default_key_duration_days;
         setSettings({
-          default_user_budget_usd: mapped.default_user_budget_usd ?? 25,
-          default_key_duration_days: mapped.default_key_duration_days ?? 5,
+          default_user_budget_usd: Number(mapped.default_user_budget_usd ?? 25),
+          default_key_duration_days: durationVal === null || durationVal === 0 ? null : Number(durationVal),
         });
       }
     } catch (error) {
