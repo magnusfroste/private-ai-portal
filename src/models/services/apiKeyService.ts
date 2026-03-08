@@ -1,8 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { apiKeyRepository } from "@/data/repositories/apiKeyRepository";
-import { usageRepository } from "@/data/repositories/usageRepository";
 import { profileRepository } from "@/data/repositories/profileRepository";
-import { ApiKey, ApiKeyWithUsage, CreateApiKeyDto, KeyUsageInfo, TrialLimitExceededError } from "@/models/types/apiKey.types";
+import { ApiKey, CreateApiKeyDto, TrialLimitExceededError } from "@/models/types/apiKey.types";
 
 export class ApiKeyService {
   async getKeysForCurrentUser(): Promise<ApiKey[]> {
@@ -12,23 +11,6 @@ export class ApiKeyService {
     return apiKeyRepository.findByUserId(user.id);
   }
 
-  async getKeyWithUsage(keyId: string): Promise<ApiKeyWithUsage | null> {
-    const key = await apiKeyRepository.findById(keyId);
-    if (!key) return null;
-
-    try {
-      const usageData = await usageRepository.fetchKeyUsage(keyId);
-      return {
-        ...key,
-        usage: usageData?.info,
-        spendLogs: usageData?.spend_logs,
-      };
-    } catch (error) {
-      console.error("Error fetching usage:", error);
-      return key;
-    }
-  }
-
   async createKey(dto: CreateApiKeyDto): Promise<void> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
@@ -36,7 +18,6 @@ export class ApiKeyService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
-    // Check trial limit BEFORE calling edge function
     const profile = await profileRepository.findById(user.id);
     if (!profile) throw new Error("Profile not found");
 
@@ -58,34 +39,6 @@ export class ApiKeyService {
     });
 
     if (error) throw error;
-  }
-
-  calculateTotalCredits(keys: ApiKey[], usageData: Record<string, KeyUsageInfo>): number {
-    return keys.reduce((sum, key) => {
-      const usage = usageData[key.id];
-      return sum + (usage ? Number(usage.max_budget) : Number(key.trial_credits_usd));
-    }, 0);
-  }
-
-  calculateUsedCredits(keys: ApiKey[], usageData: Record<string, KeyUsageInfo>): number {
-    return keys.reduce((sum, key) => {
-      const usage = usageData[key.id];
-      return sum + (usage ? Number(usage.spend) : Number(key.used_credits_usd));
-    }, 0);
-  }
-
-  calculateRemainingCredits(keys: ApiKey[], usageData: Record<string, KeyUsageInfo>): number {
-    return keys.reduce((sum, key) => {
-      const usage = usageData[key.id];
-      return sum + (usage ? Number(usage.budget_remaining) : (Number(key.trial_credits_usd) - Number(key.used_credits_usd)));
-    }, 0);
-  }
-
-  calculateBudgetUsagePercent(key: ApiKey, usage?: KeyUsageInfo): number {
-    if (usage) {
-      return (Number(usage.spend) / Number(usage.max_budget)) * 100;
-    }
-    return (Number(key.used_credits_usd) / Number(key.trial_credits_usd)) * 100;
   }
 
   calculateRemainingDays(expiresAt: string | null): number | null {

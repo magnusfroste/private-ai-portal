@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Copy, Eye, EyeOff, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { ApiKey, KeyUsageInfo } from "@/models/types/apiKey.types";
+import { ApiKey } from "@/models/types/apiKey.types";
 import { apiKeyService } from "@/models/services/apiKeyService";
 import {
   AlertDialog,
@@ -19,7 +18,6 @@ import {
 
 interface ApiKeyCardProps {
   apiKey: ApiKey;
-  usage?: KeyUsageInfo;
   onCopy: (text: string) => void;
   onRevoke?: (keyId: string) => void;
   isRevoking?: boolean;
@@ -27,7 +25,6 @@ interface ApiKeyCardProps {
 
 export const ApiKeyCard = ({
   apiKey,
-  usage,
   onCopy,
   onRevoke,
   isRevoking,
@@ -35,7 +32,6 @@ export const ApiKeyCard = ({
   const [showKey, setShowKey] = useState(false);
 
   const remainingDays = apiKeyService.calculateRemainingDays(apiKey.expires_at);
-  const usagePercent = apiKeyService.calculateBudgetUsagePercent(apiKey, usage);
 
   return (
     <div className="p-6 border border-border/50 rounded-lg bg-card/50 hover:bg-card/80 transition-all">
@@ -88,12 +84,12 @@ export const ApiKeyCard = ({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex gap-2">
-          <Input
+          <input
             value={showKey ? apiKey.key_value : "sk-" + "•".repeat(48)}
             readOnly
-            className="font-mono text-sm"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
           <Button
             variant="outline"
@@ -114,26 +110,7 @@ export const ApiKeyCard = ({
         <div className="text-sm text-muted-foreground">
           Created: {new Date(apiKey.created_at).toLocaleDateString()}
         </div>
-
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Budget Usage</span>
-            <span>{usagePercent.toFixed(1)}%</span>
-          </div>
-          <Progress value={usagePercent} className="h-2" />
-          <p className="text-xs text-muted-foreground mt-1">
-            ${(Number(apiKey.trial_credits_usd) - Number(apiKey.used_credits_usd)).toFixed(4)} remaining
-          </p>
-        </div>
       </div>
     </div>
   );
 };
-
-const Input = ({ value, readOnly, className }: any) => (
-  <input
-    value={value}
-    readOnly={readOnly}
-    className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
-  />
-);
