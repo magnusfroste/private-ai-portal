@@ -29,15 +29,11 @@ export const KeyCreationDialog = ({
 }: KeyCreationDialogProps) => {
   const [open, setOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
-  const [selectedModels, setSelectedModels] = useState<string[]>([]);
-
-  const availableModels = ["all-team-models"];
 
   const handleCreate = async () => {
-    const success = await onCreateKey(newKeyName, selectedModels);
+    const success = await onCreateKey(newKeyName, []);
     if (success) {
       setNewKeyName("");
-      setSelectedModels([]);
       setOpen(false);
     }
   };
