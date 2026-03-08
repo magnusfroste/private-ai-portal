@@ -124,6 +124,7 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
       toast.error("Kunde inte ansluta till modellen");
     } finally {
       abortRef.current = null;
+      streamingRef.current = false;
       setIsStreaming(false);
     }
   }, [messages, model, setMessages, apiKeyId]);
