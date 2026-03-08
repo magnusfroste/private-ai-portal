@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { CreditCard, Zap, Key, Loader2 } from "lucide-react";
+import { CreditCard, Zap, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Profile } from "@/models/types/profile.types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -22,9 +21,6 @@ export const SubscriptionSection = ({ profile }: SubscriptionSectionProps) => {
   const [loadingPack, setLoadingPack] = useState<string | null>(null);
 
   if (!profile) return null;
-
-  const keysUsedPercent = (profile.trial_keys_created / profile.max_trial_keys) * 100;
-  const isAtLimit = profile.trial_keys_created >= profile.max_trial_keys;
 
   const handleBuyCredits = async (pack: string) => {
     try {
@@ -58,24 +54,8 @@ export const SubscriptionSection = ({ profile }: SubscriptionSectionProps) => {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Key className="w-4 h-4 text-primary" />
-              Trial Keys
-            </div>
-            <Progress value={keysUsedPercent} className="h-2" />
-            <p className="text-xs text-muted-foreground">
-              {profile.trial_keys_created} / {profile.max_trial_keys} keys used
-            </p>
-            {isAtLimit && (
-              <p className="text-xs text-destructive font-medium">
-                Key limit reached — buy credits for more
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium">
               <Zap className="w-4 h-4 text-primary" />
-              Credits
+              Purchased Credits
             </div>
             <p className="text-2xl font-bold">${profile.purchased_credits_usd.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground">

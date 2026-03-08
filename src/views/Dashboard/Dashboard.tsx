@@ -30,12 +30,8 @@ const Dashboard = () => {
     return success;
   };
 
-  const canCreateMore = profile 
-    ? profile.trial_keys_created < profile.max_trial_keys 
-    : false;
-  const remainingKeys = profile 
-    ? profile.max_trial_keys - profile.trial_keys_created 
-    : 0;
+  const canCreateMore = true;
+  const remainingKeys = 0;
 
   if (profileLoading || keysLoading) {
     return (

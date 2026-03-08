@@ -74,8 +74,8 @@ export const KeysPage = () => {
     }
   };
 
-  const canCreateMore = profile ? profile.trial_keys_created < profile.max_trial_keys : false;
-  const remainingKeys = profile ? profile.max_trial_keys - profile.trial_keys_created : 0;
+  const canCreateMore = true;
+  const remainingKeys = 0;
 
   const activeKeys = apiKeys.filter((key: ApiKey) => key.is_active && !key.revoked_at && !isExpired(key));
 
