@@ -7,9 +7,10 @@ interface UseChatStreamOptions {
   model: string;
   messages: ChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  apiKeyId?: string;
 }
 
-export const useChatStream = ({ model, messages, setMessages }: UseChatStreamOptions) => {
+export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseChatStreamOptions) => {
   const [isStreaming, setIsStreaming] = useState(false);
 
   const sendMessage = useCallback(async (input: string) => {
@@ -26,6 +27,11 @@ export const useChatStream = ({ model, messages, setMessages }: UseChatStreamOpt
         return;
       }
 
+      const body: Record<string, unknown> = { messages: allMessages, model };
+      if (apiKeyId) {
+        body.api_key_id = apiKeyId;
+      }
+
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-playground`,
         {
@@ -34,7 +40,7 @@ export const useChatStream = ({ model, messages, setMessages }: UseChatStreamOpt
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({ messages: allMessages, model }),
+          body: JSON.stringify(body),
         }
       );
 
@@ -103,7 +109,7 @@ export const useChatStream = ({ model, messages, setMessages }: UseChatStreamOpt
     } finally {
       setIsStreaming(false);
     }
-  }, [messages, model, setMessages]);
+  }, [messages, model, setMessages, apiKeyId]);
 
   return { isStreaming, sendMessage };
 };
