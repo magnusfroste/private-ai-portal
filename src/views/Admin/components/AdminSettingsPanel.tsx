@@ -9,13 +9,11 @@ import { toast } from "sonner";
 
 interface AdminSettings {
   default_user_budget_usd: number;
-  default_key_duration_days: number | null;
 }
 
 export const AdminSettingsPanel = () => {
   const [settings, setSettings] = useState<AdminSettings>({
     default_user_budget_usd: 25,
-    default_key_duration_days: 5,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,10 +35,8 @@ export const AdminSettingsPanel = () => {
         data.forEach((row: { key: string; value: any }) => {
           mapped[row.key] = row.value;
         });
-        const durationVal = mapped.default_key_duration_days;
         setSettings({
           default_user_budget_usd: Number(mapped.default_user_budget_usd ?? 25),
-          default_key_duration_days: durationVal === null || durationVal === 0 ? null : Number(durationVal),
         });
       }
     } catch (error) {
@@ -53,12 +49,11 @@ export const AdminSettingsPanel = () => {
   const handleSaveAll = async () => {
     setSaving(true);
     try {
-      const entries = Object.entries(settings) as [string, number | null][];
+      const entries = Object.entries(settings) as [string, number][];
       for (const [key, value] of entries) {
-        const storeValue = value === null ? 0 : value;
         const { error } = await supabase
           .from("admin_settings")
-          .update({ value: storeValue as any, updated_at: new Date().toISOString() })
+          .update({ value: value as any, updated_at: new Date().toISOString() })
           .eq("key", key);
         if (error) throw error;
       }
@@ -93,46 +88,24 @@ export const AdminSettingsPanel = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="budget">Startbudget (USD)</Label>
-            <Input
-              id="budget"
-              type="number"
-              min={0}
-              step={5}
-              value={settings.default_user_budget_usd}
-              onChange={(e) =>
-                setSettings((s) => ({
-                  ...s,
-                  default_user_budget_usd: Number(e.target.value),
-                }))
-              }
-            />
-            <p className="text-xs text-muted-foreground">
-              LiteLLM user max_budget vid registrering
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="duration">Nyckelgiltighet (dagar)</Label>
-            <Input
-              id="duration"
-              type="text"
-              placeholder="Obegränsad"
-              value={settings.default_key_duration_days === null ? "" : settings.default_key_duration_days}
-              onChange={(e) => {
-                const val = e.target.value.trim();
-                setSettings((s) => ({
-                  ...s,
-                  default_key_duration_days: val === "" ? null : Number(val),
-                }));
-              }}
-            />
-            <p className="text-xs text-muted-foreground">
-              Lämna tomt för obegränsad giltighet
-            </p>
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="budget">Startbudget (USD)</Label>
+          <Input
+            id="budget"
+            type="number"
+            min={0}
+            step={5}
+            value={settings.default_user_budget_usd}
+            onChange={(e) =>
+              setSettings((s) => ({
+                ...s,
+                default_user_budget_usd: Number(e.target.value),
+              }))
+            }
+          />
+          <p className="text-xs text-muted-foreground">
+            LiteLLM user max_budget vid registrering
+          </p>
         </div>
 
         <Button onClick={handleSaveAll} disabled={saving} className="w-full md:w-auto">
