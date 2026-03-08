@@ -32,6 +32,7 @@ const CopyButton = ({ text }: { text: string }) => {
 const MarkdownContent = ({ content }: { content: string }) => (
   <ReactMarkdown
     remarkPlugins={[remarkGfm]}
+    rehypePlugins={[rehypeHighlight]}
     components={{
       pre({ children }) {
         const codeEl = (children as any)?.props;
