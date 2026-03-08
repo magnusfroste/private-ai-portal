@@ -32,6 +32,7 @@ export const ChatHeader = ({
   onSelectKey,
   disabled,
   onToggleSidebar,
+  isAdmin,
 }: ChatHeaderProps) => {
   const navigate = useNavigate();
 
