@@ -1,44 +1,51 @@
 
 
-## Plan: Utveckla profilsidan + förbered för Stripe credits-köp
+## Improvements Found
 
-Ja, ni har helt rätt — LiteLLM fortsätter som proxy och portalen är användarens vy för att hantera nycklar, se användning och köpa credits. OpenRouter är en bra inspirationskälla.
+After reviewing the admin panel, edge function, frontend components, RLS policies, and database state, here are the issues and improvements:
 
-Detta är ett stort scope, så jag föreslår att vi bryter ner det i etapper:
+### 1. RLS Policy Bug — All Policies Are Restrictive (CRITICAL)
+All RLS policies on `user_roles` use `RESTRICTIVE` mode (indicated by `Permissive: No`). In Postgres, restrictive policies are combined with AND, meaning a user needs to pass **all** policies simultaneously. This makes the "Admins can view all roles" policy useless because it conflicts with "Users can view own roles" — an admin trying to view another user's role fails the `auth.uid() = user_id` check.
 
-### Etapp 1: Profilsida (denna iteration)
+**Fix:** Change the three `user_roles` policies to `PERMISSIVE` (the default). Drop and recreate them without `AS RESTRICTIVE`.
 
-Skapa en dedikerad `/account`-sida med tre sektioner:
+### 2. Same RLS Bug on `profiles`, `api_keys`, `token_usage`
+All existing policies across these tables are also restrictive. This likely causes issues if you ever add a second policy on the same operation. Not immediately broken for single-policy-per-operation cases, but should be fixed for correctness.
 
-**1. Profilinformation** — Visa/redigera namn, email, företag
-**2. Subscription & Credits** — Visa aktuell plan (Free Trial), credits kvar, trial keys använda, uppgraderingsknapp (förberedd för Stripe)
-**3. Usage Overview** — Spend per modell (data från LiteLLM spend logs), visualiserat med recharts (redan installerat)
+**Fix:** Recreate the policies as permissive.
 
-Nya filer:
-- `src/pages/Account.tsx` — route-wrapper
-- `src/views/Account/AccountPage.tsx` — huvudvy
-- `src/views/Account/components/ProfileSection.tsx` — profilredigering
-- `src/views/Account/components/SubscriptionSection.tsx` — plan + credits
-- `src/views/Account/components/UsageOverview.tsx` — spend per modell (recharts)
-- `src/views/Account/hooks/useAccountData.ts` — hook som samlar data
-- `src/data/repositories/profileRepository.ts` — uppdatera med `update`-metod
-- `src/models/services/profileService.ts` — uppdatera med `updateProfile`-metod
+### 3. Admin Edge Function — Missing `try/catch` on `req.json()`
+In the PATCH handler, `await req.json()` can throw if the body is malformed. This would result in an unhandled error and a 500 with no useful message.
 
-Route i `App.tsx`: lägg till `/account`.
-Navigering: lägg till Account-länk i `DashboardHeader`.
+**Fix:** Wrap in try/catch with a 400 response for invalid JSON.
 
-### Etapp 2: Stripe-integration (nästa iteration)
+### 4. Admin Edge Function — No Validation on `user_id` Format
+The `user_id` from the PATCH body is passed directly to `.eq("id", user_id)` without UUID format validation. While not a SQL injection risk (Supabase SDK parameterizes), it could cause confusing errors.
 
-Aktivera Stripe via Lovable-verktyget, skapa checkout-sessioner för credit-köp. Credits läggs till i LiteLLM via `/key/update` med ny budget.
+**Fix:** Add basic UUID format validation.
 
-### Etapp 3: Landingssida inspirerad av OpenRouter (framtida)
+### 5. Frontend — `EditUserDialog` Doesn't Include Reset Option
+The dialog only lets admins change `max_trial_keys`. The reset button is separate in the table. It would be more cohesive to include a "Reset trial keys" button inside the edit dialog as well.
 
-Förbättra Index-sidan med:
-- Stats-banner (antal tokens, modeller, användare)
-- Featured Models-sektion med priser
-- Bättre pricing-sektion
+**Fix:** Add a reset button inside `EditUserDialog`.
+
+### 6. Frontend — No Confirmation for Reset Action
+Clicking the reset button in `UserTable` immediately resets without confirmation. This is a destructive action.
+
+**Fix:** Add an `AlertDialog` confirmation before resetting.
+
+### 7. Missing Error Boundary on Admin Route
+If the admin page crashes, the whole app breaks. No error boundary wraps it.
+
+**Fix:** Add a simple error boundary or use React Router's `errorElement`.
 
 ---
 
-**Ska vi börja med Etapp 1 (profilsidan)?** Stripe-integrationen kräver att vi först aktiverar Stripe-verktyget, vilket vi gör i Etapp 2.
+### Implementation Priority
+
+1. **Fix RLS policies** (critical — current restrictive policies will block admin from viewing other users' roles)
+2. **Edge function hardening** (try/catch, UUID validation)
+3. **Reset confirmation dialog** (UX safety)
+4. **Move reset into EditUserDialog** (UX cohesion)
+5. **Error boundary** (resilience)
 

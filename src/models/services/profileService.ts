@@ -1,6 +1,6 @@
 import { profileRepository } from "@/data/repositories/profileRepository";
 import { authService } from "./authService";
-import { Profile, TrialKeyStatus } from "@/models/types/profile.types";
+import { Profile, ProfileUpdateData, TrialKeyStatus } from "@/models/types/profile.types";
 
 export class ProfileService {
   async getCurrentUserProfile(): Promise<Profile | null> {
@@ -8,6 +8,12 @@ export class ProfileService {
     if (!user) return null;
 
     return profileRepository.findById(user.id);
+  }
+
+  async updateProfile(updates: ProfileUpdateData): Promise<void> {
+    const user = await authService.getCurrentUser();
+    if (!user) throw new Error("Not authenticated");
+    return profileRepository.update(user.id, updates);
   }
 
   async getTrialKeyStatus(userId: string): Promise<TrialKeyStatus> {
