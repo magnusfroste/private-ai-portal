@@ -224,7 +224,7 @@ serve(async (req: Request) => {
         data: {
           key: liteLLMResponse.key,
           name: body.keyName,
-          expires_at: expiresAt.toISOString(),
+          expires_at: expiresAt ? expiresAt.toISOString() : null,
           trial_credits_usd: 25.0,
           used_credits_usd: 0
         }
