@@ -23,6 +23,7 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
     const userMsg: ChatMessage = { role: "user", content: input };
     const allMessages = [...messages, userMsg];
     setMessages(prev => [...prev, userMsg]);
+    setIsStreaming(true);
 
     const controller = new AbortController();
     abortRef.current = controller;
