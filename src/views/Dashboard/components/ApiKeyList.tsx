@@ -86,6 +86,8 @@ export const ApiKeyList = ({
                   isLoadingUsage={loadingUsage[key.id] || false}
                   onCopy={onCopy}
                   onRefreshUsage={onRefreshKey}
+                  onRevoke={onRevoke}
+                  isRevoking={isRevoking}
                 />
               ))}
             </div>
