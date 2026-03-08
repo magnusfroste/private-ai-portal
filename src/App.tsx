@@ -26,19 +26,19 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/chat" element={<ChatPage />} />
           <Route path="/dashboard" element={<AppLayout />}>
             <Route index element={<DashboardActivity />} />
             <Route path="logs" element={<LogsPage />} />
             <Route path="credits" element={<CreditsPage />} />
             <Route path="account" element={<AccountPage />} />
             <Route path="keys" element={<KeysPage />} />
-            <Route path="chat" element={<ChatPage />} />
             <Route path="admin" element={<AdminPage />} />
           </Route>
           {/* Redirect old routes */}
           <Route path="/account" element={<Navigate to="/dashboard/account" replace />} />
           <Route path="/admin" element={<Navigate to="/dashboard/admin" replace />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/dashboard/chat" element={<Navigate to="/chat" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
