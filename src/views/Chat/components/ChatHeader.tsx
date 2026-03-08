@@ -32,15 +32,13 @@ export const ChatHeader = ({
         >
           <PanelLeft className="w-4 h-4" />
         </Button>
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-        >
-          <Shield className="w-5 h-5 text-primary" />
-          <span className="text-sm font-bold gradient-text hidden sm:inline">Autoversio</span>
-        </button>
-        <span className="text-border hidden sm:inline">|</span>
         <ChatModelSelector
+          models={models}
+          selectedModel={selectedModel}
+          onSelect={onSelectModel}
+          disabled={disabled}
+        />
+      </div>
           models={models}
           selectedModel={selectedModel}
           onSelect={onSelectModel}
