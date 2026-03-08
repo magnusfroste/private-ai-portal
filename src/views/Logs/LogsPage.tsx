@@ -20,7 +20,7 @@ export const LogsPage = () => {
 
   // Flatten logs with key name
   const allLogs = useMemo(() => {
-    const logs: Array<{ keyId: string; keyName: string; log: (typeof flatLogs)[0] }> = [];
+    const logs: Array<{ keyId: string; keyName: string; log: (typeof spendLogs)[string][0] }> = [];
     for (const [keyId, keyLogs] of Object.entries(spendLogs)) {
       for (const log of keyLogs) {
         logs.push({
