@@ -53,11 +53,12 @@ export const AdminSettingsPanel = () => {
   const handleSaveAll = async () => {
     setSaving(true);
     try {
-      const entries = Object.entries(settings) as [string, number][];
+      const entries = Object.entries(settings) as [string, number | null][];
       for (const [key, value] of entries) {
+        const storeValue = value === null ? 0 : value;
         const { error } = await supabase
           .from("admin_settings")
-          .update({ value: value as any, updated_at: new Date().toISOString() })
+          .update({ value: storeValue as any, updated_at: new Date().toISOString() })
           .eq("key", key);
         if (error) throw error;
       }
