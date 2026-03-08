@@ -12,6 +12,7 @@ import { CreditsPage } from "./views/Credits/CreditsPage";
 import { AccountPage } from "./views/Account/AccountPage";
 import { KeysPage } from "./views/Keys/KeysPage";
 import { AdminPage } from "./views/Admin/AdminPage";
+import { ChatPage } from "./views/Chat/ChatPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
