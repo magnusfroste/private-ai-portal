@@ -23,6 +23,7 @@ export type Database = {
           key_value: string
           litellm_token: string | null
           name: string
+          revoked_at: string | null
           trial_credits_usd: number | null
           used_credits_usd: number | null
           user_id: string
@@ -35,6 +36,7 @@ export type Database = {
           key_value: string
           litellm_token?: string | null
           name: string
+          revoked_at?: string | null
           trial_credits_usd?: number | null
           used_credits_usd?: number | null
           user_id: string
@@ -47,6 +49,7 @@ export type Database = {
           key_value?: string
           litellm_token?: string | null
           name?: string
+          revoked_at?: string | null
           trial_credits_usd?: number | null
           used_credits_usd?: number | null
           user_id?: string
