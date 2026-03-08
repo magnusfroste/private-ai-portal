@@ -1,7 +1,6 @@
 import { Activity, ScrollText, CreditCard, Key, Shield, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { adminRepository } from "@/data/repositories/adminRepository";
 import {
