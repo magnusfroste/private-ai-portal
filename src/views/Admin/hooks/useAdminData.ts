@@ -38,6 +38,18 @@ export const useAdminData = () => {
     },
   });
 
+  const updateBudgetMutation = useMutation({
+    mutationFn: ({ userId, maxBudget }: { userId: string; maxBudget: number }) =>
+      adminService.updateLitellmBudget(userId, maxBudget),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success("LiteLLM budget uppdaterat");
+    },
+    onError: (error: Error) => {
+      toast.error(`Kunde inte uppdatera budget: ${error.message}`);
+    },
+  });
+
   return {
     users: usersQuery.data ?? [],
     isLoading: usersQuery.isLoading,
@@ -46,6 +58,7 @@ export const useAdminData = () => {
     isAdminLoading: isAdminQuery.isLoading,
     updateMaxKeys: updateMaxKeysMutation.mutate,
     resetKeys: resetKeysMutation.mutate,
-    isUpdating: updateMaxKeysMutation.isPending || resetKeysMutation.isPending,
+    updateBudget: updateBudgetMutation.mutate,
+    isUpdating: updateMaxKeysMutation.isPending || resetKeysMutation.isPending || updateBudgetMutation.isPending,
   };
 };
