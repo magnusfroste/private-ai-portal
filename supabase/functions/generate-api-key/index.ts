@@ -152,23 +152,12 @@ serve(async (req: Request) => {
     }
 
     try {
-      // Read key duration from admin settings
-      const { data: durationSetting } = await supabase
-        .from('admin_settings')
-        .select('value')
-        .eq('key', 'default_key_duration_days')
-        .single();
-
-      const durationDays = durationSetting ? Number(durationSetting.value) : 5;
-      const hasExpiry = durationDays > 0;
-
-      // 2. Generate key through LiteLLM's API (linked to user, no team)
+      // 2. Generate key through LiteLLM's API (no expiry — budget controls access)
       const liteLLMResponse = await createLiteLLMKey(
         body.keyName, 
         LITELLM_MASTER_KEY,
         profile.litellm_user_id,
         body.models,
-        hasExpiry ? durationDays : undefined,
       );
       
       console.log('LiteLLM response structure:', {
@@ -176,10 +165,6 @@ serve(async (req: Request) => {
         hasToken: !!liteLLMResponse.token,
         keys: Object.keys(liteLLMResponse)
       });
-      
-      // Calculate expiration date (null if unlimited)
-      const expiresAt = hasExpiry ? new Date() : null;
-      if (expiresAt) expiresAt.setDate(expiresAt.getDate() + durationDays);
 
       // 3. Store the key in the database with token identifier
       const { data: apiKey, error: dbError } = await supabase
@@ -189,7 +174,7 @@ serve(async (req: Request) => {
           name: body.keyName,
           key_value: liteLLMResponse.key,
           litellm_token: liteLLMResponse.token || null,
-          expires_at: expiresAt ? expiresAt.toISOString() : null,
+          expires_at: null,
           trial_credits_usd: 25.0,
           used_credits_usd: 0,
           is_active: true
@@ -224,7 +209,7 @@ serve(async (req: Request) => {
         data: {
           key: liteLLMResponse.key,
           name: body.keyName,
-          expires_at: expiresAt ? expiresAt.toISOString() : null,
+          expires_at: null,
           trial_credits_usd: 25.0,
           used_credits_usd: 0
         }
