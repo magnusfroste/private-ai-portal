@@ -88,6 +88,7 @@ export const AdminPage = () => {
         onOpenChange={setDialogOpen}
         onSave={handleSave}
         onReset={handleReset}
+        onUpdateBudget={handleUpdateBudget}
         isUpdating={isUpdating}
       />
     </div>

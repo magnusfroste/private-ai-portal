@@ -38,6 +38,10 @@ export const AdminPanel = () => {
     resetKeys(userId);
   };
 
+  const handleUpdateBudget = (userId: string, maxBudget: number) => {
+    updateBudget({ userId, maxBudget });
+  };
+
   if (isAdminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
