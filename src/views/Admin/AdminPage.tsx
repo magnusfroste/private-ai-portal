@@ -17,6 +17,7 @@ export const AdminPage = () => {
     isAdminLoading,
     updateMaxKeys,
     resetKeys,
+    updateBudget,
     isUpdating,
   } = useAdminData();
 
