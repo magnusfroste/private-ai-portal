@@ -17,6 +17,8 @@ interface ApiKeyListProps {
   isCreatingKey: boolean;
   canCreateMore: boolean;
   remainingKeys: number;
+  onRevoke?: (keyId: string) => void;
+  isRevoking?: boolean;
 }
 
 export const ApiKeyList = ({
