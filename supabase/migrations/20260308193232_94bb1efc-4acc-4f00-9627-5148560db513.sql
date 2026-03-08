@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN litellm_user_id text;

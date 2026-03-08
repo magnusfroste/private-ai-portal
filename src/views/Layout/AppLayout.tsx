@@ -2,10 +2,12 @@ import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
+import { useLitellmUser } from "@/hooks/useLitellmUser";
 import { AppSidebar } from "./AppSidebar";
 
 export const AppLayout = () => {
   const { checkAuth } = useAuth();
+  useLitellmUser();
 
   useEffect(() => {
     checkAuth();

@@ -4,7 +4,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 interface GenerateKeyRequest {
   keyName: string;
   models?: string[];
-  teamId?: string;
 }
 
 interface ApiKeyResponse {
@@ -42,36 +41,28 @@ const respondWithError = (status: number, code: string, message: string): Respon
 async function createLiteLLMKey(
   keyName: string,
   masterKey: string,
+  litellmUserId: string,
   models?: string[],
-  teamId?: string
 ): Promise<{
   key: string;
   token: string;
   key_alias: string;
-  max_budget: number;
-  duration: string;
-  team_id?: string;
 }> {
   console.log('Calling LiteLLM API at https://api.autoversio.ai/key/generate');
   
   const requestBody: {
     key_alias: string;
-    max_budget: number;
+    user_id: string;
     duration: string;
     models?: string[];
-    team_id?: string;
   } = {
     key_alias: keyName,
-    max_budget: 25.0,
-    duration: '5d'
+    user_id: litellmUserId,
+    duration: '5d',
   };
 
   if (models && models.length > 0) {
     requestBody.models = models;
-  }
-
-  if (teamId) {
-    requestBody.team_id = teamId;
   }
 
   console.log('Request body:', requestBody);
@@ -143,7 +134,7 @@ serve(async (req: Request) => {
     // 1. Check trial key limit
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('trial_keys_created, max_trial_keys')
+      .select('trial_keys_created, max_trial_keys, litellm_user_id')
       .eq('id', user.id)
       .single();
 
@@ -159,13 +150,17 @@ serve(async (req: Request) => {
       );
     }
 
+    if (!profile.litellm_user_id) {
+      return respondWithError(400, 'no_litellm_user', 'LiteLLM user not initialized. Please reload the dashboard.');
+    }
+
     try {
-      // 2. Generate key through LiteLLM's API
+      // 2. Generate key through LiteLLM's API (linked to user, no team)
       const liteLLMResponse = await createLiteLLMKey(
         body.keyName, 
         LITELLM_MASTER_KEY,
+        profile.litellm_user_id,
         body.models,
-        body.teamId
       );
       
       console.log('LiteLLM response structure:', {

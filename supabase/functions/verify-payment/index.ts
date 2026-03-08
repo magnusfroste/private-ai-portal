@@ -55,11 +55,10 @@ serve(async (req) => {
     const creditsToAdd = parseInt(session.metadata?.credits ?? "0", 10);
     if (creditsToAdd <= 0) throw new Error("Invalid credits in session metadata");
 
-    // Use service role to update profile (bypasses RLS)
-    // First get current credits
+    // Get profile with LiteLLM user ID
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("purchased_credits_usd")
+      .select("purchased_credits_usd, litellm_user_id")
       .eq("id", user.id)
       .single();
 
@@ -73,6 +72,35 @@ serve(async (req) => {
       .eq("id", user.id);
 
     if (updateError) throw updateError;
+
+    // Update LiteLLM user budget if user has a LiteLLM account
+    if (profile.litellm_user_id) {
+      const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY') || '';
+      if (LITELLM_MASTER_KEY) {
+        try {
+          const litellmResponse = await fetch('https://api.autoversio.ai/user/update', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${LITELLM_MASTER_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: profile.litellm_user_id,
+              max_budget: newCredits,
+            }),
+          });
+          const litellmData = await litellmResponse.json();
+          console.log('[VERIFY-PAYMENT] LiteLLM user budget updated:', { 
+            status: litellmResponse.status, 
+            newBudget: newCredits,
+            response: litellmData 
+          });
+        } catch (litellmError) {
+          console.error('[VERIFY-PAYMENT] Failed to update LiteLLM budget:', litellmError);
+          // Don't fail the payment verification - credits are saved in DB
+        }
+      }
+    }
 
     // Log transaction (idempotent via unique stripe_session_id)
     await supabaseAdmin

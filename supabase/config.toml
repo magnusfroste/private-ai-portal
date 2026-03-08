@@ -14,3 +14,12 @@ verify_jwt = false
 
 [functions.revoke-key]
 verify_jwt = false
+
+[functions.create-litellm-user]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.verify-payment]
+verify_jwt = false
