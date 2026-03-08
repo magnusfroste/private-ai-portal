@@ -26,7 +26,6 @@ const mainNav = [
 export const AppSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signOut } = useAuth();
   const { profile } = useProfile();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
