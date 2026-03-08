@@ -1,21 +1,83 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import type { Conversation, ChatMessage } from "../types";
-
-const generateId = () => crypto.randomUUID();
 
 export const useChatConversations = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load conversations from DB on mount
+  useEffect(() => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("chat_conversations")
+        .select("id, title, model, messages, created_at, updated_at")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(50);
+
+      if (!error && data) {
+        setConversations(
+          data.map((row) => ({
+            id: row.id,
+            title: row.title,
+            model: row.model || "",
+            messages: (row.messages as unknown as ChatMessage[]) || [],
+            createdAt: new Date(row.created_at).getTime(),
+          }))
+        );
+      }
+      setLoaded(true);
+    };
+    load();
+  }, []);
 
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
 
-  const createConversation = useCallback((model: string) => {
+  // Debounced save to DB
+  const saveToDb = useCallback((convId: string, title: string, messages: ChatMessage[], model: string) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      await supabase
+        .from("chat_conversations")
+        .update({
+          title,
+          messages: messages as unknown as Record<string, unknown>[],
+          model,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", convId);
+    }, 500);
+  }, []);
+
+  const createConversation = useCallback(async (model: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return "";
+
+    const { data, error } = await supabase
+      .from("chat_conversations")
+      .insert({
+        user_id: user.id,
+        title: "Ny chatt",
+        model,
+        messages: [],
+      })
+      .select("id, created_at")
+      .single();
+
+    if (error || !data) return "";
+
     const conv: Conversation = {
-      id: generateId(),
+      id: data.id,
       title: "Ny chatt",
       messages: [],
       model,
-      createdAt: Date.now(),
+      createdAt: new Date(data.created_at).getTime(),
     };
     setConversations((prev) => [conv, ...prev]);
     setActiveId(conv.id);
@@ -29,24 +91,24 @@ export const useChatConversations = () => {
           if (c.id !== activeId) return c;
           const newMessages =
             typeof updater === "function" ? updater(c.messages) : updater;
-          // Auto-title from first user message
           const firstUser = newMessages.find((m) => m.role === "user");
           const title = firstUser
             ? firstUser.content.slice(0, 40) + (firstUser.content.length > 40 ? "…" : "")
             : c.title;
+          // Persist
+          saveToDb(c.id, title, newMessages, c.model);
           return { ...c, messages: newMessages, title };
         })
       );
     },
-    [activeId]
+    [activeId, saveToDb]
   );
 
   const deleteConversation = useCallback(
-    (id: string) => {
+    async (id: string) => {
       setConversations((prev) => prev.filter((c) => c.id !== id));
-      if (activeId === id) {
-        setActiveId(null);
-      }
+      if (activeId === id) setActiveId(null);
+      await supabase.from("chat_conversations").delete().eq("id", id);
     },
     [activeId]
   );
@@ -59,5 +121,6 @@ export const useChatConversations = () => {
     createConversation,
     setMessages,
     deleteConversation,
+    loaded,
   };
 };
