@@ -1,5 +1,5 @@
 import { adminRepository } from "@/data/repositories/adminRepository";
-import { AdminUser, UpdateUserPayload } from "@/models/types/admin.types";
+import { AdminUser } from "@/models/types/admin.types";
 
 export class AdminService {
   async getUsers(): Promise<AdminUser[]> {
@@ -17,6 +17,13 @@ export class AdminService {
     return adminRepository.updateUser({
       user_id: userId,
       reset_trial_keys: true,
+    });
+  }
+
+  async updateLitellmBudget(userId: string, maxBudget: number): Promise<void> {
+    await adminRepository.updateUser({
+      user_id: userId,
+      litellm_max_budget: maxBudget,
     });
   }
 

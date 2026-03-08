@@ -26,7 +26,7 @@ export const UserTable = ({ users, onEdit, isUpdating }: UserTableProps) => {
           <TableRow>
             <TableHead>Namn</TableHead>
             <TableHead>E-post</TableHead>
-            <TableHead>Företag</TableHead>
+            <TableHead>Budget</TableHead>
             <TableHead>Trial Keys</TableHead>
             <TableHead>API-nycklar</TableHead>
             <TableHead>Registrerad</TableHead>
@@ -42,7 +42,16 @@ export const UserTable = ({ users, onEdit, isUpdating }: UserTableProps) => {
                   {user.full_name || "—"}
                 </TableCell>
                 <TableCell>{user.email}</TableCell>
-                <TableCell>{user.company || "—"}</TableCell>
+                <TableCell>
+                  {user.litellm_budget ? (
+                    <div className="text-sm">
+                      <span className="font-medium">${user.litellm_budget.max_budget.toFixed(0)}</span>
+                      <span className="text-muted-foreground"> / ${user.litellm_budget.spend.toFixed(2)} used</span>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">—</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <span>

@@ -56,7 +56,7 @@ serve(async (req: Request) => {
   if (req.method === "GET") {
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("id, full_name, email, company, trial_keys_created, max_trial_keys, created_at")
+      .select("id, full_name, email, company, trial_keys_created, max_trial_keys, litellm_user_id, purchased_credits_usd, created_at")
       .order("created_at", { ascending: false });
 
     if (profilesError) {
@@ -80,9 +80,37 @@ serve(async (req: Request) => {
       }
     }
 
-    const users = profiles.map((p) => ({
+    // Fetch LiteLLM budget info for users that have litellm_user_id
+    const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY') || '';
+    const budgetMap: Record<string, { max_budget: number; spend: number }> = {};
+
+    if (LITELLM_MASTER_KEY) {
+      const usersWithLitellm = profiles.filter((p: any) => p.litellm_user_id);
+      await Promise.all(usersWithLitellm.map(async (p: any) => {
+        try {
+          const url = new URL('https://api.autoversio.ai/user/info');
+          url.searchParams.set('user_id', p.litellm_user_id);
+          const resp = await fetch(url.toString(), {
+            headers: { 'Authorization': `Bearer ${LITELLM_MASTER_KEY}` },
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            const info = data.user_info || data;
+            budgetMap[p.id] = {
+              max_budget: Number(info.max_budget ?? 0),
+              spend: Number(info.spend ?? 0),
+            };
+          }
+        } catch (e) {
+          console.error(`Failed to fetch LiteLLM info for ${p.id}:`, e);
+        }
+      }));
+    }
+
+    const users = profiles.map((p: any) => ({
       ...p,
       api_key_count: keyCountMap[p.id] || 0,
+      litellm_budget: budgetMap[p.id] || null,
     }));
 
     return jsonResponse({ users });
@@ -97,10 +125,11 @@ serve(async (req: Request) => {
       return jsonResponse({ error: "Invalid JSON body" }, 400);
     }
 
-    const { user_id, max_trial_keys, reset_trial_keys } = body as {
+    const { user_id, max_trial_keys, reset_trial_keys, litellm_max_budget } = body as {
       user_id?: string;
       max_trial_keys?: number;
       reset_trial_keys?: boolean;
+      litellm_max_budget?: number;
     };
 
     if (!user_id) {
@@ -121,23 +150,65 @@ serve(async (req: Request) => {
       updates.trial_keys_created = 0;
     }
 
-    if (Object.keys(updates).length === 0) {
+    // Update LiteLLM user budget if requested
+    if (typeof litellm_max_budget === "number" && litellm_max_budget >= 0) {
+      const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY') || '';
+      
+      // Get litellm_user_id from profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("litellm_user_id")
+        .eq("id", user_id)
+        .single();
+
+      if (profile?.litellm_user_id && LITELLM_MASTER_KEY) {
+        try {
+          const resp = await fetch('https://api.autoversio.ai/user/update', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${LITELLM_MASTER_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: profile.litellm_user_id,
+              max_budget: litellm_max_budget,
+            }),
+          });
+          const data = await resp.json();
+          console.log('LiteLLM user budget updated:', { status: resp.status, data });
+          if (!resp.ok) {
+            return jsonResponse({ error: `Failed to update LiteLLM budget: ${data.error?.message || resp.status}` }, 500);
+          }
+        } catch (e) {
+          console.error('LiteLLM budget update error:', e);
+          return jsonResponse({ error: "Failed to update LiteLLM budget" }, 500);
+        }
+      } else if (!profile?.litellm_user_id) {
+        return jsonResponse({ error: "User has no LiteLLM account" }, 400);
+      }
+    }
+
+    if (Object.keys(updates).length === 0 && typeof litellm_max_budget !== "number") {
       return jsonResponse({ error: "No valid updates provided" }, 400);
     }
 
-    const { data, error: updateError } = await supabase
-      .from("profiles")
-      .update(updates)
-      .eq("id", user_id)
-      .select("id, full_name, email, company, trial_keys_created, max_trial_keys, created_at")
-      .single();
+    // Only update DB if there are profile updates
+    if (Object.keys(updates).length > 0) {
+      const { data, error: updateError } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("id", user_id)
+        .select("id, full_name, email, company, trial_keys_created, max_trial_keys, litellm_user_id, created_at")
+        .single();
 
-    if (updateError) {
-      console.error("Error updating user:", updateError);
-      return jsonResponse({ error: "Failed to update user" }, 500);
+      if (updateError) {
+        console.error("Error updating user:", updateError);
+        return jsonResponse({ error: "Failed to update user" }, 500);
+      }
+      return jsonResponse({ user: data });
     }
 
-    return jsonResponse({ user: data });
+    return jsonResponse({ success: true });
   }
 
   return jsonResponse({ error: "Method not allowed" }, 405);

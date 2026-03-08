@@ -18,6 +18,7 @@ export const AdminPanel = () => {
     isAdminLoading,
     updateMaxKeys,
     resetKeys,
+    updateBudget,
     isUpdating,
   } = useAdminData();
 
@@ -35,6 +36,10 @@ export const AdminPanel = () => {
 
   const handleReset = (userId: string) => {
     resetKeys(userId);
+  };
+
+  const handleUpdateBudget = (userId: string, maxBudget: number) => {
+    updateBudget({ userId, maxBudget });
   };
 
   if (isAdminLoading) {
@@ -117,6 +122,7 @@ export const AdminPanel = () => {
         onOpenChange={setDialogOpen}
         onSave={handleSave}
         onReset={handleReset}
+        onUpdateBudget={handleUpdateBudget}
         isUpdating={isUpdating}
       />
     </div>
