@@ -1,4 +1,4 @@
-import { Activity, ScrollText, CreditCard, User, Key, Shield, LogOut } from "lucide-react";
+import { Activity, ScrollText, CreditCard, User, Key, Shield, LogOut, MessageSquare } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
