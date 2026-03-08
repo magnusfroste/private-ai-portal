@@ -3,7 +3,9 @@ import { Shield, RefreshCw } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "@/views/Dashboard/hooks/useDashboardData";
 import { useKeyManagement } from "@/views/Dashboard/hooks/useKeyManagement";
+import { useUserBudget } from "@/hooks/useUserBudget";
 import { ApiKeyList } from "@/views/Dashboard/components/ApiKeyList";
+import { UserBudgetCard } from "@/views/Dashboard/components/UserBudgetCard";
 import { ApiKey } from "@/models/types/apiKey.types";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +15,7 @@ export const KeysPage = () => {
   const { profile, loading: profileLoading } = useProfile();
   const [syncing, setSyncing] = useState(false);
   const [revoking, setRevoking] = useState(false);
+  const { budget, loading: budgetLoading, refetch: refetchBudget } = useUserBudget();
   const {
     apiKeys,
     loading: keysLoading,
@@ -102,7 +105,7 @@ export const KeysPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-1">API Keys</h1>
-          <p className="text-muted-foreground text-sm">Manage your active API keys</p>
+          <p className="text-muted-foreground text-sm">Manage your active API keys and budget</p>
         </div>
         <Button
           variant="outline"
@@ -114,6 +117,8 @@ export const KeysPage = () => {
           {syncing ? "Syncing..." : "Sync with LiteLLM"}
         </Button>
       </div>
+
+      <UserBudgetCard budget={budget} loading={budgetLoading} onRefresh={refetchBudget} />
 
       <ApiKeyList
         apiKeys={activeKeys}
