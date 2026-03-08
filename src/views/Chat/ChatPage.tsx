@@ -112,17 +112,17 @@ export const ChatPage = () => {
     });
   }, [messages]);
 
-  const handleSend = (input: string) => {
+  const handleSend = async (input: string) => {
     if (!input.trim() || isStreaming) return;
     if (!activeId) {
-      createConversation(selectedModel);
+      await createConversation(selectedModel);
     }
     requestAnimationFrame(() => sendMessage(input));
   };
 
-  const handleNewChat = () => {
+  const handleNewChat = async () => {
     if (!isStreaming) {
-      createConversation(selectedModel);
+      await createConversation(selectedModel);
     }
   };
 
