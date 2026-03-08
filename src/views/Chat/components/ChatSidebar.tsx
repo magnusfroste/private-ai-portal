@@ -23,6 +23,7 @@ export const ChatSidebar = ({
   open,
   onClose,
 }: ChatSidebarProps) => {
+  const navigate = useNavigate();
   const handleSelect = (id: string) => {
     onSelect(id);
     onClose();
