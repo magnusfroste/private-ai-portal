@@ -58,6 +58,29 @@ export const KeysPage = () => {
     }
   };
 
+  const handleRevoke = async (keyId: string) => {
+    setRevoking(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase.functions.invoke('revoke-key', {
+        body: { keyId },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) throw error;
+
+      toast.success(`Key "${data.name}" has been revoked`);
+      await refetch();
+    } catch (err) {
+      console.error("Revoke error:", err);
+      toast.error("Failed to revoke key");
+    } finally {
+      setRevoking(false);
+    }
+  };
+
   const canCreateMore = profile ? profile.trial_keys_created < profile.max_trial_keys : false;
   const remainingKeys = profile ? profile.max_trial_keys - profile.trial_keys_created : 0;
 
