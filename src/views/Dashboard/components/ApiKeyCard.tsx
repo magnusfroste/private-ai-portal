@@ -62,14 +62,47 @@ export const ApiKeyCard = ({
             )}
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onRefreshUsage(apiKey.id)}
-          disabled={isLoadingUsage}
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoadingUsage ? "animate-spin" : ""}`} />
-        </Button>
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onRefreshUsage(apiKey.id)}
+            disabled={isLoadingUsage}
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoadingUsage ? "animate-spin" : ""}`} />
+          </Button>
+          {onRevoke && apiKey.is_active && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive hover:text-destructive"
+                  disabled={isRevoking}
+                >
+                  <Ban className="w-4 h-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Revoke API Key</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently deactivate "{apiKey.name}" and remove it from LiteLLM. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => onRevoke(apiKey.id)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Revoke Key
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4">
