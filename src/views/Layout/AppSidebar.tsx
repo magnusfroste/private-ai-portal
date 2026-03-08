@@ -67,37 +67,6 @@ export const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <Collapsible defaultOpen={isSettingsActive} className="group/collapsible">
-            <SidebarGroupLabel asChild>
-              <CollapsibleTrigger className="flex w-full items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
-                  {!collapsed && "Settings"}
-                </span>
-                {!collapsed && <ChevronDown className="w-3 h-3 transition-transform group-data-[state=open]/collapsible:rotate-180" />}
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {settingsNav.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        isActive={isActive(item.url)}
-                        onClick={() => navigate(item.url)}
-                        tooltip={item.title}
-                      >
-                        <item.icon className="w-4 h-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </SidebarGroup>
 
         {isAdmin && (
           <SidebarGroup>
