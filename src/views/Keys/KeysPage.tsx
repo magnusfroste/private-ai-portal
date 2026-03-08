@@ -13,6 +13,7 @@ import { toast } from "sonner";
 export const KeysPage = () => {
   const { profile, loading: profileLoading } = useProfile();
   const [syncing, setSyncing] = useState(false);
+  const [revoking, setRevoking] = useState(false);
   const {
     apiKeys,
     loading: keysLoading,
