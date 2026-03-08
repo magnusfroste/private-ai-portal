@@ -1,4 +1,5 @@
-import { Plus, MessageSquare, Trash2, X } from "lucide-react";
+import { Plus, MessageSquare, Trash2, X, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import type { Conversation } from "../types";
 import { cn } from "@/lib/utils";
