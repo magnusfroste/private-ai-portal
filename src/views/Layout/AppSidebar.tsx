@@ -1,4 +1,4 @@
-import { Activity, ScrollText, CreditCard, User, Key, Settings, Shield, LogOut, ChevronDown } from "lucide-react";
+import { Activity, ScrollText, CreditCard, User, Key, Shield, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,27 +9,19 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const mainNav = [
   { title: "Activity", url: "/dashboard", icon: Activity },
   { title: "Logs", url: "/dashboard/logs", icon: ScrollText },
   { title: "Credits", url: "/dashboard/credits", icon: CreditCard },
-];
-
-const settingsNav = [
-  { title: "Account", url: "/dashboard/account", icon: User },
   { title: "API Keys", url: "/dashboard/keys", icon: Key },
+  { title: "Account", url: "/dashboard/account", icon: User },
 ];
 
 export const AppSidebar = () => {
