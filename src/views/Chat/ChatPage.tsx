@@ -132,6 +132,7 @@ export const ChatPage = () => {
           onSelectKey={setSelectedKeyId}
           disabled={isStreaming}
           onToggleSidebar={() => setSidebarOpen((v) => !v)}
+          isAdmin={isAdmin}
         />
 
         <div ref={scrollRef} className="flex-1 overflow-auto">
