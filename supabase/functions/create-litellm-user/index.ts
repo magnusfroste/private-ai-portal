@@ -59,7 +59,16 @@ serve(async (req: Request) => {
       });
     }
 
-    // Create LiteLLM internal user with trial budget
+    // Read default budget from admin_settings
+    const { data: budgetSetting } = await supabase
+      .from('admin_settings')
+      .select('value')
+      .eq('key', 'default_user_budget_usd')
+      .single();
+
+    const defaultBudget = budgetSetting ? Number(budgetSetting.value) : 25;
+
+    // Create LiteLLM internal user with configured budget
     const litellmResponse = await fetch('https://api.autoversio.ai/user/new', {
       method: 'POST',
       headers: {
@@ -69,7 +78,7 @@ serve(async (req: Request) => {
       body: JSON.stringify({
         user_id: user.id,
         user_email: user.email,
-        max_budget: 25.0,
+        max_budget: defaultBudget,
         user_role: 'internal_user',
       }),
     });
