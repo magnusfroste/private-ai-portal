@@ -115,12 +115,14 @@ export const ChatMessageList = ({ messages, isStreaming }: ChatMessageListProps)
       {messages.map((msg, i) => (
         <div
           key={i}
-          className={`py-3 ${
-            msg.role === "user" ? "text-foreground" : "text-foreground"
-          }`}
+          className="py-3"
         >
           {msg.role === "user" ? (
-            <p className="text-base font-medium whitespace-pre-wrap">{msg.content}</p>
+            <div className="flex justify-end">
+              <div className="bg-muted rounded-2xl rounded-br-sm px-4 py-2.5 max-w-[85%]">
+                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+              </div>
+            </div>
           ) : (
             <div className="text-sm leading-relaxed prose-sm">
               <MarkdownContent content={msg.content} />
