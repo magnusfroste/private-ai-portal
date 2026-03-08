@@ -1,17 +1,24 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { modelService } from "@/models/services/modelService";
+import { useAuth } from "@/hooks/useAuth";
 import { ChatInput } from "./components/ChatInput";
 import { ChatMessageList } from "./components/ChatMessageList";
-import { ChatModelSelector } from "./components/ChatModelSelector";
 import { ChatEmptyState } from "./components/ChatEmptyState";
+import { ChatHeader } from "./components/ChatHeader";
+import { ChatSidebar } from "./components/ChatSidebar";
 import { useChatStream } from "./hooks/useChatStream";
-import type { ChatMessage } from "./types";
+import { useChatConversations } from "./hooks/useChatConversations";
+import { useRef, useState } from "react";
 
 export const ChatPage = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>("");
+  const { checkAuth } = useAuth();
+  const [selectedModel, setSelectedModel] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   const { data: models = [] } = useQuery({
     queryKey: ["available-models"],
@@ -26,6 +33,18 @@ export const ChatPage = () => {
     }
   }, [models, selectedModel]);
 
+  const {
+    conversations,
+    activeConversation,
+    activeId,
+    setActiveId,
+    createConversation,
+    setMessages,
+    deleteConversation,
+  } = useChatConversations();
+
+  const messages = activeConversation?.messages ?? [];
+
   const { isStreaming, sendMessage } = useChatStream({
     model: selectedModel,
     messages,
@@ -33,50 +52,60 @@ export const ChatPage = () => {
   });
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages]);
 
   const handleSend = (input: string) => {
     if (!input.trim() || isStreaming) return;
-    sendMessage(input);
+    // Auto-create conversation if none active
+    if (!activeId) {
+      createConversation(selectedModel);
+    }
+    // Small delay to ensure state is set when creating new conv
+    setTimeout(() => sendMessage(input), 0);
   };
 
-  const handleClear = () => {
-    if (!isStreaming) setMessages([]);
+  const handleNewChat = () => {
+    if (!isStreaming) {
+      createConversation(selectedModel);
+    }
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3rem)]">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-border/50">
-        <ChatModelSelector
-          models={models}
-          selectedModel={selectedModel}
-          onSelect={setSelectedModel}
-          disabled={isStreaming}
+    <div className="flex flex-col h-screen bg-background">
+      <ChatHeader
+        models={models}
+        selectedModel={selectedModel}
+        onSelectModel={setSelectedModel}
+        disabled={isStreaming}
+      />
+
+      <div className="flex flex-1 min-h-0">
+        <ChatSidebar
+          conversations={conversations}
+          activeId={activeId}
+          onSelect={setActiveId}
+          onNew={handleNewChat}
+          onDelete={deleteConversation}
         />
-        {messages.length > 0 && (
-          <button
-            onClick={handleClear}
-            disabled={isStreaming}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-          >
-            Rensa chatt
-          </button>
-        )}
-      </div>
 
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-auto">
-        {messages.length === 0 ? (
-          <ChatEmptyState onSelectPrompt={handleSend} />
-        ) : (
-          <ChatMessageList messages={messages} isStreaming={isStreaming} />
-        )}
-      </div>
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Messages */}
+          <div ref={scrollRef} className="flex-1 overflow-auto">
+            {messages.length === 0 ? (
+              <ChatEmptyState onSelectPrompt={handleSend} />
+            ) : (
+              <ChatMessageList messages={messages} isStreaming={isStreaming} />
+            )}
+          </div>
 
-      {/* Input */}
-      <ChatInput onSend={handleSend} disabled={isStreaming} />
+          {/* Input */}
+          <ChatInput onSend={handleSend} disabled={isStreaming} />
+        </div>
+      </div>
     </div>
   );
 };
