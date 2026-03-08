@@ -2,6 +2,8 @@ import { Copy, Check } from "lucide-react";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.min.css";
 import type { ChatMessage } from "../types";
 
 interface ChatMessageListProps {
@@ -30,6 +32,7 @@ const CopyButton = ({ text }: { text: string }) => {
 const MarkdownContent = ({ content }: { content: string }) => (
   <ReactMarkdown
     remarkPlugins={[remarkGfm]}
+    rehypePlugins={[rehypeHighlight]}
     components={{
       pre({ children }) {
         const codeEl = (children as any)?.props;
