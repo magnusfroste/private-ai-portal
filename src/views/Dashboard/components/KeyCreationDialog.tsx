@@ -29,15 +29,11 @@ export const KeyCreationDialog = ({
 }: KeyCreationDialogProps) => {
   const [open, setOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
-  const [selectedModels, setSelectedModels] = useState<string[]>([]);
-
-  const availableModels = ["all-team-models"];
 
   const handleCreate = async () => {
-    const success = await onCreateKey(newKeyName, selectedModels);
+    const success = await onCreateKey(newKeyName, []);
     if (success) {
       setNewKeyName("");
-      setSelectedModels([]);
       setOpen(false);
     }
   };
@@ -81,31 +77,8 @@ export const KeyCreationDialog = ({
               onChange={(e) => setNewKeyName(e.target.value)}
             />
           </div>
-          <div className="space-y-2">
-            <Label>Available Models</Label>
-            <div className="space-y-2">
-              {availableModels.map((model) => (
-                <div key={model} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={model}
-                    checked={selectedModels.includes(model)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedModels([...selectedModels, model]);
-                      } else {
-                        setSelectedModels(selectedModels.filter((m) => m !== model));
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor={model}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {model}
-                  </label>
-                </div>
-              ))}
-            </div>
+          <div className="text-sm text-muted-foreground">
+            Nyckeln ger tillgång till alla tillgängliga modeller.
           </div>
             <Button
               onClick={handleCreate}
