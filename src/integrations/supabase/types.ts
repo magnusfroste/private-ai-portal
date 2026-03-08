@@ -90,6 +90,7 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          litellm_user_id: string | null
           max_trial_keys: number
           purchased_credits_usd: number
           trial_keys_created: number
@@ -101,6 +102,7 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          litellm_user_id?: string | null
           max_trial_keys?: number
           purchased_credits_usd?: number
           trial_keys_created?: number
@@ -112,6 +114,7 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          litellm_user_id?: string | null
           max_trial_keys?: number
           purchased_credits_usd?: number
           trial_keys_created?: number
