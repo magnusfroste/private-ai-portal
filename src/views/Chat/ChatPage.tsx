@@ -100,7 +100,6 @@ export const ChatPage = () => {
 
   const { isStreaming, sendMessage, stopStreaming } = useChatStream({
     model: selectedModel,
-    messages,
     setMessages,
     apiKeyId: selectedKeyId === "__master__" ? undefined : selectedKeyId,
   });
@@ -120,7 +119,7 @@ export const ChatPage = () => {
       if (!activeId) {
         await createConversation(selectedModel);
       }
-      await sendMessage(input);
+      await sendMessage(input, messages);
     } finally {
       sendingRef.current = false;
     }

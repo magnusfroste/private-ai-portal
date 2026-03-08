@@ -5,12 +5,11 @@ import type { ChatMessage } from "../types";
 
 interface UseChatStreamOptions {
   model: string;
-  messages: ChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   apiKeyId?: string;
 }
 
-export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseChatStreamOptions) => {
+export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOptions) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const streamingRef = useRef(false);
@@ -19,13 +18,14 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
     abortRef.current?.abort();
   }, []);
 
-  const sendMessage = useCallback(async (input: string) => {
+  const sendMessage = useCallback(async (input: string, currentMessages: ChatMessage[]) => {
     if (streamingRef.current) return;
-    const userMsg: ChatMessage = { role: "user", content: input };
-    const allMessages = [...messages, userMsg];
-    setMessages(prev => [...prev, userMsg]);
     streamingRef.current = true;
     setIsStreaming(true);
+
+    const userMsg: ChatMessage = { role: "user", content: input };
+    const allMessages = [...currentMessages, userMsg];
+    setMessages(prev => [...prev, userMsg]);
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -34,7 +34,6 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.error("Du måste vara inloggad");
-        setIsStreaming(false);
         return;
       }
 
@@ -59,13 +58,11 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({ error: "Okänt fel" }));
         toast.error(err.error || `Fel: ${resp.status}`);
-        setIsStreaming(false);
         return;
       }
 
       if (!resp.body) {
         toast.error("Ingen streaming-support");
-        setIsStreaming(false);
         return;
       }
 
@@ -97,7 +94,9 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
 
           try {
             const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            const delta = parsed.choices?.[0]?.delta;
+            // Support both regular content and reasoning models that send content separately
+            const content = (delta?.content as string | undefined) ?? "";
             if (content) {
               assistantSoFar += content;
               const snapshot = assistantSoFar;
@@ -117,7 +116,6 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
       }
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") {
-        // User cancelled — keep partial response
         return;
       }
       console.error("Chat stream error:", e);
@@ -127,7 +125,7 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
       streamingRef.current = false;
       setIsStreaming(false);
     }
-  }, [messages, model, setMessages, apiKeyId]);
+  }, [model, setMessages, apiKeyId]);
 
   return { isStreaming, sendMessage, stopStreaming };
 };
