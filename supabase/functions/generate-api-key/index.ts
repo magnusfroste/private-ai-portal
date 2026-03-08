@@ -155,12 +155,22 @@ serve(async (req: Request) => {
     }
 
     try {
+      // Read key duration from admin settings
+      const { data: durationSetting } = await supabase
+        .from('admin_settings')
+        .select('value')
+        .eq('key', 'default_key_duration_days')
+        .single();
+
+      const durationDays = durationSetting ? Number(durationSetting.value) : 5;
+
       // 2. Generate key through LiteLLM's API (linked to user, no team)
       const liteLLMResponse = await createLiteLLMKey(
         body.keyName, 
         LITELLM_MASTER_KEY,
         profile.litellm_user_id,
         body.models,
+        durationDays,
       );
       
       console.log('LiteLLM response structure:', {
@@ -169,9 +179,9 @@ serve(async (req: Request) => {
         keys: Object.keys(liteLLMResponse)
       });
       
-      // Calculate expiration date (5 days from now)
+      // Calculate expiration date
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 5);
+      expiresAt.setDate(expiresAt.getDate() + durationDays);
 
       // 3. Store the key in the database with token identifier
       const { data: apiKey, error: dbError } = await supabase
