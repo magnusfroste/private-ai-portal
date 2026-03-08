@@ -50,10 +50,7 @@ export const KeyCreationDialog = ({
         <DialogHeader>
           <DialogTitle>Create New API Key</DialogTitle>
           <DialogDescription>
-            {canCreateMore 
-              ? `Generate a new trial API key (${remainingKeys} remaining)`
-              : 'Trial key limit reached. Upgrade to create more keys.'
-            }
+            Skapa en ny API-nyckel för att komma igång.
           </DialogDescription>
         </DialogHeader>
 
