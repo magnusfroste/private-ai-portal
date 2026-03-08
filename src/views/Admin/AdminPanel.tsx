@@ -7,6 +7,7 @@ import { useAdminData } from "./hooks/useAdminData";
 import { UserTable } from "./components/UserTable";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
+import { StripeConfigCard } from "./components/StripeConfigCard";
 
 export const AdminPanel = () => {
   const navigate = useNavigate();
