@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Eye, EyeOff, RefreshCw, Activity } from "lucide-react";
+import { Copy, Eye, EyeOff, RefreshCw, Activity, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -7,6 +7,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ApiKey, KeyUsageInfo, SpendLog } from "@/models/types/apiKey.types";
 import { apiKeyService } from "@/models/services/apiKeyService";
 import { SpendLogTable } from "./SpendLogTable";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ApiKeyCardProps {
   apiKey: ApiKey;
@@ -15,6 +26,8 @@ interface ApiKeyCardProps {
   isLoadingUsage: boolean;
   onCopy: (text: string) => void;
   onRefreshUsage: (keyId: string) => void;
+  onRevoke?: (keyId: string) => void;
+  isRevoking?: boolean;
 }
 
 export const ApiKeyCard = ({
