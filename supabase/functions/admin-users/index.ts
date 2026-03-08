@@ -125,10 +125,8 @@ serve(async (req: Request) => {
       return jsonResponse({ error: "Invalid JSON body" }, 400);
     }
 
-    const { user_id, max_trial_keys, reset_trial_keys, litellm_max_budget } = body as {
+    const { user_id, litellm_max_budget } = body as {
       user_id?: string;
-      max_trial_keys?: number;
-      reset_trial_keys?: boolean;
       litellm_max_budget?: number;
     };
 
@@ -138,16 +136,6 @@ serve(async (req: Request) => {
 
     if (!UUID_REGEX.test(user_id)) {
       return jsonResponse({ error: "user_id must be a valid UUID" }, 400);
-    }
-
-    const updates: Record<string, unknown> = {};
-
-    if (typeof max_trial_keys === "number" && max_trial_keys >= 0) {
-      updates.max_trial_keys = max_trial_keys;
-    }
-
-    if (reset_trial_keys === true) {
-      updates.trial_keys_created = 0;
     }
 
     // Update LiteLLM user budget if requested
