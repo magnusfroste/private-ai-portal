@@ -51,7 +51,6 @@ export class ApiKeyService {
       body: {
         keyName: dto.keyName,
         models: dto.models,
-        teamId: dto.teamId || 'e2e76f95-0fbf-4077-bf9c-0d16880f99b0',
       },
       headers: {
         Authorization: `Bearer ${session.access_token}`,

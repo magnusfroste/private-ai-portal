@@ -43,7 +43,6 @@ export interface ApiKeyWithUsage extends ApiKey {
 export interface CreateApiKeyDto {
   keyName: string;
   models?: string[];
-  teamId?: string;
 }
 
 export class TrialLimitExceededError extends Error {

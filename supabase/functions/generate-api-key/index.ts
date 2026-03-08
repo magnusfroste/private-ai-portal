@@ -134,7 +134,7 @@ serve(async (req: Request) => {
     // 1. Check trial key limit
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('trial_keys_created, max_trial_keys')
+      .select('trial_keys_created, max_trial_keys, litellm_user_id')
       .eq('id', user.id)
       .single();
 
@@ -150,13 +150,17 @@ serve(async (req: Request) => {
       );
     }
 
+    if (!profile.litellm_user_id) {
+      return respondWithError(400, 'no_litellm_user', 'LiteLLM user not initialized. Please reload the dashboard.');
+    }
+
     try {
-      // 2. Generate key through LiteLLM's API
+      // 2. Generate key through LiteLLM's API (linked to user, no team)
       const liteLLMResponse = await createLiteLLMKey(
         body.keyName, 
         LITELLM_MASTER_KEY,
+        profile.litellm_user_id,
         body.models,
-        body.teamId
       );
       
       console.log('LiteLLM response structure:', {
