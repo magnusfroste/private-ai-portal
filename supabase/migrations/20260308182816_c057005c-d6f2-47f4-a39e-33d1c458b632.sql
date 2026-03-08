@@ -1,0 +1,1 @@
+ALTER TABLE public.api_keys ADD COLUMN revoked_at timestamptz DEFAULT NULL;
