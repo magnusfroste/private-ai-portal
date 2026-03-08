@@ -19,10 +19,10 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
   }, []);
 
   const sendMessage = useCallback(async (input: string) => {
+    if (isStreaming) return;
     const userMsg: ChatMessage = { role: "user", content: input };
     const allMessages = [...messages, userMsg];
     setMessages(prev => [...prev, userMsg]);
-    setIsStreaming(true);
 
     const controller = new AbortController();
     abortRef.current = controller;
