@@ -176,24 +176,8 @@ serve(async (req: Request) => {
       }
     }
 
-    if (Object.keys(updates).length === 0 && typeof litellm_max_budget !== "number") {
+    if (typeof litellm_max_budget !== "number") {
       return jsonResponse({ error: "No valid updates provided" }, 400);
-    }
-
-    // Only update DB if there are profile updates
-    if (Object.keys(updates).length > 0) {
-      const { data, error: updateError } = await supabase
-        .from("profiles")
-        .update(updates)
-        .eq("id", user_id)
-        .select("id, full_name, email, company, trial_keys_created, max_trial_keys, litellm_user_id, created_at")
-        .single();
-
-      if (updateError) {
-        console.error("Error updating user:", updateError);
-        return jsonResponse({ error: "Failed to update user" }, 500);
-      }
-      return jsonResponse({ user: data });
     }
 
     return jsonResponse({ success: true });

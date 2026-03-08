@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { apiKeyService } from "@/models/services/apiKeyService";
-import { TrialLimitExceededError } from "@/models/types/apiKey.types";
 import { toast } from "sonner";
 
 export const useKeyManagement = () => {
@@ -23,11 +22,7 @@ export const useKeyManagement = () => {
       return true;
     } catch (error) {
       console.error("Error creating API key:", error);
-      if (error instanceof TrialLimitExceededError) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to create API key");
-      }
+      toast.error("Failed to create API key");
       return false;
     } finally {
       setIsCreatingKey(false);

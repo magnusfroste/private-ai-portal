@@ -132,23 +132,16 @@ serve(async (req: Request) => {
     
     console.log('Creating new LiteLLM key for user:', { userId: user.id, keyName: body.keyName });
 
-    // 1. Check trial key limit
+    // 1. Get user profile for litellm_user_id
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('trial_keys_created, max_trial_keys, litellm_user_id')
+      .select('litellm_user_id')
       .eq('id', user.id)
       .single();
 
     if (profileError) {
       console.error('Profile fetch error:', profileError);
       return respondWithError(500, 'database_error', 'Failed to fetch user profile');
-    }
-
-    if (profile.trial_keys_created >= profile.max_trial_keys) {
-      console.warn(`Trial limit reached for user ${user.id}: ${profile.trial_keys_created}/${profile.max_trial_keys}`);
-      return respondWithError(403, 'trial_limit_exceeded', 
-        `Trial key limit reached (${profile.trial_keys_created}/${profile.max_trial_keys}). Upgrade to create more keys.`
-      );
     }
 
     if (!profile.litellm_user_id) {
