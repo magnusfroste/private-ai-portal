@@ -1,13 +1,10 @@
-import { useState } from "react";
-import { Shield, RefreshCw } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Shield } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "@/views/Dashboard/hooks/useDashboardData";
 import { useKeyManagement } from "@/views/Dashboard/hooks/useKeyManagement";
-import { useUserBudget } from "@/hooks/useUserBudget";
 import { ApiKeyList } from "@/views/Dashboard/components/ApiKeyList";
-import { UserBudgetCard } from "@/views/Dashboard/components/UserBudgetCard";
 import { ApiKey } from "@/models/types/apiKey.types";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
