@@ -98,7 +98,7 @@ export const ChatPage = () => {
 
   const messages = activeConversation?.messages ?? [];
 
-  const { isStreaming, sendMessage, stopStreaming } = useChatStream({
+  const { isStreaming, isReasoning, sendMessage, stopStreaming } = useChatStream({
     model: selectedModel,
     setMessages,
     apiKeyId: selectedKeyId === "__master__" ? undefined : selectedKeyId,
@@ -160,7 +160,7 @@ export const ChatPage = () => {
           {messages.length === 0 ? (
             <ChatEmptyState onSelectPrompt={handleSend} />
           ) : (
-            <ChatMessageList messages={messages} isStreaming={isStreaming} />
+            <ChatMessageList messages={messages} isStreaming={isStreaming} isReasoning={isReasoning} />
           )}
         </div>
 
