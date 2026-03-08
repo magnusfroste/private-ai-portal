@@ -44,17 +44,15 @@ export const AppLayout = () => {
           <header className="h-12 flex items-center justify-between border-b border-border/50 px-4 sticky top-0 z-40 bg-background/80 backdrop-blur-sm">
             <SidebarTrigger />
             <div className="flex items-center gap-2">
-              {isAdmin && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/chat")}
-                  className="gap-2 text-muted-foreground hover:text-foreground"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span className="hidden sm:inline">Chat</span>
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/chat")}
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span className="hidden sm:inline">Chat</span>
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold hover:bg-primary/20 transition-colors">

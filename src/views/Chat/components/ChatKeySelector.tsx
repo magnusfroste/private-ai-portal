@@ -7,14 +7,15 @@ interface ApiKeyOption {
   is_active: boolean;
 }
 
-interface ChatKeySelecorProps {
+interface ChatKeySelectorProps {
   keys: ApiKeyOption[];
   selectedKeyId: string;
   onSelect: (keyId: string) => void;
   disabled?: boolean;
+  isAdmin?: boolean;
 }
 
-export const ChatKeySelector = ({ keys, selectedKeyId, onSelect, disabled }: ChatKeySelecorProps) => {
+export const ChatKeySelector = ({ keys, selectedKeyId, onSelect, disabled, isAdmin }: ChatKeySelectorProps) => {
   const activeKeys = keys.filter((k) => k.is_active);
 
   if (activeKeys.length === 0) {
@@ -34,9 +35,11 @@ export const ChatKeySelector = ({ keys, selectedKeyId, onSelect, disabled }: Cha
           <SelectValue placeholder="Välj nyckel..." />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="__master__" textValue="Master Key (admin)">
-            <span className="text-xs">Master Key (admin)</span>
-          </SelectItem>
+          {isAdmin && (
+            <SelectItem value="__master__" textValue="Master Key (admin)">
+              <span className="text-xs">Master Key (admin)</span>
+            </SelectItem>
+          )}
           {activeKeys.map((k) => (
             <SelectItem key={k.id} value={k.id} textValue={k.name}>
               <span className="text-xs">{k.name}</span>

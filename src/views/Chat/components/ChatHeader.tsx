@@ -20,6 +20,7 @@ interface ChatHeaderProps {
   onSelectKey: (keyId: string) => void;
   disabled?: boolean;
   onToggleSidebar: () => void;
+  isAdmin?: boolean;
 }
 
 export const ChatHeader = ({
@@ -31,6 +32,7 @@ export const ChatHeader = ({
   onSelectKey,
   disabled,
   onToggleSidebar,
+  isAdmin,
 }: ChatHeaderProps) => {
   const navigate = useNavigate();
 
@@ -58,6 +60,7 @@ export const ChatHeader = ({
             selectedKeyId={selectedKeyId}
             onSelect={onSelectKey}
             disabled={disabled}
+            isAdmin={isAdmin}
           />
         </div>
       </div>
