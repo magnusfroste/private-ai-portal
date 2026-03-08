@@ -105,7 +105,7 @@ export const KeysPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-1">API Keys</h1>
-          <p className="text-muted-foreground text-sm">Manage your active API keys</p>
+          <p className="text-muted-foreground text-sm">Manage your active API keys and budget</p>
         </div>
         <Button
           variant="outline"
@@ -117,6 +117,8 @@ export const KeysPage = () => {
           {syncing ? "Syncing..." : "Sync with LiteLLM"}
         </Button>
       </div>
+
+      <UserBudgetCard budget={budget} loading={budgetLoading} onRefresh={refetchBudget} />
 
       <ApiKeyList
         apiKeys={activeKeys}
