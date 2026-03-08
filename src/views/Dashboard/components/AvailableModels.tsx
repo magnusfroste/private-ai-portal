@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Cpu, RefreshCw, DollarSign, Hash } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { modelService } from "@/models/services/modelService";
+import { useChatSettings } from "@/hooks/useChatSettings";
 import { ModelInfo } from "@/models/types/model.types";
 
 const formatTokenCount = (tokens: number | null): string => {
@@ -92,12 +94,20 @@ const ModelCard = ({ model }: { model: ModelInfo }) => (
 );
 
 export const AvailableModels = () => {
-  const { data: models = [], isLoading: loading, error, refetch } = useQuery({
+  const { data: allModels = [], isLoading: loading, error, refetch } = useQuery({
     queryKey: ["availableModels"],
     queryFn: () => modelService.getAvailableModels(),
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
+
+  const { data: chatSettings } = useChatSettings();
+
+  const models = useMemo(() => {
+    const enabled = chatSettings?.enabledModels ?? [];
+    if (enabled.length === 0) return allModels;
+    return allModels.filter((m) => enabled.includes(m.id));
+  }, [allModels, chatSettings]);
 
   const errorMessage = error ? "Could not load available models" : null;
 
