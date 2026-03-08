@@ -16,16 +16,7 @@ export const KeysPage = () => {
   const [syncing, setSyncing] = useState(false);
   const [revoking, setRevoking] = useState(false);
   const { budget, loading: budgetLoading, refetch: refetchBudget } = useUserBudget();
-  const {
-    apiKeys,
-    loading: keysLoading,
-    keyUsageData,
-    loadingUsage,
-    spendLogs,
-    refreshAllUsage,
-    refreshKeyUsage,
-    refetch,
-  } = useDashboardData();
+  const { apiKeys, loading: keysLoading, refetch } = useDashboardData();
   const { createKey, isCreatingKey, copyToClipboard } = useKeyManagement();
 
   const handleCreateKey = async (name: string, models: string[]) => {
@@ -86,7 +77,6 @@ export const KeysPage = () => {
   const canCreateMore = profile ? profile.trial_keys_created < profile.max_trial_keys : false;
   const remainingKeys = profile ? profile.max_trial_keys - profile.trial_keys_created : 0;
 
-  // Only show active keys
   const activeKeys = apiKeys.filter((key: ApiKey) => key.is_active && !key.revoked_at && !isExpired(key));
 
   if (profileLoading || keysLoading) {
@@ -122,11 +112,6 @@ export const KeysPage = () => {
 
       <ApiKeyList
         apiKeys={activeKeys}
-        keyUsageData={keyUsageData}
-        loadingUsage={loadingUsage}
-        spendLogs={spendLogs}
-        onRefreshAll={refreshAllUsage}
-        onRefreshKey={refreshKeyUsage}
         onCopy={copyToClipboard}
         onCreateKey={handleCreateKey}
         isCreatingKey={isCreatingKey}

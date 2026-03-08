@@ -4,9 +4,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "./hooks/useDashboardData";
 import { useKeyManagement } from "./hooks/useKeyManagement";
-import { apiKeyService } from "@/models/services/apiKeyService";
+import { useUserBudget } from "@/hooks/useUserBudget";
 import { DashboardHeader } from "./components/DashboardHeader";
-import { UsageStats } from "./components/UsageStats";
+import { UserBudgetCard } from "./components/UserBudgetCard";
 import { ApiKeyList } from "./components/ApiKeyList";
 import { IntegrationGuide } from "./components/IntegrationGuide";
 import { AvailableModels } from "./components/AvailableModels";
@@ -14,17 +14,9 @@ import { AvailableModels } from "./components/AvailableModels";
 const Dashboard = () => {
   const { checkAuth, signOut } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
-  const {
-    apiKeys,
-    loading: keysLoading,
-    keyUsageData,
-    loadingUsage,
-    spendLogs,
-    refreshAllUsage,
-    refreshKeyUsage,
-    refetch,
-  } = useDashboardData();
+  const { apiKeys, loading: keysLoading, refetch } = useDashboardData();
   const { createKey, isCreatingKey, copyToClipboard } = useKeyManagement();
+  const { budget, loading: budgetLoading, refetch: refetchBudget } = useUserBudget();
 
   useEffect(() => {
     checkAuth();
@@ -37,10 +29,6 @@ const Dashboard = () => {
     }
     return success;
   };
-
-  const totalCredits = apiKeyService.calculateTotalCredits(apiKeys, keyUsageData);
-  const usedCredits = apiKeyService.calculateUsedCredits(apiKeys, keyUsageData);
-  const remainingCredits = apiKeyService.calculateRemainingCredits(apiKeys, keyUsageData);
 
   const canCreateMore = profile 
     ? profile.trial_keys_created < profile.max_trial_keys 
@@ -64,25 +52,20 @@ const Dashboard = () => {
     <div className="min-h-screen">
       <DashboardHeader profile={profile} onSignOut={signOut} />
       
-      <UsageStats
-        totalCredits={totalCredits}
-        usedCredits={usedCredits}
-        remainingCredits={remainingCredits}
-      />
+      <div className="container mx-auto px-4 py-6">
+        <UserBudgetCard budget={budget} loading={budgetLoading} onRefresh={refetchBudget} />
+      </div>
 
-      <ApiKeyList
-        apiKeys={apiKeys}
-        keyUsageData={keyUsageData}
-        loadingUsage={loadingUsage}
-        spendLogs={spendLogs}
-        onRefreshAll={refreshAllUsage}
-        onRefreshKey={refreshKeyUsage}
-        onCopy={copyToClipboard}
-        onCreateKey={handleCreateKey}
-        isCreatingKey={isCreatingKey}
-        canCreateMore={canCreateMore}
-        remainingKeys={remainingKeys}
-      />
+      <div className="container mx-auto px-4 pb-8">
+        <ApiKeyList
+          apiKeys={apiKeys}
+          onCopy={copyToClipboard}
+          onCreateKey={handleCreateKey}
+          isCreatingKey={isCreatingKey}
+          canCreateMore={canCreateMore}
+          remainingKeys={remainingKeys}
+        />
+      </div>
 
       <AvailableModels />
 
