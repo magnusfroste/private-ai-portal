@@ -54,13 +54,16 @@ async function createLiteLLMKey(
   const requestBody: {
     key_alias: string;
     user_id: string;
-    duration: string;
+    duration?: string;
     models?: string[];
   } = {
     key_alias: keyName,
     user_id: litellmUserId,
-    duration: `${durationDays}d`,
   };
+
+  if (durationDays) {
+    requestBody.duration = `${durationDays}d`;
+  }
 
   if (models && models.length > 0) {
     requestBody.models = models;
