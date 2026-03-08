@@ -82,10 +82,7 @@ export const ApiKeyList = ({
                   key={key.id}
                   apiKey={key}
                   usage={keyUsageData[key.id]}
-                  spendLogs={spendLogs[key.id]}
-                  isLoadingUsage={loadingUsage[key.id] || false}
                   onCopy={onCopy}
-                  onRefreshUsage={onRefreshKey}
                   onRevoke={onRevoke}
                   isRevoking={isRevoking}
                 />
