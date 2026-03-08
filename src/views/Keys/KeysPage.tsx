@@ -108,7 +108,7 @@ export const KeysPage = () => {
         </Button>
       </div>
 
-      <UserBudgetCard budget={budget} loading={budgetLoading} onRefresh={refetchBudget} />
+      
 
       <ApiKeyList
         apiKeys={activeKeys}
