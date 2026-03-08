@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { modelService } from "@/models/services/modelService";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { adminRepository } from "@/data/repositories/adminRepository";
+import { useChatSettings } from "@/hooks/useChatSettings";
 import { ChatInput } from "./components/ChatInput";
 import { ChatMessageList } from "./components/ChatMessageList";
 import { ChatEmptyState } from "./components/ChatEmptyState";
@@ -24,11 +25,20 @@ export const ChatPage = () => {
     checkAuth();
   }, []);
 
-  const { data: models = [] } = useQuery({
+  const { data: allModels = [] } = useQuery({
     queryKey: ["available-models"],
     queryFn: () => modelService.getAvailableModels(),
     staleTime: 10 * 60 * 1000,
   });
+
+  const { data: chatSettings } = useChatSettings();
+
+  // Filter models to admin-curated list
+  const models = useMemo(() => {
+    const enabled = chatSettings?.enabledModels ?? [];
+    if (enabled.length === 0) return allModels;
+    return allModels.filter((m) => enabled.includes(m.id));
+  }, [allModels, chatSettings]);
 
   // Fetch user's API keys
   const { data: apiKeys = [] } = useQuery({
@@ -63,12 +73,18 @@ export const ChatPage = () => {
     }
   }, [apiKeys, isAdmin, selectedKeyId]);
 
+  // Use admin default model, or fallback to first healthy
   useEffect(() => {
     if (models.length > 0 && !selectedModel) {
-      const healthy = models.find((m) => m.status === "healthy");
-      setSelectedModel(healthy?.id || models[0].id);
+      const defaultModel = chatSettings?.defaultModel;
+      if (defaultModel && models.some((m) => m.id === defaultModel)) {
+        setSelectedModel(defaultModel);
+      } else {
+        const healthy = models.find((m) => m.status === "healthy");
+        setSelectedModel(healthy?.id || models[0].id);
+      }
     }
-  }, [models, selectedModel]);
+  }, [models, selectedModel, chatSettings]);
 
   const {
     conversations,
