@@ -59,7 +59,9 @@ export const AdminPage = () => {
           <h1 className="text-3xl font-bold">User Management</h1>
           <p className="text-muted-foreground text-sm">Manage users and trial keys</p>
         </div>
-      </div>
+      <AdminSettingsPanel />
+
+      <div className="mt-8">
 
       {isLoading && (
         <div className="text-center py-12 text-muted-foreground">Loading users...</div>
