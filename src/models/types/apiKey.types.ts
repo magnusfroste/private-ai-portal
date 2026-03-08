@@ -4,6 +4,7 @@ export interface ApiKey {
   key_value: string;
   created_at: string;
   expires_at: string | null;
+  revoked_at: string | null;
   trial_credits_usd: number;
   used_credits_usd: number;
   is_active: boolean;
