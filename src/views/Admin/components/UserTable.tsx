@@ -26,7 +26,7 @@ export const UserTable = ({ users, onEdit, isUpdating }: UserTableProps) => {
           <TableRow>
             <TableHead>Namn</TableHead>
             <TableHead>E-post</TableHead>
-            <TableHead>Företag</TableHead>
+            <TableHead>Budget</TableHead>
             <TableHead>Trial Keys</TableHead>
             <TableHead>API-nycklar</TableHead>
             <TableHead>Registrerad</TableHead>
