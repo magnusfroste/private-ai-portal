@@ -111,12 +111,6 @@ export const AppSidebar = () => {
               )}
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={signOut} tooltip="Sign Out">
-              <LogOut className="w-4 h-4" />
-              <span>Sign Out</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
