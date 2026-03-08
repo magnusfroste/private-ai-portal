@@ -11,8 +11,18 @@ import { UsageOverview } from "./components/UsageOverview";
 
 export const AccountPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { profile, loading: profileLoading, refetch: refetchProfile } = useProfile();
   const { usageByModel, totalSpend, loading: usageLoading } = useAccountData();
+
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    if (payment === "success") {
+      toast.success("Payment successful! Credits will be added shortly.");
+    } else if (payment === "canceled") {
+      toast.info("Payment was canceled.");
+    }
+  }, [searchParams]);
 
   if (profileLoading) {
     return (
