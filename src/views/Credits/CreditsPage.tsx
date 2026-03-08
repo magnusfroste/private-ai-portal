@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { CreditCard, Zap, Loader2, DollarSign } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -14,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useProfile } from "@/hooks/useProfile";
+import { useUserBudget } from "@/hooks/useUserBudget";
 import { transactionRepository } from "@/data/repositories/transactionRepository";
 import { CreditTransaction } from "@/models/types/transaction.types";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +28,7 @@ const CREDIT_PACKS = [
 
 export const CreditsPage = () => {
   const { profile, refetch: refetchProfile } = useProfile();
+  const { budget, loading: budgetLoading, refetch: refetchBudget } = useUserBudget();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loadingPack, setLoadingPack] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
@@ -52,6 +55,7 @@ export const CreditsPage = () => {
           } else if (data?.status === "paid") {
             toast.success(`Payment verified! ${data.credits_added} credits added.`, { id: "verify-payment" });
             refetchProfile();
+            refetchBudget();
             loadTransactions();
           } else {
             toast.info("Payment not yet completed.", { id: "verify-payment" });
@@ -63,7 +67,7 @@ export const CreditsPage = () => {
       toast.info("Payment was canceled.");
       setSearchParams({});
     }
-  }, [searchParams, setSearchParams, refetchProfile]);
+  }, [searchParams, setSearchParams, refetchProfile, refetchBudget]);
 
   const loadTransactions = async () => {
     try {
@@ -95,28 +99,66 @@ export const CreditsPage = () => {
     }
   };
 
+  const maxBudget = budget?.max_budget ?? 0;
+  const spent = budget?.spend ?? 0;
+  const remaining = budget?.budget_remaining ?? 0;
+  const usagePercent = maxBudget > 0 ? Math.min((spent / maxBudget) * 100, 100) : 0;
+
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-8">
-      {/* Balance */}
       <div>
         <h1 className="text-3xl font-bold mb-1">Credits</h1>
         <p className="text-muted-foreground text-sm">Manage your API credit balance</p>
       </div>
 
-      <Card className="glass-card">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Current Balance</p>
-              <p className="text-4xl font-bold tracking-tight">
-                <span className="text-muted-foreground text-2xl mr-1">$</span>
-                {profile?.purchased_credits_usd.toFixed(2) ?? "0.00"}
-              </p>
+      {/* Budget Overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="glass-card">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm text-muted-foreground">Budget</p>
+              <Wallet className="w-4 h-4 text-muted-foreground" />
             </div>
-            <DollarSign className="w-10 h-10 text-primary opacity-50" />
+            <p className="text-2xl font-bold tracking-tight">
+              ${budgetLoading ? "—" : maxBudget.toFixed(2)}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm text-muted-foreground">Spent</p>
+              <TrendingUp className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <p className="text-2xl font-bold tracking-tight">
+              ${budgetLoading ? "—" : spent.toFixed(4)}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm text-muted-foreground">Remaining</p>
+              <TrendingDown className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <p className="text-2xl font-bold tracking-tight text-primary">
+              ${budgetLoading ? "—" : remaining.toFixed(2)}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {!budgetLoading && maxBudget > 0 && (
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>{usagePercent.toFixed(1)}% used</span>
+            <span>${spent.toFixed(4)} / ${maxBudget.toFixed(2)}</span>
           </div>
-        </CardContent>
-      </Card>
+          <Progress value={usagePercent} className="h-2" />
+        </div>
+      )}
 
       {/* Buy Credits */}
       <Card className="glass-card">
