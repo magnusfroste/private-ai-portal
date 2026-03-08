@@ -1,5 +1,4 @@
 import { AdminUser } from "@/models/types/admin.types";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -9,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, Key } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { format } from "date-fns";
 
 interface UserTableProps {
@@ -27,15 +26,17 @@ export const UserTable = ({ users, onEdit, isUpdating }: UserTableProps) => {
             <TableHead>Namn</TableHead>
             <TableHead>E-post</TableHead>
             <TableHead>Budget</TableHead>
-            <TableHead>Trial Keys</TableHead>
-            <TableHead>API-nycklar</TableHead>
+            <TableHead>Spend</TableHead>
+            <TableHead>Kvar</TableHead>
             <TableHead>Registrerad</TableHead>
             <TableHead className="text-right">Åtgärder</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {users.map((user) => {
-            const limitReached = user.trial_keys_created >= user.max_trial_keys;
+            const remaining = user.litellm_budget
+              ? user.litellm_budget.max_budget - user.litellm_budget.spend
+              : null;
             return (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">
@@ -44,31 +45,26 @@ export const UserTable = ({ users, onEdit, isUpdating }: UserTableProps) => {
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
                   {user.litellm_budget ? (
-                    <div className="text-sm">
-                      <span className="font-medium">${user.litellm_budget.max_budget.toFixed(0)}</span>
-                      <span className="text-muted-foreground"> / ${user.litellm_budget.spend.toFixed(2)} used</span>
-                    </div>
+                    <span className="font-medium">${user.litellm_budget.max_budget.toFixed(0)}</span>
                   ) : (
                     <span className="text-muted-foreground text-xs">—</span>
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span>
-                      {user.trial_keys_created}/{user.max_trial_keys}
-                    </span>
-                    {limitReached && (
-                      <Badge variant="outline" className="text-orange-600 border-orange-600 text-xs">
-                        Max
-                      </Badge>
-                    )}
-                  </div>
+                  {user.litellm_budget ? (
+                    <span className="text-muted-foreground">${user.litellm_budget.spend.toFixed(2)}</span>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">—</span>
+                  )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Key className="w-3.5 h-3.5 text-muted-foreground" />
-                    {user.api_key_count}
-                  </div>
+                  {remaining !== null ? (
+                    <span className={remaining <= 0 ? "text-destructive font-medium" : "text-green-600 font-medium"}>
+                      ${remaining.toFixed(2)}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">—</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {format(new Date(user.created_at), "yyyy-MM-dd")}
