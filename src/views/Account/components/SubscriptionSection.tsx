@@ -77,8 +77,9 @@ export const SubscriptionSection = ({ profile }: SubscriptionSectionProps) => {
               <Zap className="w-4 h-4 text-primary" />
               Credits
             </div>
+            <p className="text-2xl font-bold">${profile.purchased_credits_usd.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground">
-              Each trial key includes $0.25 in credits. Purchase more below.
+              Purchased credits available for API usage.
             </p>
           </div>
         </CardContent>

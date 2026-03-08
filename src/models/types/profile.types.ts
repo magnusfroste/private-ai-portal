@@ -4,6 +4,7 @@ export interface Profile {
   company: string | null;
   trial_keys_created: number;
   max_trial_keys: number;
+  purchased_credits_usd: number;
 }
 
 export interface ProfileUpdateData {
