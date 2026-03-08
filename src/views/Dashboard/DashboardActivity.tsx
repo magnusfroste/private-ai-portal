@@ -1,40 +1,25 @@
 import { Shield } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "./hooks/useDashboardData";
-import { useKeyManagement } from "./hooks/useKeyManagement";
-import { apiKeyService } from "@/models/services/apiKeyService";
-import { UsageStats } from "./components/UsageStats";
-import { ApiKeyList } from "./components/ApiKeyList";
-import { IntegrationGuide } from "./components/IntegrationGuide";
-import { AvailableModels } from "./components/AvailableModels";
-import { Badge } from "@/components/ui/badge";
+import { useActivityData } from "./hooks/useActivityData";
+import { ActivityStatCard } from "./components/ActivityStatCard";
+
+const formatCurrency = (v: number) => `$${v.toFixed(4)}`;
+const formatTokens = (v: number) => {
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(2)}M`;
+  if (v >= 1_000) return `${(v / 1_000).toFixed(0)}K`;
+  return v.toString();
+};
 
 export const DashboardActivity = () => {
   const { profile, loading: profileLoading } = useProfile();
   const {
-    apiKeys,
     loading: keysLoading,
     keyUsageData,
-    loadingUsage,
     spendLogs,
-    refreshAllUsage,
-    refreshKeyUsage,
-    refetch,
   } = useDashboardData();
-  const { createKey, isCreatingKey, copyToClipboard } = useKeyManagement();
 
-  const handleCreateKey = async (name: string, models: string[]) => {
-    const success = await createKey(name, models);
-    if (success) await refetch();
-    return success;
-  };
-
-  const totalCredits = apiKeyService.calculateTotalCredits(apiKeys, keyUsageData);
-  const usedCredits = apiKeyService.calculateUsedCredits(apiKeys, keyUsageData);
-  const remainingCredits = apiKeyService.calculateRemainingCredits(apiKeys, keyUsageData);
-
-  const canCreateMore = profile ? profile.trial_keys_created < profile.max_trial_keys : false;
-  const remainingKeys = profile ? profile.max_trial_keys - profile.trial_keys_created : 0;
+  const activity = useActivityData(spendLogs, keyUsageData);
 
   if (profileLoading || keysLoading) {
     return (
@@ -49,51 +34,34 @@ export const DashboardActivity = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-1">
-            Welcome back, {profile?.full_name || "Developer"}
-          </h1>
-          <p className="text-muted-foreground text-sm">{profile?.email}</p>
-        </div>
-        {profile && (
-          <div className="flex items-center gap-3">
-            <div className="text-sm text-muted-foreground">
-              Trial Keys: <span className="font-semibold text-foreground">
-                {profile.trial_keys_created}/{profile.max_trial_keys}
-              </span>
-            </div>
-            {profile.trial_keys_created >= profile.max_trial_keys && (
-              <Badge variant="outline" className="text-orange-600 border-orange-600">
-                Limit Reached
-              </Badge>
-            )}
-          </div>
-        )}
+      <h1 className="text-3xl font-bold">Activity</h1>
+      <p className="text-sm text-muted-foreground">
+        Your usage across models on Autoversio
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <ActivityStatCard
+          title="Spend"
+          value={`$${activity.totalSpend.toFixed(3)}`}
+          chartData={activity.chartDataSpend}
+          modelBreakdowns={activity.spendBreakdowns}
+          formatValue={formatCurrency}
+        />
+        <ActivityStatCard
+          title="Requests"
+          value={activity.totalRequests.toLocaleString()}
+          chartData={activity.chartDataRequests}
+          modelBreakdowns={activity.requestBreakdowns}
+          formatValue={(v) => v.toLocaleString()}
+        />
+        <ActivityStatCard
+          title="Tokens"
+          value={formatTokens(activity.totalTokens)}
+          chartData={activity.chartDataTokens}
+          modelBreakdowns={activity.tokenBreakdowns}
+          formatValue={formatTokens}
+        />
       </div>
-
-      <UsageStats
-        totalCredits={totalCredits}
-        usedCredits={usedCredits}
-        remainingCredits={remainingCredits}
-      />
-
-      <ApiKeyList
-        apiKeys={apiKeys}
-        keyUsageData={keyUsageData}
-        loadingUsage={loadingUsage}
-        spendLogs={spendLogs}
-        onRefreshAll={refreshAllUsage}
-        onRefreshKey={refreshKeyUsage}
-        onCopy={copyToClipboard}
-        onCreateKey={handleCreateKey}
-        isCreatingKey={isCreatingKey}
-        canCreateMore={canCreateMore}
-        remainingKeys={remainingKeys}
-      />
-
-      <AvailableModels />
-      <IntegrationGuide onCopy={copyToClipboard} />
     </div>
   );
 };
