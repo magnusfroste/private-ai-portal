@@ -60,12 +60,11 @@ export const ChatPage = () => {
 
   const handleSend = (input: string) => {
     if (!input.trim() || isStreaming) return;
-    // Auto-create conversation if none active
     if (!activeId) {
       createConversation(selectedModel);
     }
-    // Small delay to ensure state is set when creating new conv
-    setTimeout(() => sendMessage(input), 0);
+    // Use requestAnimationFrame to ensure state updates before sending
+    requestAnimationFrame(() => sendMessage(input));
   };
 
   const handleNewChat = () => {
