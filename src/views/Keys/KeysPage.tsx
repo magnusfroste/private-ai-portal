@@ -1,13 +1,18 @@
-import { Shield } from "lucide-react";
+import { useState } from "react";
+import { Shield, RefreshCw } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "@/views/Dashboard/hooks/useDashboardData";
 import { useKeyManagement } from "@/views/Dashboard/hooks/useKeyManagement";
 import { ApiKeyList } from "@/views/Dashboard/components/ApiKeyList";
 import { HistoricalKeyList } from "@/views/Keys/components/HistoricalKeyList";
 import { ApiKey } from "@/models/types/apiKey.types";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const KeysPage = () => {
   const { profile, loading: profileLoading } = useProfile();
+  const [syncing, setSyncing] = useState(false);
   const {
     apiKeys,
     loading: keysLoading,
@@ -24,6 +29,32 @@ export const KeysPage = () => {
     const success = await createKey(name, models);
     if (success) await refetch();
     return success;
+  };
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase.functions.invoke('sync-keys', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) throw error;
+
+      if (data.deactivated?.length > 0) {
+        toast.success(`Synced: ${data.deactivated.length} key(s) marked inactive`);
+        await refetch();
+      } else {
+        toast.success(`All ${data.synced} keys are in sync`);
+      }
+    } catch (err) {
+      console.error("Sync error:", err);
+      toast.error("Failed to sync keys");
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const canCreateMore = profile ? profile.trial_keys_created < profile.max_trial_keys : false;
@@ -46,9 +77,20 @@ export const KeysPage = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-1">API Keys</h1>
-        <p className="text-muted-foreground text-sm">Manage your API keys</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-1">API Keys</h1>
+          <p className="text-muted-foreground text-sm">Manage your API keys</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSync}
+          disabled={syncing}
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
+          {syncing ? "Syncing..." : "Sync with LiteLLM"}
+        </Button>
       </div>
 
       <ApiKeyList
