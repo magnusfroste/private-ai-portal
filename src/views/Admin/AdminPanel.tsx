@@ -18,6 +18,7 @@ export const AdminPanel = () => {
     isAdminLoading,
     updateMaxKeys,
     resetKeys,
+    updateBudget,
     isUpdating,
   } = useAdminData();
 
