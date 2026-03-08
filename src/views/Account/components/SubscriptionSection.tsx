@@ -1,64 +1,119 @@
-import { CreditCard, Zap, Key } from "lucide-react";
+import { useState } from "react";
+import { CreditCard, Zap, Key, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Profile } from "@/models/types/profile.types";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface SubscriptionSectionProps {
   profile: Profile | null;
 }
 
+const CREDIT_PACKS = [
+  { id: "small", label: "$5", credits: 5, description: "5 credits" },
+  { id: "medium", label: "$20", credits: 20, description: "20 credits", popular: true },
+  { id: "large", label: "$100", credits: 100, description: "100 credits" },
+];
+
 export const SubscriptionSection = ({ profile }: SubscriptionSectionProps) => {
+  const [loadingPack, setLoadingPack] = useState<string | null>(null);
+
   if (!profile) return null;
 
   const keysUsedPercent = (profile.trial_keys_created / profile.max_trial_keys) * 100;
   const isAtLimit = profile.trial_keys_created >= profile.max_trial_keys;
 
+  const handleBuyCredits = async (pack: string) => {
+    try {
+      setLoadingPack(pack);
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { pack },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+      toast.error("Failed to start checkout");
+    } finally {
+      setLoadingPack(null);
+    }
+  };
+
   return (
-    <Card className="glass-card">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Current Plan</CardTitle>
-          <Badge variant="secondary" className="text-xs">Free Trial</Badge>
-        </div>
-        <CardDescription>Your subscription and credit usage</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Trial Keys */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Key className="w-4 h-4 text-primary" />
-            Trial Keys
+    <div className="space-y-6">
+      <Card className="glass-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Current Plan</CardTitle>
+            <Badge variant="secondary" className="text-xs">Free Trial</Badge>
           </div>
-          <Progress value={keysUsedPercent} className="h-2" />
-          <p className="text-xs text-muted-foreground">
-            {profile.trial_keys_created} / {profile.max_trial_keys} keys used
-          </p>
-          {isAtLimit && (
-            <p className="text-xs text-destructive font-medium">
-              Key limit reached — upgrade for more
+          <CardDescription>Your subscription and credit usage</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Key className="w-4 h-4 text-primary" />
+              Trial Keys
+            </div>
+            <Progress value={keysUsedPercent} className="h-2" />
+            <p className="text-xs text-muted-foreground">
+              {profile.trial_keys_created} / {profile.max_trial_keys} keys used
             </p>
-          )}
-        </div>
-
-        {/* Credits overview */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Zap className="w-4 h-4 text-primary" />
-            Credits
+            {isAtLimit && (
+              <p className="text-xs text-destructive font-medium">
+                Key limit reached — buy credits for more
+              </p>
+            )}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Each trial key includes $0.25 in credits. Upgrade to add more credits to your account.
-          </p>
-        </div>
 
-        {/* Upgrade CTA */}
-        <Button className="w-full glow" disabled>
-          <CreditCard className="w-4 h-4 mr-2" />
-          Upgrade Plan (Coming Soon)
-        </Button>
-      </CardContent>
-    </Card>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Zap className="w-4 h-4 text-primary" />
+              Credits
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Each trial key includes $0.25 in credits. Purchase more below.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-lg">Buy Credits</CardTitle>
+          <CardDescription>Top up your account with API credits</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {CREDIT_PACKS.map((pack) => (
+            <Button
+              key={pack.id}
+              variant={pack.popular ? "default" : "outline"}
+              className={`w-full justify-between ${pack.popular ? "glow" : ""}`}
+              disabled={loadingPack !== null}
+              onClick={() => handleBuyCredits(pack.id)}
+            >
+              <span className="flex items-center gap-2">
+                {loadingPack === pack.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CreditCard className="w-4 h-4" />
+                )}
+                {pack.description}
+                {pack.popular && (
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Popular</Badge>
+                )}
+              </span>
+              <span className="font-bold">{pack.label}</span>
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
