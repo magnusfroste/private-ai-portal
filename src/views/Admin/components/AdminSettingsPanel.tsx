@@ -10,14 +10,12 @@ import { toast } from "sonner";
 interface AdminSettings {
   default_user_budget_usd: number;
   default_key_duration_days: number;
-  default_max_trial_keys: number;
 }
 
 export const AdminSettingsPanel = () => {
   const [settings, setSettings] = useState<AdminSettings>({
     default_user_budget_usd: 25,
     default_key_duration_days: 5,
-    default_max_trial_keys: 3,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -42,31 +40,12 @@ export const AdminSettingsPanel = () => {
         setSettings({
           default_user_budget_usd: mapped.default_user_budget_usd ?? 25,
           default_key_duration_days: mapped.default_key_duration_days ?? 5,
-          default_max_trial_keys: mapped.default_max_trial_keys ?? 3,
         });
       }
     } catch (error) {
       console.error("Error loading settings:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const saveSetting = async (key: string, value: number) => {
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from("admin_settings")
-        .update({ value: value as any, updated_at: new Date().toISOString() })
-        .eq("key", key);
-
-      if (error) throw error;
-      toast.success(`${key} uppdaterat till ${value}`);
-    } catch (error) {
-      console.error("Error saving setting:", error);
-      toast.error("Kunde inte spara inställningen");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -112,7 +91,7 @@ export const AdminSettingsPanel = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="budget">Startbudget (USD)</Label>
             <Input
@@ -149,27 +128,7 @@ export const AdminSettingsPanel = () => {
               }
             />
             <p className="text-xs text-muted-foreground">
-              Duration för trial-nycklar i LiteLLM
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="max-keys">Max trial-nycklar</Label>
-            <Input
-              id="max-keys"
-              type="number"
-              min={1}
-              max={100}
-              value={settings.default_max_trial_keys}
-              onChange={(e) =>
-                setSettings((s) => ({
-                  ...s,
-                  default_max_trial_keys: Number(e.target.value),
-                }))
-              }
-            />
-            <p className="text-xs text-muted-foreground">
-              Standard max_trial_keys för nya profiler
+              Duration för nycklar i LiteLLM
             </p>
           </div>
         </div>
