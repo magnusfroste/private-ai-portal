@@ -15,6 +15,7 @@ export const KeysPage = () => {
   const { profile, loading: profileLoading } = useProfile();
   const [syncing, setSyncing] = useState(false);
   const [revoking, setRevoking] = useState(false);
+  const { budget, loading: budgetLoading, refetch: refetchBudget } = useUserBudget();
   const {
     apiKeys,
     loading: keysLoading,
