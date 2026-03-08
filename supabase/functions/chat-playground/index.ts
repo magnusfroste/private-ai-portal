@@ -12,7 +12,6 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Verify user is admin
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -34,33 +33,69 @@ serve(async (req: Request) => {
       });
     }
 
-    // Check admin role
-    const { data: hasRole } = await supabase.rpc('has_role', {
-      _user_id: user.id,
-      _role: 'admin',
-    });
+    const { messages, model, api_key_id } = await req.json();
 
-    if (!hasRole) {
-      return new Response(JSON.stringify({ error: 'Admin access required' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Determine which key to use
+    let apiKeyForRequest: string;
+
+    if (api_key_id) {
+      // User selected a specific key — look it up and verify ownership
+      const { data: keyRow, error: keyError } = await supabase
+        .from('api_keys')
+        .select('key_value, is_active, user_id')
+        .eq('id', api_key_id)
+        .single();
+
+      if (keyError || !keyRow) {
+        return new Response(JSON.stringify({ error: 'API key not found' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (keyRow.user_id !== user.id) {
+        return new Response(JSON.stringify({ error: 'Unauthorized: key does not belong to you' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (!keyRow.is_active) {
+        return new Response(JSON.stringify({ error: 'This API key is revoked or inactive' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      apiKeyForRequest = keyRow.key_value;
+    } else {
+      // Fallback: admin using master key (backwards compatible)
+      const { data: hasRole } = await supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: 'admin',
       });
-    }
 
-    const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY');
-    if (!LITELLM_MASTER_KEY) {
-      return new Response(JSON.stringify({ error: 'LiteLLM configuration missing' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+      if (!hasRole) {
+        return new Response(JSON.stringify({ error: 'No API key selected and not admin' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
-    const { messages, model } = await req.json();
+      const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY');
+      if (!LITELLM_MASTER_KEY) {
+        return new Response(JSON.stringify({ error: 'LiteLLM configuration missing' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      apiKeyForRequest = LITELLM_MASTER_KEY;
+    }
 
     const response = await fetch('https://api.autoversio.ai/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LITELLM_MASTER_KEY}`,
+        'Authorization': `Bearer ${apiKeyForRequest}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

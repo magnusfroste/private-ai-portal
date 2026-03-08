@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { modelService } from "@/models/services/modelService";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { ChatInput } from "./components/ChatInput";
 import { ChatMessageList } from "./components/ChatMessageList";
 import { ChatEmptyState } from "./components/ChatEmptyState";
@@ -9,11 +10,12 @@ import { ChatHeader } from "./components/ChatHeader";
 import { ChatSidebar } from "./components/ChatSidebar";
 import { useChatStream } from "./hooks/useChatStream";
 import { useChatConversations } from "./hooks/useChatConversations";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState } from "react";
 
 export const ChatPage = () => {
   const { checkAuth } = useAuth();
   const [selectedModel, setSelectedModel] = useState("");
+  const [selectedKeyId, setSelectedKeyId] = useState("__master__");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -25,6 +27,23 @@ export const ChatPage = () => {
     queryKey: ["available-models"],
     queryFn: () => modelService.getAvailableModels(),
     staleTime: 10 * 60 * 1000,
+  });
+
+  // Fetch user's API keys
+  const { data: apiKeys = [] } = useQuery({
+    queryKey: ["user-api-keys"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("api_keys")
+        .select("id, name, is_active")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 30 * 1000,
   });
 
   useEffect(() => {
@@ -50,6 +69,7 @@ export const ChatPage = () => {
     model: selectedModel,
     messages,
     setMessages,
+    apiKeyId: selectedKeyId === "__master__" ? undefined : selectedKeyId,
   });
 
   useEffect(() => {
@@ -64,7 +84,6 @@ export const ChatPage = () => {
     if (!activeId) {
       createConversation(selectedModel);
     }
-    // Use requestAnimationFrame to ensure state updates before sending
     requestAnimationFrame(() => sendMessage(input));
   };
 
@@ -76,7 +95,6 @@ export const ChatPage = () => {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Sidebar - full height */}
       <ChatSidebar
         conversations={conversations}
         activeId={activeId}
@@ -87,17 +105,18 @@ export const ChatPage = () => {
         onClose={() => setSidebarOpen(false)}
       />
 
-      {/* Right side: header + content */}
       <div className="flex-1 flex flex-col min-w-0">
         <ChatHeader
           models={models}
           selectedModel={selectedModel}
           onSelectModel={setSelectedModel}
+          keys={apiKeys}
+          selectedKeyId={selectedKeyId}
+          onSelectKey={setSelectedKeyId}
           disabled={isStreaming}
           onToggleSidebar={() => setSidebarOpen((v) => !v)}
         />
 
-        {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-auto">
           {messages.length === 0 ? (
             <ChatEmptyState onSelectPrompt={handleSend} />
@@ -106,7 +125,6 @@ export const ChatPage = () => {
           )}
         </div>
 
-        {/* Input */}
         <ChatInput onSend={handleSend} disabled={isStreaming} />
       </div>
     </div>
