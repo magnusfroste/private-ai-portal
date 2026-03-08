@@ -112,7 +112,3 @@ export const KeysPage = () => {
   );
 };
 
-function isExpired(key: ApiKey): boolean {
-  if (!key.expires_at) return false;
-  return new Date(key.expires_at) < new Date();
-}

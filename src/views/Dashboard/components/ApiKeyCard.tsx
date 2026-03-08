@@ -3,7 +3,6 @@ import { Copy, Eye, EyeOff, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ApiKey } from "@/models/types/apiKey.types";
-import { apiKeyService } from "@/models/services/apiKeyService";
 import {
   AlertDialog,
   AlertDialogAction,
