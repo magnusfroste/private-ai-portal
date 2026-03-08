@@ -33,6 +33,8 @@ export const ApiKeyList = ({
   isCreatingKey,
   canCreateMore,
   remainingKeys,
+  onRevoke,
+  isRevoking,
 }: ApiKeyListProps) => {
   return (
     <div className="container mx-auto px-4 pb-8">
