@@ -37,6 +37,10 @@ export const AdminPage = () => {
     resetKeys(userId);
   };
 
+  const handleUpdateBudget = (userId: string, maxBudget: number) => {
+    updateBudget({ userId, maxBudget });
+  };
+
   if (isAdminLoading) {
     return (
       <div className="flex items-center justify-center py-24">
