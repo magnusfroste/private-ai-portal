@@ -30,14 +30,6 @@ export const AdminPanel = () => {
     setDialogOpen(true);
   };
 
-  const handleSave = (userId: string, maxKeys: number) => {
-    updateMaxKeys({ userId, maxKeys });
-  };
-
-  const handleReset = (userId: string) => {
-    resetKeys(userId);
-  };
-
   const handleUpdateBudget = (userId: string, maxBudget: number) => {
     updateBudget({ userId, maxBudget });
   };
@@ -120,8 +112,6 @@ export const AdminPanel = () => {
         user={editUser}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onSave={handleSave}
-        onReset={handleReset}
         onUpdateBudget={handleUpdateBudget}
         isUpdating={isUpdating}
       />
