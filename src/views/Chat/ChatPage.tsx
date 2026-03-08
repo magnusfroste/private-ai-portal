@@ -83,6 +83,8 @@ export const ChatPage = () => {
         onSelect={setActiveId}
         onNew={handleNewChat}
         onDelete={deleteConversation}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
       {/* Right side: header + content */}
@@ -92,6 +94,7 @@ export const ChatPage = () => {
           selectedModel={selectedModel}
           onSelectModel={setSelectedModel}
           disabled={isStreaming}
+          onToggleSidebar={() => setSidebarOpen((v) => !v)}
         />
 
         {/* Messages */}
