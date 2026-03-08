@@ -120,11 +120,8 @@ export const ChatPage = () => {
       if (!activeId) {
         await createConversation(selectedModel);
       }
-      requestAnimationFrame(() => {
-        sendMessage(input);
-        sendingRef.current = false;
-      });
-    } catch {
+      await sendMessage(input);
+    } finally {
       sendingRef.current = false;
     }
   }, [isStreaming, activeId, createConversation, selectedModel, sendMessage]);
