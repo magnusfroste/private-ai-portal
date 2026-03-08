@@ -6,6 +6,7 @@ import { AdminUser } from "@/models/types/admin.types";
 import { useAdminData } from "./hooks/useAdminData";
 import { UserTable } from "./components/UserTable";
 import { EditUserDialog } from "./components/EditUserDialog";
+import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
 
 export const AdminPanel = () => {
   const navigate = useNavigate();
@@ -85,25 +86,29 @@ export const AdminPanel = () => {
           </div>
         </div>
 
-        {isLoading && (
-          <div className="text-center py-12 text-muted-foreground">
-            Laddar användare...
-          </div>
-        )}
+        <AdminSettingsPanel />
 
-        {isError && (
-          <div className="text-center py-12 text-destructive">
-            Kunde inte ladda användare. Försök igen.
-          </div>
-        )}
+        <div className="mt-8">
+          {isLoading && (
+            <div className="text-center py-12 text-muted-foreground">
+              Laddar användare...
+            </div>
+          )}
 
-        {!isLoading && !isError && (
-          <UserTable
-            users={users}
-            onEdit={handleEdit}
-            isUpdating={isUpdating}
-          />
-        )}
+          {isError && (
+            <div className="text-center py-12 text-destructive">
+              Kunde inte ladda användare. Försök igen.
+            </div>
+          )}
+
+          {!isLoading && !isError && (
+            <UserTable
+              users={users}
+              onEdit={handleEdit}
+              isUpdating={isUpdating}
+            />
+          )}
+        </div>
       </div>
 
       <EditUserDialog
