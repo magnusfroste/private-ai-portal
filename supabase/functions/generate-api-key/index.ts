@@ -4,7 +4,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 interface GenerateKeyRequest {
   keyName: string;
   models?: string[];
-  teamId?: string;
 }
 
 interface ApiKeyResponse {
