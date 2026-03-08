@@ -1,10 +1,13 @@
 import { Shield } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "./hooks/useDashboardData";
+import { useAccountData } from "@/views/Account/hooks/useAccountData";
+import { UsageOverview } from "@/views/Account/components/UsageOverview";
 
 export const DashboardActivity = () => {
   const { loading: profileLoading } = useProfile();
   const { loading: keysLoading } = useDashboardData();
+  const { usageByModel, totalSpend, loading: usageLoading } = useAccountData();
 
   if (profileLoading || keysLoading) {
     return (
@@ -18,13 +21,15 @@ export const DashboardActivity = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-4xl">
       <div>
         <h1 className="text-3xl font-bold">Activity</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Usage activity is now tracked at the account level. View your budget on the Keys page.
+          Overview of your API usage across models.
         </p>
       </div>
+
+      <UsageOverview usageByModel={usageByModel} totalSpend={totalSpend} loading={usageLoading} />
     </div>
   );
 };
