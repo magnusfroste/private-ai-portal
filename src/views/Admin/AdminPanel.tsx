@@ -6,6 +6,7 @@ import { AdminUser } from "@/models/types/admin.types";
 import { useAdminData } from "./hooks/useAdminData";
 import { UserTable } from "./components/UserTable";
 import { EditUserDialog } from "./components/EditUserDialog";
+import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
 
 export const AdminPanel = () => {
   const navigate = useNavigate();
