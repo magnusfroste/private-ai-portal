@@ -78,7 +78,7 @@ export const KeysPage = () => {
   const canCreateMore = true;
   const remainingKeys = 0;
 
-  const activeKeys = apiKeys.filter((key: ApiKey) => key.is_active && !key.revoked_at && !isExpired(key));
+  const activeKeys = apiKeys.filter((key: ApiKey) => key.is_active && !key.revoked_at);
 
   if (profileLoading || keysLoading) {
     return (
