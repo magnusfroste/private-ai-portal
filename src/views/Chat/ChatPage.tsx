@@ -47,6 +47,22 @@ export const ChatPage = () => {
     staleTime: 30 * 1000,
   });
 
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: () => adminRepository.checkIsAdmin(),
+  });
+
+  // Auto-select first active key for non-admins, master key for admins
+  useEffect(() => {
+    if (selectedKeyId) return;
+    if (isAdmin) {
+      setSelectedKeyId("__master__");
+    } else {
+      const firstActive = apiKeys.find((k) => k.is_active);
+      if (firstActive) setSelectedKeyId(firstActive.id);
+    }
+  }, [apiKeys, isAdmin, selectedKeyId]);
+
   useEffect(() => {
     if (models.length > 0 && !selectedModel) {
       const healthy = models.find((m) => m.status === "healthy");
