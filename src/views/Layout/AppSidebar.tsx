@@ -1,7 +1,8 @@
-import { Activity, ScrollText, CreditCard, User, Key, Shield, LogOut, MessageSquare } from "lucide-react";
+import { Activity, ScrollText, CreditCard, Key, Shield, LogOut, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { adminRepository } from "@/data/repositories/adminRepository";
 import {
   Sidebar,
@@ -21,13 +22,13 @@ const mainNav = [
   { title: "Logs", url: "/dashboard/logs", icon: ScrollText },
   { title: "Credits", url: "/dashboard/credits", icon: CreditCard },
   { title: "API Keys", url: "/dashboard/keys", icon: Key },
-  { title: "Account", url: "/dashboard/account", icon: User },
 ];
 
 export const AppSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
+  const { profile } = useProfile();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
 
@@ -37,6 +38,10 @@ export const AppSidebar = () => {
   });
 
   const isActive = (path: string) => location.pathname === path;
+
+  const initials = profile?.full_name
+    ? profile.full_name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    : profile?.email?.[0]?.toUpperCase() || "?";
 
   return (
     <Sidebar collapsible="icon">
@@ -67,7 +72,6 @@ export const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-
         {isAdmin && (
           <SidebarGroup>
             <SidebarGroupContent>
@@ -90,6 +94,23 @@ export const AppSidebar = () => {
 
       <SidebarFooter className="p-2">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isActive("/dashboard/account")}
+              onClick={() => navigate("/dashboard/account")}
+              tooltip="Profile"
+            >
+              <div className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-semibold shrink-0">
+                {initials}
+              </div>
+              {!collapsed && (
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm truncate">{profile?.full_name || "Profile"}</span>
+                  <span className="text-[10px] text-muted-foreground truncate">{profile?.email}</span>
+                </div>
+              )}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={signOut} tooltip="Sign Out">
               <LogOut className="w-4 h-4" />
