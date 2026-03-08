@@ -1,4 +1,4 @@
-import { Activity, ScrollText, CreditCard, User, Key, Settings, Shield, LogOut, ChevronDown } from "lucide-react";
+import { Activity, ScrollText, CreditCard, User, Key, Shield, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,27 +9,19 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const mainNav = [
   { title: "Activity", url: "/dashboard", icon: Activity },
   { title: "Logs", url: "/dashboard/logs", icon: ScrollText },
   { title: "Credits", url: "/dashboard/credits", icon: CreditCard },
-];
-
-const settingsNav = [
-  { title: "Account", url: "/dashboard/account", icon: User },
   { title: "API Keys", url: "/dashboard/keys", icon: Key },
+  { title: "Account", url: "/dashboard/account", icon: User },
 ];
 
 export const AppSidebar = () => {
@@ -45,7 +37,6 @@ export const AppSidebar = () => {
   });
 
   const isActive = (path: string) => location.pathname === path;
-  const isSettingsActive = settingsNav.some((item) => isActive(item.url));
 
   return (
     <Sidebar collapsible="icon">
@@ -76,37 +67,6 @@ export const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <Collapsible defaultOpen={isSettingsActive} className="group/collapsible">
-            <SidebarGroupLabel asChild>
-              <CollapsibleTrigger className="flex w-full items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
-                  {!collapsed && "Settings"}
-                </span>
-                {!collapsed && <ChevronDown className="w-3 h-3 transition-transform group-data-[state=open]/collapsible:rotate-180" />}
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {settingsNav.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        isActive={isActive(item.url)}
-                        onClick={() => navigate(item.url)}
-                        tooltip={item.title}
-                      >
-                        <item.icon className="w-4 h-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </SidebarGroup>
 
         {isAdmin && (
           <SidebarGroup>
