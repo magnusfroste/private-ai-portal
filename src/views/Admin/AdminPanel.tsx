@@ -122,6 +122,7 @@ export const AdminPanel = () => {
         onOpenChange={setDialogOpen}
         onSave={handleSave}
         onReset={handleReset}
+        onUpdateBudget={handleUpdateBudget}
         isUpdating={isUpdating}
       />
     </div>
