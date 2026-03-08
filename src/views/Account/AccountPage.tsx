@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { Shield, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { useAccountData } from "./hooks/useAccountData";
