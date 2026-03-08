@@ -83,6 +83,9 @@ export const AdminPanel = () => {
         </div>
 
         <AdminSettingsPanel />
+        <div className="mt-6">
+          <StripeConfigCard />
+        </div>
 
         <div className="mt-8">
           {isLoading && (
