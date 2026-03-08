@@ -189,7 +189,7 @@ serve(async (req: Request) => {
           name: body.keyName,
           key_value: liteLLMResponse.key,
           litellm_token: liteLLMResponse.token || null,
-          expires_at: expiresAt.toISOString(),
+          expires_at: expiresAt ? expiresAt.toISOString() : null,
           trial_credits_usd: 25.0,
           used_credits_usd: 0,
           is_active: true
