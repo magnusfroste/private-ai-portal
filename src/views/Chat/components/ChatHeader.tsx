@@ -20,6 +20,7 @@ interface ChatHeaderProps {
   onSelectKey: (keyId: string) => void;
   disabled?: boolean;
   onToggleSidebar: () => void;
+  isAdmin?: boolean;
 }
 
 export const ChatHeader = ({
