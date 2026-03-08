@@ -159,7 +159,7 @@ export const ChatPage = () => {
           )}
         </div>
 
-        <ChatInput onSend={handleSend} disabled={isStreaming} />
+        <ChatInput onSend={handleSend} onStop={stopStreaming} disabled={isStreaming} />
       </div>
     </div>
   );
