@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN purchased_credits_usd numeric NOT NULL DEFAULT 0;

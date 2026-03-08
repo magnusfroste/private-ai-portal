@@ -61,6 +61,7 @@ export type Database = {
           full_name: string | null
           id: string
           max_trial_keys: number
+          purchased_credits_usd: number
           trial_keys_created: number
           updated_at: string
         }
@@ -71,6 +72,7 @@ export type Database = {
           full_name?: string | null
           id: string
           max_trial_keys?: number
+          purchased_credits_usd?: number
           trial_keys_created?: number
           updated_at?: string
         }
@@ -81,6 +83,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           max_trial_keys?: number
+          purchased_credits_usd?: number
           trial_keys_created?: number
           updated_at?: string
         }
