@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { modelService } from "@/models/services/modelService";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { adminRepository } from "@/data/repositories/adminRepository";
 import { ChatInput } from "./components/ChatInput";
 import { ChatMessageList } from "./components/ChatMessageList";
 import { ChatEmptyState } from "./components/ChatEmptyState";
@@ -15,7 +16,7 @@ import { useRef, useState } from "react";
 export const ChatPage = () => {
   const { checkAuth } = useAuth();
   const [selectedModel, setSelectedModel] = useState("");
-  const [selectedKeyId, setSelectedKeyId] = useState("__master__");
+  const [selectedKeyId, setSelectedKeyId] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 

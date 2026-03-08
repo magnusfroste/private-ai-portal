@@ -60,6 +60,7 @@ export const ChatHeader = ({
             selectedKeyId={selectedKeyId}
             onSelect={onSelectKey}
             disabled={disabled}
+            isAdmin={isAdmin}
           />
         </div>
       </div>
