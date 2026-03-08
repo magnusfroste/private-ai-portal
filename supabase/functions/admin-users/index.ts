@@ -56,7 +56,7 @@ serve(async (req: Request) => {
   if (req.method === "GET") {
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("id, full_name, email, company, trial_keys_created, max_trial_keys, litellm_user_id, purchased_credits_usd, created_at")
+      .select("id, full_name, email, company, litellm_user_id, purchased_credits_usd, created_at")
       .order("created_at", { ascending: false });
 
     if (profilesError) {
