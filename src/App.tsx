@@ -32,6 +32,7 @@ const App = () => (
             <Route path="credits" element={<CreditsPage />} />
             <Route path="account" element={<AccountPage />} />
             <Route path="keys" element={<KeysPage />} />
+            <Route path="chat" element={<ChatPage />} />
             <Route path="admin" element={<AdminPage />} />
           </Route>
           {/* Redirect old routes */}
