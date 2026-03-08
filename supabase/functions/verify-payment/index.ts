@@ -74,6 +74,19 @@ serve(async (req) => {
 
     if (updateError) throw updateError;
 
+    // Log transaction (idempotent via unique stripe_session_id)
+    await supabaseAdmin
+      .from("credit_transactions")
+      .upsert(
+        {
+          user_id: user.id,
+          amount_usd: creditsToAdd,
+          credits_added: creditsToAdd,
+          stripe_session_id: session_id,
+        },
+        { onConflict: "stripe_session_id" }
+      );
+
     return new Response(
       JSON.stringify({ status: "paid", credits_added: creditsToAdd, total_credits: newCredits }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
