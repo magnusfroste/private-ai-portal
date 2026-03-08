@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Cpu, RefreshCw, DollarSign, Hash } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { modelService } from "@/models/services/modelService";
+import { useChatSettings } from "@/hooks/useChatSettings";
 import { ModelInfo } from "@/models/types/model.types";
 
 const formatTokenCount = (tokens: number | null): string => {
