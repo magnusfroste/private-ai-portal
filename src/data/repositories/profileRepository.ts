@@ -18,6 +18,15 @@ export class ProfileRepository {
     if (!profile) return false;
     return profile.trial_keys_created < profile.max_trial_keys;
   }
+
+  async update(userId: string, updates: { full_name?: string; company?: string }): Promise<void> {
+    const { error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", userId);
+
+    if (error) throw error;
+  }
 }
 
 export const profileRepository = new ProfileRepository();

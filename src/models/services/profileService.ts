@@ -10,6 +10,12 @@ export class ProfileService {
     return profileRepository.findById(user.id);
   }
 
+  async updateProfile(updates: ProfileUpdateData): Promise<void> {
+    const user = await authService.getCurrentUser();
+    if (!user) throw new Error("Not authenticated");
+    return profileRepository.update(user.id, updates);
+  }
+
   async getTrialKeyStatus(userId: string): Promise<TrialKeyStatus> {
     const profile = await profileRepository.findById(userId);
     if (!profile) throw new Error("Profile not found");

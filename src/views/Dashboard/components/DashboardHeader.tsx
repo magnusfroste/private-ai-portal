@@ -27,7 +27,11 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
             <Shield className="w-6 h-6 text-primary" />
             <span className="text-xl font-bold gradient-text">Autoversio</span>
           </div>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={() => navigate("/account")}>
+              <User className="w-4 h-4 mr-2" />
+              Account
+            </Button>
             {isAdmin && (
               <Button variant="ghost" onClick={() => navigate("/admin")}>
                 <Settings className="w-4 h-4 mr-2" />
