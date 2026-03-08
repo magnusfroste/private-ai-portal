@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 interface AdminSettings {
   default_user_budget_usd: number;
-  default_key_duration_days: number;
+  default_key_duration_days: number | null;
 }
 
 export const AdminSettingsPanel = () => {
