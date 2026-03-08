@@ -41,36 +41,28 @@ const respondWithError = (status: number, code: string, message: string): Respon
 async function createLiteLLMKey(
   keyName: string,
   masterKey: string,
+  litellmUserId: string,
   models?: string[],
-  teamId?: string
 ): Promise<{
   key: string;
   token: string;
   key_alias: string;
-  max_budget: number;
-  duration: string;
-  team_id?: string;
 }> {
   console.log('Calling LiteLLM API at https://api.autoversio.ai/key/generate');
   
   const requestBody: {
     key_alias: string;
-    max_budget: number;
+    user_id: string;
     duration: string;
     models?: string[];
-    team_id?: string;
   } = {
     key_alias: keyName,
-    max_budget: 25.0,
-    duration: '5d'
+    user_id: litellmUserId,
+    duration: '5d',
   };
 
   if (models && models.length > 0) {
     requestBody.models = models;
-  }
-
-  if (teamId) {
-    requestBody.team_id = teamId;
   }
 
   console.log('Request body:', requestBody);
