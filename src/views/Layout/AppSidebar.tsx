@@ -1,7 +1,6 @@
-import { Activity, ScrollText, CreditCard, Key, Shield, LogOut, User } from "lucide-react";
+import { Activity, ScrollText, CreditCard, Key, Shield, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { adminRepository } from "@/data/repositories/adminRepository";
 import {
@@ -27,7 +26,6 @@ const mainNav = [
 export const AppSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signOut } = useAuth();
   const { profile } = useProfile();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -109,12 +107,6 @@ export const AppSidebar = () => {
                   <span className="text-[10px] text-muted-foreground truncate">{profile?.email}</span>
                 </div>
               )}
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={signOut} tooltip="Sign Out">
-              <LogOut className="w-4 h-4" />
-              <span>Sign Out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
