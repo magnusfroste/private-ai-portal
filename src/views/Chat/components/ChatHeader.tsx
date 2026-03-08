@@ -1,4 +1,4 @@
-import { LayoutDashboard, Shield, PanelLeft } from "lucide-react";
+import { LayoutDashboard, PanelLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChatModelSelector } from "./ChatModelSelector";
@@ -33,12 +33,6 @@ export const ChatHeader = ({
           <PanelLeft className="w-4 h-4" />
         </Button>
         <ChatModelSelector
-          models={models}
-          selectedModel={selectedModel}
-          onSelect={onSelectModel}
-          disabled={disabled}
-        />
-      </div>
           models={models}
           selectedModel={selectedModel}
           onSelect={onSelectModel}
