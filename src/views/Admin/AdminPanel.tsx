@@ -7,6 +7,7 @@ import { useAdminData } from "./hooks/useAdminData";
 import { UserTable } from "./components/UserTable";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
+import { StripeConfigCard } from "./components/StripeConfigCard";
 
 export const AdminPanel = () => {
   const navigate = useNavigate();
@@ -82,6 +83,9 @@ export const AdminPanel = () => {
         </div>
 
         <AdminSettingsPanel />
+        <div className="mt-6">
+          <StripeConfigCard />
+        </div>
 
         <div className="mt-8">
           {isLoading && (
