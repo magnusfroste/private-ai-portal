@@ -36,7 +36,7 @@ export const SubscriptionSection = ({ profile }: SubscriptionSectionProps) => {
             {profile.trial_keys_created} / {profile.max_trial_keys} keys used
           </p>
           {isAtLimit && (
-            <p className="text-xs text-orange-500 font-medium">
+            <p className="text-xs text-destructive font-medium">
               Key limit reached — upgrade for more
             </p>
           )}
