@@ -121,6 +121,30 @@ serve(async (req) => {
     if (!keyInfoResponse.ok) {
       const errorText = await keyInfoResponse.text();
       console.error('LiteLLM API error:', keyInfoResponse.status, errorText);
+      
+      // If key not found in LiteLLM (e.g. created before migration), return empty usage
+      if (keyInfoResponse.status === 404) {
+        const emptyResponse: KeyUsageResponse = {
+          info: {
+            key_name: apiKeyData.name,
+            key_alias: apiKeyData.name,
+            spend: 0,
+            max_budget: 0,
+            budget_remaining: 0,
+            total_tokens: 0,
+            prompt_tokens: 0,
+            completion_tokens: 0,
+            models: [],
+            expires: '',
+            metadata: {},
+          },
+          spend_logs: [],
+        };
+        return new Response(JSON.stringify(emptyResponse), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
       return new Response(JSON.stringify({ error: 'Failed to fetch key info from LiteLLM' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
