@@ -61,7 +61,7 @@ export const HistoricalKeyList = ({ keys, onCopy }: HistoricalKeyListProps) => {
                 )}
               </div>
               <div className="text-xs text-muted-foreground">
-                Budget: ${Number(key.trial_credits_usd).toFixed(2)} · Used: ${Number(key.used_credits_usd).toFixed(2)}
+                Status: {key.is_active ? "Active" : "Inactive"}
               </div>
             </div>
           ))}

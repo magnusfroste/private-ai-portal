@@ -22,8 +22,7 @@ export const KeyEventLog = ({ keys }: KeyEventLogProps) => {
             <TableHead>Key Name</TableHead>
             <TableHead>Event</TableHead>
             <TableHead>Date</TableHead>
-            <TableHead className="text-right">Budget</TableHead>
-            <TableHead className="text-right">Used</TableHead>
+            <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -36,11 +35,8 @@ export const KeyEventLog = ({ keys }: KeyEventLogProps) => {
               <TableCell className="text-xs text-muted-foreground">
                 {getEventDate(key)}
               </TableCell>
-              <TableCell className="text-right text-xs">
-                ${Number(key.trial_credits_usd).toFixed(2)}
-              </TableCell>
-              <TableCell className="text-right text-xs">
-                ${Number(key.used_credits_usd).toFixed(2)}
+              <TableCell className="text-xs">
+                {key.is_active ? "Active" : "Inactive"}
               </TableCell>
             </TableRow>
           ))}
