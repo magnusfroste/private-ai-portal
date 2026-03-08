@@ -112,13 +112,22 @@ export const ChatPage = () => {
     });
   }, [messages]);
 
-  const handleSend = async (input: string) => {
-    if (!input.trim() || isStreaming) return;
-    if (!activeId) {
-      await createConversation(selectedModel);
+  const sendingRef = useRef(false);
+  const handleSend = useCallback(async (input: string) => {
+    if (!input.trim() || isStreaming || sendingRef.current) return;
+    sendingRef.current = true;
+    try {
+      if (!activeId) {
+        await createConversation(selectedModel);
+      }
+      requestAnimationFrame(() => {
+        sendMessage(input);
+        sendingRef.current = false;
+      });
+    } catch {
+      sendingRef.current = false;
     }
-    requestAnimationFrame(() => sendMessage(input));
-  };
+  }, [isStreaming, activeId, createConversation, selectedModel, sendMessage]);
 
   const handleNewChat = async () => {
     if (!isStreaming) {
