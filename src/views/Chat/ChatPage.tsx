@@ -98,7 +98,7 @@ export const ChatPage = () => {
 
   const messages = activeConversation?.messages ?? [];
 
-  const { isStreaming, sendMessage } = useChatStream({
+  const { isStreaming, sendMessage, stopStreaming } = useChatStream({
     model: selectedModel,
     messages,
     setMessages,
