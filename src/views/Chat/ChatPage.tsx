@@ -9,11 +9,12 @@ import { ChatHeader } from "./components/ChatHeader";
 import { ChatSidebar } from "./components/ChatSidebar";
 import { useChatStream } from "./hooks/useChatStream";
 import { useChatConversations } from "./hooks/useChatConversations";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 
 export const ChatPage = () => {
   const { checkAuth } = useAuth();
   const [selectedModel, setSelectedModel] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -82,6 +83,8 @@ export const ChatPage = () => {
         onSelect={setActiveId}
         onNew={handleNewChat}
         onDelete={deleteConversation}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
       {/* Right side: header + content */}
@@ -91,6 +94,7 @@ export const ChatPage = () => {
           selectedModel={selectedModel}
           onSelectModel={setSelectedModel}
           disabled={isStreaming}
+          onToggleSidebar={() => setSidebarOpen((v) => !v)}
         />
 
         {/* Messages */}
