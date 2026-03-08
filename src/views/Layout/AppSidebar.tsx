@@ -37,7 +37,6 @@ export const AppSidebar = () => {
   });
 
   const isActive = (path: string) => location.pathname === path;
-  const isSettingsActive = settingsNav.some((item) => isActive(item.url));
 
   return (
     <Sidebar collapsible="icon">
