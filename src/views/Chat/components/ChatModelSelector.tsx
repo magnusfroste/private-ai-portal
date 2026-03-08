@@ -12,15 +12,14 @@ interface ChatModelSelectorProps {
 
 const StatusDot = ({ status }: { status: ModelInfo["status"] }) => {
   const colors = {
-    healthy: "bg-emerald-500 shadow-[0_0_6px_hsl(var(--chart-2)/0.5)]",
-    unhealthy: "bg-destructive shadow-[0_0_6px_hsl(var(--destructive)/0.5)]",
+    healthy: "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]",
+    unhealthy: "bg-destructive shadow-[0_0_6px_rgba(239,68,68,0.5)]",
     unknown: "bg-muted-foreground/50",
   };
 
   return (
     <span
       className={cn("inline-block w-2 h-2 rounded-full shrink-0", colors[status])}
-      title={status === "healthy" ? "Online" : status === "unhealthy" ? "Offline" : "Okänd status"}
     />
   );
 };
@@ -32,19 +31,23 @@ export const ChatModelSelector = ({ models, selectedModel, onSelect, disabled }:
     <div className="flex items-center gap-2">
       <Bot className="w-4 h-4 text-primary" />
       <Select value={selectedModel} onValueChange={onSelect} disabled={disabled}>
-        <SelectTrigger className="w-[280px] h-8 text-sm border-border/50 bg-background">
-          <span className="flex items-center gap-2 truncate">
-            {selected && <StatusDot status={selected.status} />}
+        <SelectTrigger className="w-[320px] h-8 text-sm border-border/50 bg-background">
+          {selected ? (
+            <span className="flex items-center gap-2 truncate">
+              <StatusDot status={selected.status} />
+              <span className="truncate font-mono text-xs">{selected.id}</span>
+            </span>
+          ) : (
             <SelectValue placeholder="Välj modell..." />
-          </span>
+          )}
         </SelectTrigger>
         <SelectContent>
           {models.map((m) => (
-            <SelectItem key={m.id} value={m.id}>
+            <SelectItem key={m.id} value={m.id} textValue={m.id}>
               <span className="flex items-center gap-2">
                 <StatusDot status={m.status} />
-                <span className="text-xs text-muted-foreground">{m.provider}</span>
-                <span>{m.id}</span>
+                <span className="text-xs text-muted-foreground w-16 shrink-0">{m.provider}</span>
+                <span className="font-mono text-xs">{m.id}</span>
               </span>
             </SelectItem>
           ))}
