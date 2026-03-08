@@ -52,16 +52,16 @@ export const AdminPage = () => {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="p-6 max-w-5xl mx-auto space-y-8">
+      <div className="flex items-center gap-3">
         <Users className="w-8 h-8 text-primary" />
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
           <p className="text-muted-foreground text-sm">Manage users and trial keys</p>
         </div>
-      <AdminSettingsPanel />
+      </div>
 
-      <div className="mt-8">
+      <AdminSettingsPanel />
 
       {isLoading && (
         <div className="text-center py-12 text-muted-foreground">Loading users...</div>
