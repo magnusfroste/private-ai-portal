@@ -1,4 +1,4 @@
-import { LayoutDashboard, Shield, PanelLeft } from "lucide-react";
+import { LayoutDashboard, PanelLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChatModelSelector } from "./ChatModelSelector";
@@ -32,14 +32,6 @@ export const ChatHeader = ({
         >
           <PanelLeft className="w-4 h-4" />
         </Button>
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-        >
-          <Shield className="w-5 h-5 text-primary" />
-          <span className="text-sm font-bold gradient-text hidden sm:inline">Autoversio</span>
-        </button>
-        <span className="text-border hidden sm:inline">|</span>
         <ChatModelSelector
           models={models}
           selectedModel={selectedModel}

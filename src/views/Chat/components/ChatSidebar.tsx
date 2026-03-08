@@ -1,4 +1,5 @@
-import { Plus, MessageSquare, Trash2, X } from "lucide-react";
+import { Plus, MessageSquare, Trash2, X, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import type { Conversation } from "../types";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ export const ChatSidebar = ({
   open,
   onClose,
 }: ChatSidebarProps) => {
+  const navigate = useNavigate();
   const handleSelect = (id: string) => {
     onSelect(id);
     onClose();
@@ -48,15 +50,11 @@ export const ChatSidebar = ({
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="p-3 flex items-center gap-2">
-          <Button
-            onClick={handleNew}
-            variant="outline"
-            className="flex-1 justify-start gap-2 text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Ny chatt
-          </Button>
+        <div className="p-4 flex items-center justify-between">
+          <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2">
+            <Shield className="w-6 h-6 text-primary shrink-0" />
+            <span className="text-lg font-bold gradient-text">Autoversio</span>
+          </button>
           <Button
             variant="ghost"
             size="icon"
@@ -64,6 +62,17 @@ export const ChatSidebar = ({
             className="md:hidden shrink-0 h-8 w-8"
           >
             <X className="w-4 h-4" />
+          </Button>
+        </div>
+
+        <div className="px-3 pb-3">
+          <Button
+            onClick={handleNew}
+            variant="outline"
+            className="w-full justify-start gap-2 text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Ny chatt
           </Button>
         </div>
 
