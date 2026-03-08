@@ -31,8 +31,6 @@ export const ApiKeyCard = ({
 }: ApiKeyCardProps) => {
   const [showKey, setShowKey] = useState(false);
 
-  const remainingDays = apiKeyService.calculateRemainingDays(apiKey.expires_at);
-
   return (
     <div className="p-6 border border-border/50 rounded-lg bg-card/50 hover:bg-card/80 transition-all">
       <div className="flex items-start justify-between mb-4">
@@ -42,11 +40,6 @@ export const ApiKeyCard = ({
             <Badge variant={apiKey.is_active ? "default" : "secondary"}>
               {apiKey.is_active ? "Active" : "Inactive"}
             </Badge>
-            {remainingDays !== null && (
-              <Badge variant="outline">
-                {remainingDays > 0 ? `${remainingDays} days left` : "Expired"}
-              </Badge>
-            )}
           </div>
         </div>
         <div className="flex gap-1">
