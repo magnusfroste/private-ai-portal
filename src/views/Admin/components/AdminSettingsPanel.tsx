@@ -118,19 +118,19 @@ export const AdminSettingsPanel = () => {
             <Label htmlFor="duration">Nyckelgiltighet (dagar)</Label>
             <Input
               id="duration"
-              type="number"
-              min={1}
-              max={365}
-              value={settings.default_key_duration_days}
-              onChange={(e) =>
+              type="text"
+              placeholder="Obegränsad"
+              value={settings.default_key_duration_days === null ? "" : settings.default_key_duration_days}
+              onChange={(e) => {
+                const val = e.target.value.trim();
                 setSettings((s) => ({
                   ...s,
-                  default_key_duration_days: Number(e.target.value),
-                }))
-              }
+                  default_key_duration_days: val === "" ? null : Number(val),
+                }));
+              }}
             />
             <p className="text-xs text-muted-foreground">
-              Duration för nycklar i LiteLLM
+              Lämna tomt för obegränsad giltighet
             </p>
           </div>
         </div>
