@@ -21,10 +21,25 @@ const formatCost = (cost: number | null): string => {
   return `$${cost}`;
 };
 
+const StatusDot = ({ status }: { status: ModelInfo["status"] }) => {
+  const colors = {
+    healthy: "bg-emerald-500",
+    unhealthy: "bg-destructive",
+    unknown: "bg-muted-foreground/50",
+  };
+  return (
+    <span
+      className={`inline-block w-2 h-2 rounded-full shrink-0 ${colors[status]}`}
+      title={status === "healthy" ? "Online" : status === "unhealthy" ? "Offline" : "Unknown"}
+    />
+  );
+};
+
 const ModelCard = ({ model }: { model: ModelInfo }) => (
   <div className="flex items-start gap-3 rounded-lg border border-border/50 bg-card/50 p-3 transition-colors hover:bg-accent/30">
     <div className="flex-1 min-w-0 space-y-1.5">
       <div className="flex items-center gap-2 flex-wrap">
+        <StatusDot status={model.status} />
         <span className="font-mono text-sm font-medium text-foreground truncate">
           {model.id}
         </span>
