@@ -132,23 +132,16 @@ serve(async (req: Request) => {
     
     console.log('Creating new LiteLLM key for user:', { userId: user.id, keyName: body.keyName });
 
-    // 1. Check trial key limit
+    // 1. Get user profile for litellm_user_id
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('trial_keys_created, max_trial_keys, litellm_user_id')
+      .select('litellm_user_id')
       .eq('id', user.id)
       .single();
 
     if (profileError) {
       console.error('Profile fetch error:', profileError);
       return respondWithError(500, 'database_error', 'Failed to fetch user profile');
-    }
-
-    if (profile.trial_keys_created >= profile.max_trial_keys) {
-      console.warn(`Trial limit reached for user ${user.id}: ${profile.trial_keys_created}/${profile.max_trial_keys}`);
-      return respondWithError(403, 'trial_limit_exceeded', 
-        `Trial key limit reached (${profile.trial_keys_created}/${profile.max_trial_keys}). Upgrade to create more keys.`
-      );
     }
 
     if (!profile.litellm_user_id) {
@@ -221,16 +214,6 @@ serve(async (req: Request) => {
         throw new Error(`Failed to save API key to database: ${dbError.message || 'Unknown database error'}`);
       }
 
-      // 4. Increment trial key counter (atomic operation with optimistic locking)
-      const { error: incrementError } = await supabase.rpc('increment_trial_key_count', {
-        user_id_param: user.id
-      });
-
-      if (incrementError) {
-        console.error('Failed to increment trial key counter:', incrementError);
-        // Key was created but counter wasn't incremented - log for manual fix
-        // Don't fail the request as the key is valid
-      }
 
       const response: ApiKeyResponse = {
         success: true,

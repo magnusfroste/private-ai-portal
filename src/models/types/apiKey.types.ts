@@ -13,9 +13,3 @@ export interface CreateApiKeyDto {
   models?: string[];
 }
 
-export class TrialLimitExceededError extends Error {
-  constructor(current: number, max: number) {
-    super(`Trial key limit reached (${current}/${max}). Upgrade to create more keys.`);
-    this.name = 'TrialLimitExceededError';
-  }
-}

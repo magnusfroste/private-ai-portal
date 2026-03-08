@@ -6,20 +6,6 @@ export class AdminService {
     return adminRepository.fetchUsers();
   }
 
-  async updateMaxTrialKeys(userId: string, maxKeys: number): Promise<AdminUser> {
-    return adminRepository.updateUser({
-      user_id: userId,
-      max_trial_keys: maxKeys,
-    });
-  }
-
-  async resetTrialKeys(userId: string): Promise<AdminUser> {
-    return adminRepository.updateUser({
-      user_id: userId,
-      reset_trial_keys: true,
-    });
-  }
-
   async updateLitellmBudget(userId: string, maxBudget: number): Promise<void> {
     await adminRepository.updateUser({
       user_id: userId,
