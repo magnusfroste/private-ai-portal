@@ -1,4 +1,4 @@
-import { Activity, ScrollText, CreditCard, User, Key, Shield, LogOut } from "lucide-react";
+import { Activity, ScrollText, CreditCard, User, Key, Shield, LogOut, MessageSquare } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -72,6 +72,16 @@ export const AppSidebar = () => {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={isActive("/dashboard/chat")}
+                    onClick={() => navigate("/dashboard/chat")}
+                    tooltip="Chat"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Chat</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     isActive={isActive("/dashboard/admin")}

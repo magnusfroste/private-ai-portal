@@ -12,6 +12,7 @@ import { CreditsPage } from "./views/Credits/CreditsPage";
 import { AccountPage } from "./views/Account/AccountPage";
 import { KeysPage } from "./views/Keys/KeysPage";
 import { AdminPage } from "./views/Admin/AdminPage";
+import { ChatPage } from "./views/Chat/ChatPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="credits" element={<CreditsPage />} />
             <Route path="account" element={<AccountPage />} />
             <Route path="keys" element={<KeysPage />} />
+            <Route path="chat" element={<ChatPage />} />
             <Route path="admin" element={<AdminPage />} />
           </Route>
           {/* Redirect old routes */}
