@@ -13,13 +13,14 @@ interface UseChatStreamOptions {
 export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseChatStreamOptions) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const streamingRef = useRef(false);
 
   const stopStreaming = useCallback(() => {
     abortRef.current?.abort();
   }, []);
 
   const sendMessage = useCallback(async (input: string) => {
-    if (isStreaming) return;
+    if (streamingRef.current) return;
     const userMsg: ChatMessage = { role: "user", content: input };
     const allMessages = [...messages, userMsg];
     setMessages(prev => [...prev, userMsg]);
