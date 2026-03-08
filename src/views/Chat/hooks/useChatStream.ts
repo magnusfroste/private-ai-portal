@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { ChatMessage } from "../types";
@@ -12,12 +12,20 @@ interface UseChatStreamOptions {
 
 export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseChatStreamOptions) => {
   const [isStreaming, setIsStreaming] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const stopStreaming = useCallback(() => {
+    abortRef.current?.abort();
+  }, []);
 
   const sendMessage = useCallback(async (input: string) => {
     const userMsg: ChatMessage = { role: "user", content: input };
     const allMessages = [...messages, userMsg];
     setMessages(prev => [...prev, userMsg]);
     setIsStreaming(true);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -41,6 +49,7 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
             Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify(body),
+          signal: controller.signal,
         }
       );
 
@@ -104,12 +113,17 @@ export const useChatStream = ({ model, messages, setMessages, apiKeyId }: UseCha
         }
       }
     } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") {
+        // User cancelled — keep partial response
+        return;
+      }
       console.error("Chat stream error:", e);
       toast.error("Kunde inte ansluta till modellen");
     } finally {
+      abortRef.current = null;
       setIsStreaming(false);
     }
   }, [messages, model, setMessages, apiKeyId]);
 
-  return { isStreaming, sendMessage };
+  return { isStreaming, sendMessage, stopStreaming };
 };

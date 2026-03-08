@@ -98,7 +98,7 @@ export const ChatPage = () => {
 
   const messages = activeConversation?.messages ?? [];
 
-  const { isStreaming, sendMessage } = useChatStream({
+  const { isStreaming, sendMessage, stopStreaming } = useChatStream({
     model: selectedModel,
     messages,
     setMessages,
@@ -159,7 +159,7 @@ export const ChatPage = () => {
           )}
         </div>
 
-        <ChatInput onSend={handleSend} disabled={isStreaming} />
+        <ChatInput onSend={handleSend} onStop={stopStreaming} disabled={isStreaming} />
       </div>
     </div>
   );
