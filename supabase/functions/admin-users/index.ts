@@ -80,9 +80,37 @@ serve(async (req: Request) => {
       }
     }
 
-    const users = profiles.map((p) => ({
+    // Fetch LiteLLM budget info for users that have litellm_user_id
+    const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY') || '';
+    const budgetMap: Record<string, { max_budget: number; spend: number }> = {};
+
+    if (LITELLM_MASTER_KEY) {
+      const usersWithLitellm = profiles.filter((p: any) => p.litellm_user_id);
+      await Promise.all(usersWithLitellm.map(async (p: any) => {
+        try {
+          const url = new URL('https://api.autoversio.ai/user/info');
+          url.searchParams.set('user_id', p.litellm_user_id);
+          const resp = await fetch(url.toString(), {
+            headers: { 'Authorization': `Bearer ${LITELLM_MASTER_KEY}` },
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            const info = data.user_info || data;
+            budgetMap[p.id] = {
+              max_budget: Number(info.max_budget ?? 0),
+              spend: Number(info.spend ?? 0),
+            };
+          }
+        } catch (e) {
+          console.error(`Failed to fetch LiteLLM info for ${p.id}:`, e);
+        }
+      }));
+    }
+
+    const users = profiles.map((p: any) => ({
       ...p,
       api_key_count: keyCountMap[p.id] || 0,
+      litellm_budget: budgetMap[p.id] || null,
     }));
 
     return jsonResponse({ users });
