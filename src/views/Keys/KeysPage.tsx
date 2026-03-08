@@ -4,7 +4,6 @@ import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "@/views/Dashboard/hooks/useDashboardData";
 import { useKeyManagement } from "@/views/Dashboard/hooks/useKeyManagement";
 import { ApiKeyList } from "@/views/Dashboard/components/ApiKeyList";
-import { HistoricalKeyList } from "@/views/Keys/components/HistoricalKeyList";
 import { ApiKey } from "@/models/types/apiKey.types";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,9 +83,8 @@ export const KeysPage = () => {
   const canCreateMore = profile ? profile.trial_keys_created < profile.max_trial_keys : false;
   const remainingKeys = profile ? profile.max_trial_keys - profile.trial_keys_created : 0;
 
-  // Split keys into active and historical
+  // Only show active keys
   const activeKeys = apiKeys.filter((key: ApiKey) => key.is_active && !key.revoked_at && !isExpired(key));
-  const historicalKeys = apiKeys.filter((key: ApiKey) => !key.is_active || !!key.revoked_at || isExpired(key));
 
   if (profileLoading || keysLoading) {
     return (
@@ -104,7 +102,7 @@ export const KeysPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold mb-1">API Keys</h1>
-          <p className="text-muted-foreground text-sm">Manage your API keys</p>
+          <p className="text-muted-foreground text-sm">Manage your active API keys</p>
         </div>
         <Button
           variant="outline"
@@ -132,10 +130,6 @@ export const KeysPage = () => {
         onRevoke={handleRevoke}
         isRevoking={revoking}
       />
-
-      {historicalKeys.length > 0 && (
-        <HistoricalKeyList keys={historicalKeys} onCopy={copyToClipboard} />
-      )}
     </div>
   );
 };

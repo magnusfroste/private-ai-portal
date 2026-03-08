@@ -10,15 +10,17 @@ import { SpendLog } from "@/models/types/apiKey.types";
 
 interface SpendLogTableProps {
   logs: SpendLog[];
+  keyNames?: Record<string, string>;
 }
 
-export const SpendLogTable = ({ logs }: SpendLogTableProps) => {
+export const SpendLogTable = ({ logs, keyNames }: SpendLogTableProps) => {
   return (
     <div className="border rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Time</TableHead>
+            {keyNames && <TableHead>Key</TableHead>}
             <TableHead>Model</TableHead>
             <TableHead className="text-right">Tokens</TableHead>
             <TableHead className="text-right">Cost</TableHead>
@@ -26,11 +28,16 @@ export const SpendLogTable = ({ logs }: SpendLogTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {logs.slice(0, 10).map((log) => (
+          {logs.slice(0, 50).map((log) => (
             <TableRow key={log.request_id}>
               <TableCell className="text-xs">
                 {new Date(log.startTime).toLocaleString()}
               </TableCell>
+              {keyNames && (
+                <TableCell className="text-xs font-medium">
+                  {keyNames[log.request_id] || "—"}
+                </TableCell>
+              )}
               <TableCell className="text-xs font-mono">{log.model}</TableCell>
               <TableCell className="text-right text-xs">
                 {log.total_tokens.toLocaleString()}
