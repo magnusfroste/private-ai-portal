@@ -4,6 +4,7 @@ import { AdminUser } from "@/models/types/admin.types";
 import { useAdminData } from "./hooks/useAdminData";
 import { UserTable } from "./components/UserTable";
 import { EditUserDialog } from "./components/EditUserDialog";
+import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -51,14 +52,16 @@ export const AdminPage = () => {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="p-6 max-w-5xl mx-auto space-y-8">
+      <div className="flex items-center gap-3">
         <Users className="w-8 h-8 text-primary" />
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
           <p className="text-muted-foreground text-sm">Manage users and trial keys</p>
         </div>
       </div>
+
+      <AdminSettingsPanel />
 
       {isLoading && (
         <div className="text-center py-12 text-muted-foreground">Loading users...</div>
