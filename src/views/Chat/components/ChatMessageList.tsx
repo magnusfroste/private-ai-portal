@@ -1,4 +1,4 @@
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Brain, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -9,6 +9,7 @@ import type { ChatMessage } from "../types";
 interface ChatMessageListProps {
   messages: ChatMessage[];
   isStreaming: boolean;
+  isReasoning?: boolean;
 }
 
 const CopyButton = ({ text }: { text: string }) => {
@@ -112,30 +113,87 @@ const MarkdownContent = ({ content }: { content: string }) => (
   </ReactMarkdown>
 );
 
-export const ChatMessageList = ({ messages, isStreaming }: ChatMessageListProps) => {
+const ReasoningBlock = ({ reasoning, isLive }: { reasoning: string; isLive: boolean }) => {
+  const [expanded, setExpanded] = useState(isLive);
+
+  // Auto-expand while streaming reasoning
+  const isOpen = isLive || expanded;
+
+  return (
+    <div className="mb-3 rounded-lg border border-border/50 bg-muted/20 overflow-hidden">
+      <button
+        onClick={() => setExpanded(v => !v)}
+        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <Brain className="w-3.5 h-3.5 text-primary/70" />
+        <span className="font-medium">Tankekedja</span>
+        {isLive && (
+          <span className="flex gap-0.5 ml-1">
+            <span className="w-1 h-1 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-1 h-1 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-1 h-1 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+          </span>
+        )}
+        {!isLive && (
+          <span className="ml-auto">
+            {isOpen
+              ? <ChevronDown className="w-3.5 h-3.5" />
+              : <ChevronRight className="w-3.5 h-3.5" />
+            }
+          </span>
+        )}
+      </button>
+      {isOpen && (
+        <div className="px-3 pb-3 text-xs text-muted-foreground/80 leading-relaxed whitespace-pre-wrap border-t border-border/30 pt-2 max-h-64 overflow-y-auto">
+          {reasoning}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const ChatMessageList = ({ messages, isStreaming, isReasoning }: ChatMessageListProps) => {
   const lastMsg = messages[messages.length - 1];
   const showThinking = isStreaming && lastMsg?.role === "user";
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-2">
-      {messages.map((msg, i) => (
-        <div key={i} className="py-3">
-          {msg.role === "user" ? (
-            <div className="flex justify-end">
-              <div className="bg-muted rounded-2xl rounded-br-sm px-4 py-2.5 max-w-[85%]">
-                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+      {messages.map((msg, i) => {
+        const isLastAssistant = msg.role === "assistant" && i === messages.length - 1;
+
+        return (
+          <div key={i} className="py-3">
+            {msg.role === "user" ? (
+              <div className="flex justify-end">
+                <div className="bg-muted rounded-2xl rounded-br-sm px-4 py-2.5 max-w-[85%]">
+                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-sm leading-relaxed prose-sm">
-              <MarkdownContent content={msg.content} />
-              {i === messages.length - 1 && isStreaming && (
-                <span className="inline-block w-1.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+            ) : (
+              <div className="text-sm leading-relaxed prose-sm">
+                {msg.reasoning && (
+                  <ReasoningBlock
+                    reasoning={msg.reasoning}
+                    isLive={isLastAssistant && isStreaming && !!isReasoning}
+                  />
+                )}
+                {msg.content ? (
+                  <>
+                    <MarkdownContent content={msg.content} />
+                    {isLastAssistant && isStreaming && (
+                      <span className="inline-block w-1.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />
+                    )}
+                  </>
+                ) : (
+                  isLastAssistant && isStreaming && !isReasoning && (
+                    <span className="inline-block w-1.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />
+                  )
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
 
       {showThinking && (
         <div className="py-3">

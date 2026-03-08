@@ -11,6 +11,7 @@ interface UseChatStreamOptions {
 
 export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOptions) => {
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isReasoning, setIsReasoning] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const streamingRef = useRef(false);
 
@@ -22,6 +23,7 @@ export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOpt
     if (streamingRef.current) return;
     streamingRef.current = true;
     setIsStreaming(true);
+    setIsReasoning(false);
 
     const userMsg: ChatMessage = { role: "user", content: input };
     const allMessages = [...currentMessages, userMsg];
@@ -69,7 +71,8 @@ export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOpt
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let textBuffer = "";
-      let assistantSoFar = "";
+      let assistantContent = "";
+      let reasoningContent = "";
       let streamDone = false;
 
       while (!streamDone) {
@@ -95,17 +98,33 @@ export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOpt
           try {
             const parsed = JSON.parse(jsonStr);
             const delta = parsed.choices?.[0]?.delta;
-            // Support both regular content and reasoning models that send content separately
-            const content = (delta?.content as string | undefined) ?? "";
+            if (!delta) continue;
+
+            const content = (delta.content as string | undefined) ?? "";
+            const reasoning = (delta.reasoning_content as string | undefined) ?? (delta.reasoning as string | undefined) ?? "";
+
+            if (reasoning) {
+              reasoningContent += reasoning;
+              setIsReasoning(true);
+            }
+
             if (content) {
-              assistantSoFar += content;
-              const snapshot = assistantSoFar;
+              assistantContent += content;
+              setIsReasoning(false);
+            }
+
+            if (reasoning || content) {
+              const snapshot = { content: assistantContent, reasoning: reasoningContent || undefined };
               setMessages(prev => {
                 const last = prev[prev.length - 1];
                 if (last?.role === "assistant") {
-                  return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: snapshot } : m);
+                  return prev.map((m, i) =>
+                    i === prev.length - 1
+                      ? { ...m, content: snapshot.content, reasoning: snapshot.reasoning }
+                      : m
+                  );
                 }
-                return [...prev, { role: "assistant", content: snapshot }];
+                return [...prev, { role: "assistant", content: snapshot.content, reasoning: snapshot.reasoning }];
               });
             }
           } catch {
@@ -124,8 +143,9 @@ export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOpt
       abortRef.current = null;
       streamingRef.current = false;
       setIsStreaming(false);
+      setIsReasoning(false);
     }
   }, [model, setMessages, apiKeyId]);
 
-  return { isStreaming, sendMessage, stopStreaming };
+  return { isStreaming, isReasoning, sendMessage, stopStreaming };
 };
