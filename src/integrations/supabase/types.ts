@@ -109,9 +109,7 @@ export type Database = {
           full_name: string | null
           id: string
           litellm_user_id: string | null
-          max_trial_keys: number
           purchased_credits_usd: number
-          trial_keys_created: number
           updated_at: string
         }
         Insert: {
@@ -121,9 +119,7 @@ export type Database = {
           full_name?: string | null
           id: string
           litellm_user_id?: string | null
-          max_trial_keys?: number
           purchased_credits_usd?: number
-          trial_keys_created?: number
           updated_at?: string
         }
         Update: {
@@ -133,9 +129,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           litellm_user_id?: string | null
-          max_trial_keys?: number
           purchased_credits_usd?: number
-          trial_keys_created?: number
           updated_at?: string
         }
         Relationships: []
@@ -207,10 +201,6 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
-      }
-      increment_trial_key_count: {
-        Args: { user_id_param: string }
-        Returns: undefined
       }
     }
     Enums: {
