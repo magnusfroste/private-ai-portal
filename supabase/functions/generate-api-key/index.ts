@@ -214,16 +214,6 @@ serve(async (req: Request) => {
         throw new Error(`Failed to save API key to database: ${dbError.message || 'Unknown database error'}`);
       }
 
-      // 4. Increment trial key counter (atomic operation with optimistic locking)
-      const { error: incrementError } = await supabase.rpc('increment_trial_key_count', {
-        user_id_param: user.id
-      });
-
-      if (incrementError) {
-        console.error('Failed to increment trial key counter:', incrementError);
-        // Key was created but counter wasn't incremented - log for manual fix
-        // Don't fail the request as the key is valid
-      }
 
       const response: ApiKeyResponse = {
         success: true,
