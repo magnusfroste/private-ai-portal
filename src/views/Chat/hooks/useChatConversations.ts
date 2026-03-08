@@ -47,7 +47,7 @@ export const useChatConversations = () => {
         .from("chat_conversations")
         .update({
           title,
-          messages: messages as unknown as Record<string, unknown>[],
+          messages: JSON.parse(JSON.stringify(messages)),
           model,
           updated_at: new Date().toISOString(),
         })
