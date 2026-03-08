@@ -43,6 +43,7 @@ async function createLiteLLMKey(
   masterKey: string,
   litellmUserId: string,
   models?: string[],
+  durationDays: number = 5,
 ): Promise<{
   key: string;
   token: string;
@@ -58,7 +59,7 @@ async function createLiteLLMKey(
   } = {
     key_alias: keyName,
     user_id: litellmUserId,
-    duration: '5d',
+    duration: `${durationDays}d`,
   };
 
   if (models && models.length > 0) {
