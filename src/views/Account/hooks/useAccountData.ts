@@ -1,23 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ModelUsage } from "@/models/types/usage.types";
 
-export const useAccountData = () => {
+interface UseAccountDataOptions {
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export const useAccountData = (options?: UseAccountDataOptions) => {
   const [usageByModel, setUsageByModel] = useState<ModelUsage[]>([]);
   const [totalSpend, setTotalSpend] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUsageData();
-  }, []);
+  const startIso = options?.startDate?.toISOString();
+  const endIso = options?.endDate?.toISOString();
 
-  const fetchUsageData = async () => {
+  const fetchUsageData = useCallback(async () => {
     try {
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      // Get all user's API keys
       const { data: keys, error: keysError } = await supabase
         .from("api_keys")
         .select("id, name")
@@ -30,7 +33,6 @@ export const useAccountData = () => {
         return;
       }
 
-      // Fetch usage from LiteLLM for each key
       const modelMap: Record<string, ModelUsage> = {};
       let total = 0;
 
@@ -44,14 +46,21 @@ export const useAccountData = () => {
 
             if (error || !data) return;
 
-            // Aggregate from key info spend
-            const keySpend = data.info?.spend || 0;
-            const keyTokens = data.info?.total_tokens || 0;
-
-            // Use spend_logs for per-model breakdown
             const logs = data.spend_logs || [];
-            if (logs.length > 0) {
-              logs.forEach((log: any) => {
+            const filteredLogs = logs.filter((log: any) => {
+              if (!log.startTime) return true;
+              const logDate = new Date(log.startTime);
+              if (startIso && logDate < new Date(startIso)) return false;
+              if (endIso) {
+                const end = new Date(endIso);
+                end.setHours(23, 59, 59, 999);
+                if (logDate > end) return false;
+              }
+              return true;
+            });
+
+            if (filteredLogs.length > 0) {
+              filteredLogs.forEach((log: any) => {
                 const model = log.model || "unknown";
                 if (!modelMap[model]) {
                   modelMap[model] = { model, cost: 0, tokens: 0, requests: 0 };
@@ -60,17 +69,21 @@ export const useAccountData = () => {
                 modelMap[model].tokens += Number(log.total_tokens || 0);
                 modelMap[model].requests += 1;
               });
-              total += logs.reduce((s: number, l: any) => s + (l.spend || 0), 0);
-            } else if (keySpend > 0) {
-              // Fallback: no logs but key has spend — show as single entry
-              const fallbackModel = "aggregated";
-              if (!modelMap[fallbackModel]) {
-                modelMap[fallbackModel] = { model: fallbackModel, cost: 0, tokens: 0, requests: 0 };
+              total += filteredLogs.reduce((s: number, l: any) => s + (l.spend || 0), 0);
+            } else if (!startIso && !endIso) {
+              // Fallback only when no date filter
+              const keySpend = data.info?.spend || 0;
+              const keyTokens = data.info?.total_tokens || 0;
+              if (keySpend > 0) {
+                const fallbackModel = "aggregated";
+                if (!modelMap[fallbackModel]) {
+                  modelMap[fallbackModel] = { model: fallbackModel, cost: 0, tokens: 0, requests: 0 };
+                }
+                modelMap[fallbackModel].cost += keySpend;
+                modelMap[fallbackModel].tokens += keyTokens;
+                modelMap[fallbackModel].requests += 1;
+                total += keySpend;
               }
-              modelMap[fallbackModel].cost += keySpend;
-              modelMap[fallbackModel].tokens += keyTokens;
-              modelMap[fallbackModel].requests += 1;
-              total += keySpend;
             }
           } catch (err) {
             console.error(`Error fetching usage for key ${key.name}:`, err);
@@ -86,7 +99,11 @@ export const useAccountData = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [startIso, endIso]);
+
+  useEffect(() => {
+    fetchUsageData();
+  }, [fetchUsageData]);
 
   return { usageByModel, totalSpend, loading };
 };

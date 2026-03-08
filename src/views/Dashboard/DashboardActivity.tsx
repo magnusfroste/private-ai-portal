@@ -1,13 +1,54 @@
-import { Shield } from "lucide-react";
+import { useState } from "react";
+import { format, subDays, startOfMonth } from "date-fns";
+import { CalendarIcon, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "./hooks/useDashboardData";
 import { useAccountData } from "@/views/Account/hooks/useAccountData";
 import { ActivityCard } from "./components/ActivityCard";
 
+const PRESETS = [
+  { label: "7d", days: 7 },
+  { label: "30d", days: 30 },
+  { label: "Denna månad", fromDate: () => startOfMonth(new Date()) },
+  { label: "Alla", days: null },
+] as const;
+
 export const DashboardActivity = () => {
   const { loading: profileLoading } = useProfile();
   const { loading: keysLoading } = useDashboardData();
-  const { usageByModel, totalSpend, loading: usageLoading } = useAccountData();
+
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [activePreset, setActivePreset] = useState<string>("Alla");
+
+  const { usageByModel, totalSpend, loading: usageLoading } = useAccountData({
+    startDate,
+    endDate,
+  });
+
+  const applyPreset = (preset: typeof PRESETS[number]) => {
+    setActivePreset(preset.label);
+    if (preset.label === "Alla") {
+      setStartDate(undefined);
+      setEndDate(undefined);
+    } else if ("fromDate" in preset) {
+      setStartDate(preset.fromDate());
+      setEndDate(new Date());
+    } else if (preset.days) {
+      setStartDate(subDays(new Date(), preset.days));
+      setEndDate(new Date());
+    }
+  };
+
+  const handleCustomDate = (type: "start" | "end", date: Date | undefined) => {
+    setActivePreset("");
+    if (type === "start") setStartDate(date);
+    else setEndDate(date);
+  };
 
   if (profileLoading || keysLoading) {
     return (
@@ -36,33 +77,101 @@ export const DashboardActivity = () => {
 
   return (
     <div className="p-6 space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-3xl font-bold">Activity</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Your usage across models on Autoversio
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Activity</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Your usage across models on Autoversio
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {PRESETS.map((p) => (
+            <Button
+              key={p.label}
+              size="sm"
+              variant={activePreset === p.label ? "default" : "outline"}
+              onClick={() => applyPreset(p)}
+              className="text-xs"
+            >
+              {p.label}
+            </Button>
+          ))}
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className={cn("text-xs gap-1.5", startDate && "text-foreground")}
+              >
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {startDate ? format(startDate, "d MMM") : "Från"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={startDate}
+                onSelect={(d) => handleCustomDate("start", d)}
+                disabled={(d) => d > new Date()}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className={cn("text-xs gap-1.5", endDate && "text-foreground")}
+              >
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {endDate ? format(endDate, "d MMM") : "Till"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={endDate}
+                onSelect={(d) => handleCustomDate("end", d)}
+                disabled={(d) => d > new Date()}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <ActivityCard
-          title="Spend"
-          value={`$${totalSpend.toFixed(3)}`}
-          data={spendData}
-          formatLegend={(v) => v.toFixed(4)}
-        />
-        <ActivityCard
-          title="Requests"
-          value={totalRequests.toLocaleString()}
-          data={requestData}
-          formatLegend={(v) => v.toLocaleString()}
-        />
-        <ActivityCard
-          title="Tokens"
-          value={formatTokens(totalTokens)}
-          data={tokenData}
-          formatLegend={formatTokens}
-        />
-      </div>
+      {usageLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground text-sm animate-pulse">Laddar usage-data...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ActivityCard
+            title="Spend"
+            value={`$${totalSpend.toFixed(3)}`}
+            data={spendData}
+            formatLegend={(v) => v.toFixed(4)}
+          />
+          <ActivityCard
+            title="Requests"
+            value={totalRequests.toLocaleString()}
+            data={requestData}
+            formatLegend={(v) => v.toLocaleString()}
+          />
+          <ActivityCard
+            title="Tokens"
+            value={formatTokens(totalTokens)}
+            data={tokenData}
+            formatLegend={formatTokens}
+          />
+        </div>
+      )}
     </div>
   );
 };
