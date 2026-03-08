@@ -21,7 +21,8 @@ export const ChatPage = () => {
 
   useEffect(() => {
     if (models.length > 0 && !selectedModel) {
-      setSelectedModel(models[0].id);
+      const healthy = models.find((m) => m.status === "healthy");
+      setSelectedModel(healthy?.id || models[0].id);
     }
   }, [models, selectedModel]);
 
