@@ -27,14 +27,6 @@ export class ApiKeyService {
     if (error) throw error;
   }
 
-  calculateRemainingDays(expiresAt: string | null): number | null {
-    if (!expiresAt) return null;
-    const now = new Date();
-    const expires = new Date(expiresAt);
-    const diffTime = expires.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  }
 }
 
 export const apiKeyService = new ApiKeyService();
