@@ -129,6 +129,8 @@ export const KeysPage = () => {
         isCreatingKey={isCreatingKey}
         canCreateMore={canCreateMore}
         remainingKeys={remainingKeys}
+        onRevoke={handleRevoke}
+        isRevoking={revoking}
       />
 
       {historicalKeys.length > 0 && (
