@@ -94,12 +94,20 @@ const ModelCard = ({ model }: { model: ModelInfo }) => (
 );
 
 export const AvailableModels = () => {
-  const { data: models = [], isLoading: loading, error, refetch } = useQuery({
+  const { data: allModels = [], isLoading: loading, error, refetch } = useQuery({
     queryKey: ["availableModels"],
     queryFn: () => modelService.getAvailableModels(),
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
+
+  const { data: chatSettings } = useChatSettings();
+
+  const models = useMemo(() => {
+    const enabled = chatSettings?.enabledModels ?? [];
+    if (enabled.length === 0) return allModels;
+    return allModels.filter((m) => enabled.includes(m.id));
+  }, [allModels, chatSettings]);
 
   const errorMessage = error ? "Could not load available models" : null;
 
