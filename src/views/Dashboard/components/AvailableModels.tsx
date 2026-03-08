@@ -25,7 +25,7 @@ const StatusDot = ({ status }: { status: ModelInfo["status"] }) => {
   const colors = {
     healthy: "bg-emerald-500",
     unhealthy: "bg-destructive",
-    unknown: "bg-muted-foreground/50",
+    unknown: "bg-blue-400",
   };
   return (
     <span
