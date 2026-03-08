@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Shield, ArrowLeft } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -8,21 +8,43 @@ import { useAccountData } from "./hooks/useAccountData";
 import { ProfileSection } from "./components/ProfileSection";
 import { SubscriptionSection } from "./components/SubscriptionSection";
 import { UsageOverview } from "./components/UsageOverview";
+import { supabase } from "@/integrations/supabase/client";
 
 export const AccountPage = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { profile, loading: profileLoading, refetch: refetchProfile } = useProfile();
   const { usageByModel, totalSpend, loading: usageLoading } = useAccountData();
+  const verifiedRef = useRef(false);
 
   useEffect(() => {
     const payment = searchParams.get("payment");
-    if (payment === "success") {
-      toast.success("Payment successful! Credits will be added shortly.");
+    const sessionId = searchParams.get("session_id");
+
+    if (payment === "success" && sessionId && !verifiedRef.current) {
+      verifiedRef.current = true;
+      toast.loading("Verifying payment...", { id: "verify-payment" });
+
+      supabase.functions
+        .invoke("verify-payment", { body: { session_id: sessionId } })
+        .then(({ data, error }) => {
+          if (error || data?.error) {
+            toast.error("Could not verify payment. Contact support if credits are missing.", { id: "verify-payment" });
+          } else if (data?.status === "paid") {
+            toast.success(`Payment verified! ${data.credits_added} credits added.`, { id: "verify-payment" });
+            refetchProfile();
+          } else {
+            toast.info("Payment not yet completed.", { id: "verify-payment" });
+          }
+        });
+
+      // Clean up URL params
+      setSearchParams({});
     } else if (payment === "canceled") {
       toast.info("Payment was canceled.");
+      setSearchParams({});
     }
-  }, [searchParams]);
+  }, [searchParams, setSearchParams, refetchProfile]);
 
   if (profileLoading) {
     return (
