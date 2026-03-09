@@ -42,15 +42,19 @@ export const ChatModelSelector = ({ models, selectedModel, onSelect, disabled }:
           )}
         </SelectTrigger>
         <SelectContent>
-          {models.map((m) => (
-            <SelectItem key={m.id} value={m.id} textValue={m.id}>
-              <span className="flex items-center gap-2">
-                <StatusDot status={m.status} />
-                <span className="text-xs text-muted-foreground w-16 shrink-0">{m.provider}</span>
-                <span className="font-mono text-xs">{m.id}</span>
-              </span>
-            </SelectItem>
-          ))}
+          {models.map((m) => {
+            const isDefault = "is_default" in m && m.is_default;
+            return (
+              <SelectItem key={m.id} value={m.id} textValue={m.id}>
+                <span className="flex items-center gap-2">
+                  <StatusDot status={m.status} />
+                  <span className="text-xs text-muted-foreground w-16 shrink-0">{m.provider}</span>
+                  <span className="font-mono text-xs">{m.id}</span>
+                  {isDefault && <span className="text-yellow-400 text-xs">★</span>}
+                </span>
+              </SelectItem>
+            );
+          })}
         </SelectContent>
       </Select>
     </div>

@@ -37,6 +37,7 @@ export const ChatPage = () => {
     output_cost_per_million: m.output_cost_per_million,
     mode: m.mode,
     status: m.status,
+    is_default: m.is_default,
   }));
 
   // Fetch user's API keys

@@ -61,5 +61,6 @@ export const useCuratedModels = (enabledOnly = false) => {
     setHuggingfaceUrl: hfUrlMutation.mutate,
     syncModels: syncMutation.mutate,
     isSyncing: syncMutation.isPending,
+    setDefault: setDefaultMutation.mutate,
   };
 };
