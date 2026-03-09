@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ExternalLink, Hash, DollarSign, Cpu } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -5,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCuratedModels } from "@/hooks/useCuratedModels";
 import { CuratedModel } from "@/models/types/curatedModel.types";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useAuth } from "@/hooks/useAuth";
 
 const formatTokenCount = (tokens: number | null): string => {
   if (!tokens) return "—";
