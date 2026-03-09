@@ -35,7 +35,7 @@ export const ChatModelSelector = ({ models, selectedModel, onSelect, disabled }:
           {selected ? (
             <span className="flex items-center gap-2 truncate">
               <StatusDot status={selected.status} />
-              <span className="truncate font-mono text-xs">{selected.id}</span>
+              <span className="truncate font-mono text-xs">{selected.model_name || selected.id}</span>
             </span>
           ) : (
             <SelectValue placeholder="Välj modell..." />
@@ -45,11 +45,11 @@ export const ChatModelSelector = ({ models, selectedModel, onSelect, disabled }:
           {models.map((m) => {
             const isDefault = "is_default" in m && m.is_default;
             return (
-              <SelectItem key={m.id} value={m.id} textValue={m.id}>
+              <SelectItem key={m.id} value={m.id} textValue={m.model_name || m.id}>
                 <span className="flex items-center gap-2">
                   <StatusDot status={m.status} />
                   <span className="text-xs text-muted-foreground w-16 shrink-0">{m.provider}</span>
-                  <span className="font-mono text-xs">{m.id}</span>
+                  <span className="font-mono text-xs">{m.model_name || m.id}</span>
                   {isDefault && <span className="text-yellow-400 text-xs">★</span>}
                 </span>
               </SelectItem>

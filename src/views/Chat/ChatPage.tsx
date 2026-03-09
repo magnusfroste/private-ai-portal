@@ -30,6 +30,7 @@ export const ChatPage = () => {
   // Map curated models to ModelInfo shape expected by ChatHeader
   const modelInfos = models.map((m) => ({
     id: m.id,
+    model_name: m.model_name,
     provider: m.provider,
     max_input_tokens: m.max_input_tokens,
     max_output_tokens: m.max_output_tokens,
