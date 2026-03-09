@@ -37,6 +37,7 @@ export const ChatPage = () => {
     output_cost_per_million: m.output_cost_per_million,
     mode: m.mode,
     status: m.status,
+    is_default: m.is_default,
   }));
 
   // Fetch user's API keys
@@ -75,8 +76,15 @@ export const ChatPage = () => {
   // Select default model from enabled models
   useEffect(() => {
     if (modelInfos.length > 0 && !selectedModel) {
-      const healthy = modelInfos.find((m) => m.status === "healthy");
-      setSelectedModel(healthy?.id || modelInfos[0].id);
+      // First try to find the default model
+      const defaultModel = modelInfos.find((m) => m.is_default);
+      if (defaultModel) {
+        setSelectedModel(defaultModel.id);
+      } else {
+        // Fallback to first healthy or first available
+        const healthy = modelInfos.find((m) => m.status === "healthy");
+        setSelectedModel(healthy?.id || modelInfos[0].id);
+      }
     }
   }, [modelInfos, selectedModel]);
 

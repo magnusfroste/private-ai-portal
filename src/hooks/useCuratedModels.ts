@@ -43,6 +43,15 @@ export const useCuratedModels = (enabledOnly = false) => {
     onError: () => toast.error("Kunde inte synka modeller"),
   });
 
+  const setDefaultMutation = useMutation({
+    mutationFn: (id: string) => curatedModelService.setDefault(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+      toast.success("Standardmodell uppdaterad");
+    },
+    onError: () => toast.error("Kunde inte sätta standardmodell"),
+  });
+
   return {
     models: query.data || [],
     isLoading: query.isLoading,
@@ -52,5 +61,6 @@ export const useCuratedModels = (enabledOnly = false) => {
     setHuggingfaceUrl: hfUrlMutation.mutate,
     syncModels: syncMutation.mutate,
     isSyncing: syncMutation.isPending,
+    setDefault: setDefaultMutation.mutate,
   };
 };

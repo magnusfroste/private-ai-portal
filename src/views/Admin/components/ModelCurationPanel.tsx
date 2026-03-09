@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Cpu, RefreshCw, ExternalLink, Search } from "lucide-react";
+import { Cpu, RefreshCw, ExternalLink, Search, Star } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -25,7 +25,7 @@ const formatCost = (cost: number | null): string => {
 };
 
 export const ModelCurationPanel = () => {
-  const { models, isLoading, syncModels, isSyncing, toggleModel, setHuggingfaceUrl } = useCuratedModels();
+  const { models, isLoading, syncModels, isSyncing, toggleModel, setHuggingfaceUrl, setDefault } = useCuratedModels();
   const [search, setSearch] = useState("");
   const [editingHf, setEditingHf] = useState<string | null>(null);
   const [hfValue, setHfValue] = useState("");
@@ -86,6 +86,29 @@ export const ModelCurationPanel = () => {
                 key={model.id}
                 className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
               >
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => setDefault(model.id)}
+                      >
+                        <Star
+                          className={`w-4 h-4 ${
+                            model.is_default
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-muted-foreground/40"
+                          }`}
+                        />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {model.is_default ? "Standardmodell" : "Sätt som standard"}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <Switch
                   checked={model.enabled}
                   onCheckedChange={(enabled) => toggleModel({ id: model.id, enabled })}
