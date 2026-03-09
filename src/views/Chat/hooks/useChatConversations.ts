@@ -45,6 +45,13 @@ export const useChatConversations = () => {
     load();
   }, []);
 
+  // Persist activeId to sessionStorage
+  const wrappedSetActiveId = useCallback((id: string | null) => {
+    setActiveId(id);
+    if (id) sessionStorage.setItem("chat-active-id", id);
+    else sessionStorage.removeItem("chat-active-id");
+  }, []);
+
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
 
   // Debounced save to DB
