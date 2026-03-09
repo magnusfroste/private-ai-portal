@@ -12,7 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Save, Loader2 } from "lucide-react";
 
-export const SiteSettingsPage = () => {
+interface SiteSettingsPageProps {
+  embedded?: boolean;
+}
+
+export const SiteSettingsPage = ({ embedded = false }: SiteSettingsPageProps) => {
   const navigate = useNavigate();
   const { data: isAdmin, isLoading: adminLoading } = useQuery({
     queryKey: ["is-admin"],
@@ -31,10 +35,10 @@ export const SiteSettingsPage = () => {
   }, [settings]);
 
   useEffect(() => {
-    if (!adminLoading && !isAdmin) navigate("/dashboard");
-  }, [isAdmin, adminLoading, navigate]);
+    if (!embedded && !adminLoading && !isAdmin) navigate("/dashboard");
+  }, [isAdmin, adminLoading, navigate, embedded]);
 
-  if (adminLoading || isLoading) {
+  if (!embedded && (adminLoading || isLoading)) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -42,16 +46,26 @@ export const SiteSettingsPage = () => {
     );
   }
 
-  if (!isAdmin) return null;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!embedded && !isAdmin) return null;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className={embedded ? "space-y-6" : "p-6 max-w-4xl mx-auto space-y-6"}>
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Webbplatsinställningar</h1>
-          <p className="text-muted-foreground text-sm">Hantera branding, SEO, AEO och konfiguration</p>
-        </div>
-        <Button onClick={() => save(draft)} disabled={isSaving}>
+        {!embedded && (
+          <div>
+            <h1 className="text-2xl font-bold">Webbplatsinställningar</h1>
+            <p className="text-muted-foreground text-sm">Hantera branding, SEO, AEO och konfiguration</p>
+          </div>
+        )}
+        <Button onClick={() => save(draft)} disabled={isSaving} className={embedded ? "ml-auto" : ""}>
           {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
           Spara
         </Button>
