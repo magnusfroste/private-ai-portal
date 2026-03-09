@@ -95,7 +95,7 @@ export const useChatConversations = () => {
       createdAt: new Date(data.created_at).getTime(),
     };
     setConversations((prev) => [conv, ...prev]);
-    setActiveId(conv.id);
+    wrappedSetActiveId(conv.id);
     return conv.id;
   }, []);
 
