@@ -75,8 +75,15 @@ export const ChatPage = () => {
   // Select default model from enabled models
   useEffect(() => {
     if (modelInfos.length > 0 && !selectedModel) {
-      const healthy = modelInfos.find((m) => m.status === "healthy");
-      setSelectedModel(healthy?.id || modelInfos[0].id);
+      // First try to find the default model
+      const defaultModel = modelInfos.find((m) => m.is_default);
+      if (defaultModel) {
+        setSelectedModel(defaultModel.id);
+      } else {
+        // Fallback to first healthy or first available
+        const healthy = modelInfos.find((m) => m.status === "healthy");
+        setSelectedModel(healthy?.id || modelInfos[0].id);
+      }
     }
   }, [modelInfos, selectedModel]);
 
