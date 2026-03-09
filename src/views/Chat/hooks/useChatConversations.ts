@@ -4,7 +4,9 @@ import type { Conversation, ChatMessage } from "../types";
 
 export const useChatConversations = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(() => {
+    return sessionStorage.getItem("chat-active-id") || null;
+  });
   const [loaded, setLoaded] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -22,19 +24,32 @@ export const useChatConversations = () => {
         .limit(50);
 
       if (!error && data) {
-        setConversations(
-          data.map((row) => ({
-            id: row.id,
-            title: row.title,
-            model: row.model || "",
-            messages: (row.messages as unknown as ChatMessage[]) || [],
-            createdAt: new Date(row.created_at).getTime(),
-          }))
-        );
+        const convs = data.map((row) => ({
+          id: row.id,
+          title: row.title,
+          model: row.model || "",
+          messages: (row.messages as unknown as ChatMessage[]) || [],
+          createdAt: new Date(row.created_at).getTime(),
+        }));
+        setConversations(convs);
+        // Auto-select last active or most recent
+        const stored = sessionStorage.getItem("chat-active-id");
+        if (stored && convs.some((c) => c.id === stored)) {
+          setActiveId(stored);
+        } else if (convs.length > 0) {
+          setActiveId(convs[0].id);
+        }
       }
       setLoaded(true);
     };
     load();
+  }, []);
+
+  // Persist activeId to sessionStorage
+  const wrappedSetActiveId = useCallback((id: string | null) => {
+    setActiveId(id);
+    if (id) sessionStorage.setItem("chat-active-id", id);
+    else sessionStorage.removeItem("chat-active-id");
   }, []);
 
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
@@ -80,7 +95,7 @@ export const useChatConversations = () => {
       createdAt: new Date(data.created_at).getTime(),
     };
     setConversations((prev) => [conv, ...prev]);
-    setActiveId(conv.id);
+    wrappedSetActiveId(conv.id);
     return conv.id;
   }, []);
 
@@ -107,7 +122,7 @@ export const useChatConversations = () => {
   const deleteConversation = useCallback(
     async (id: string) => {
       setConversations((prev) => prev.filter((c) => c.id !== id));
-      if (activeId === id) setActiveId(null);
+      if (activeId === id) wrappedSetActiveId(null);
       await supabase.from("chat_conversations").delete().eq("id", id);
     },
     [activeId]
@@ -117,7 +132,7 @@ export const useChatConversations = () => {
     conversations,
     activeConversation,
     activeId,
-    setActiveId,
+    setActiveId: wrappedSetActiveId,
     createConversation,
     setMessages,
     deleteConversation,
