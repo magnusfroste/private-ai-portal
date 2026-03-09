@@ -98,16 +98,24 @@ const ModelRow = ({ model }: { model: CuratedModel }) => (
 export const ModelsPage = () => {
   const { models, isLoading } = useCuratedModels(true);
   const { settings, isLoading: settingsLoading } = useSiteSettings();
-  const { session, loading: authLoading } = useAuth();
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
   const siteName = settings?.site_name || "the portal";
   const isPublic = settings?.models_public ?? false;
 
   useEffect(() => {
-    if (!authLoading && !settingsLoading && !isPublic && !session) {
+    supabase.auth.getSession().then(({ data }) => {
+      setIsAuthenticated(!!data.session);
+      setAuthChecked(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (authChecked && !settingsLoading && !isPublic && !isAuthenticated) {
       navigate("/auth");
     }
-  }, [authLoading, settingsLoading, isPublic, session, navigate]);
+  }, [authChecked, settingsLoading, isPublic, isAuthenticated, navigate]);
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-3xl">
