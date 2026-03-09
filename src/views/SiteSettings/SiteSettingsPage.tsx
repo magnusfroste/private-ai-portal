@@ -75,12 +75,16 @@ export const SiteSettingsPage = ({ embedded = false }: SiteSettingsPageProps) =>
       <Tabs defaultValue="branding">
         <TabsList>
           <TabsTrigger value="branding">Branding</TabsTrigger>
+          <TabsTrigger value="landing">Landningssida</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="aeo">AEO</TabsTrigger>
           <TabsTrigger value="robots">Robots & Sitemap</TabsTrigger>
         </TabsList>
         <TabsContent value="branding" className="mt-4">
           <BrandingSection settings={draft} onChange={setDraft} onUpload={handleUpload} isUploading={isUploading} />
+        </TabsContent>
+        <TabsContent value="landing" className="mt-4">
+          <LandingSection settings={draft} onChange={setDraft} />
         </TabsContent>
         <TabsContent value="seo" className="mt-4">
           <SeoSection settings={draft} onChange={setDraft} onUpload={handleUpload} isUploading={isUploading} />
