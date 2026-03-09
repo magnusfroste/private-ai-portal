@@ -1,5 +1,6 @@
 export interface ModelInfo {
   id: string;
+  model_name: string | null;
   provider: string;
   max_input_tokens: number | null;
   max_output_tokens: number | null;
