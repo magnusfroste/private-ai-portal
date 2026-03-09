@@ -4,7 +4,9 @@ import type { Conversation, ChatMessage } from "../types";
 
 export const useChatConversations = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(() => {
+    return sessionStorage.getItem("chat-active-id") || null;
+  });
   const [loaded, setLoaded] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
