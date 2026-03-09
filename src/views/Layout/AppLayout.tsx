@@ -70,10 +70,7 @@ export const AppLayout = () => {
               >
                 <Cpu className="w-4 h-4" />
                 <span className="hidden sm:inline">Models</span>
-              </Button>
-                <Cpu className="w-4 h-4" />
-                <span className="hidden sm:inline">Models</span>
-              </Button>
+            </div>
             </div>
             <div className="flex items-center gap-2">
               <DropdownMenu>
