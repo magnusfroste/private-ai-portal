@@ -25,7 +25,7 @@ const formatCost = (cost: number | null): string => {
 };
 
 export const ModelCurationPanel = () => {
-  const { models, isLoading, syncModels, isSyncing, toggleModel, setHuggingfaceUrl } = useCuratedModels();
+  const { models, isLoading, syncModels, isSyncing, toggleModel, setHuggingfaceUrl, setDefault } = useCuratedModels();
   const [search, setSearch] = useState("");
   const [editingHf, setEditingHf] = useState<string | null>(null);
   const [hfValue, setHfValue] = useState("");
