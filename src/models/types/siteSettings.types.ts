@@ -16,6 +16,9 @@ export interface SiteSettings {
   logo_url: string;
   favicon_url: string;
 
+  // API
+  api_base_url: string;
+
   // SEO
   seo_title: string;
   seo_description: string;
