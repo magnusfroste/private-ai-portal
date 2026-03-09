@@ -1,10 +1,9 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { modelService } from "@/models/services/modelService";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { adminRepository } from "@/data/repositories/adminRepository";
-import { useChatSettings } from "@/hooks/useChatSettings";
+import { useCuratedModels } from "@/hooks/useCuratedModels";
 import { ChatInput } from "./components/ChatInput";
 import { ChatMessageList } from "./components/ChatMessageList";
 import { ChatEmptyState } from "./components/ChatEmptyState";
@@ -25,20 +24,20 @@ export const ChatPage = () => {
     checkAuth();
   }, []);
 
-  const { data: allModels = [] } = useQuery({
-    queryKey: ["available-models"],
-    queryFn: () => modelService.getAvailableModels(),
-    staleTime: 10 * 60 * 1000,
-  });
+  // Use curated enabled models directly from DB
+  const { models } = useCuratedModels(true);
 
-  const { data: chatSettings } = useChatSettings();
-
-  // Filter models to admin-curated list
-  const models = useMemo(() => {
-    const enabled = chatSettings?.enabledModels ?? [];
-    if (enabled.length === 0) return allModels;
-    return allModels.filter((m) => enabled.includes(m.id));
-  }, [allModels, chatSettings]);
+  // Map curated models to ModelInfo shape expected by ChatHeader
+  const modelInfos = models.map((m) => ({
+    id: m.id,
+    provider: m.provider,
+    max_input_tokens: m.max_input_tokens,
+    max_output_tokens: m.max_output_tokens,
+    input_cost_per_million: m.input_cost_per_million,
+    output_cost_per_million: m.output_cost_per_million,
+    mode: m.mode,
+    status: m.status,
+  }));
 
   // Fetch user's API keys
   const { data: apiKeys = [] } = useQuery({
@@ -73,18 +72,13 @@ export const ChatPage = () => {
     }
   }, [apiKeys, isAdmin, selectedKeyId]);
 
-  // Use admin default model, or fallback to first healthy
+  // Select default model from enabled models
   useEffect(() => {
-    if (models.length > 0 && !selectedModel) {
-      const defaultModel = chatSettings?.defaultModel;
-      if (defaultModel && models.some((m) => m.id === defaultModel)) {
-        setSelectedModel(defaultModel);
-      } else {
-        const healthy = models.find((m) => m.status === "healthy");
-        setSelectedModel(healthy?.id || models[0].id);
-      }
+    if (modelInfos.length > 0 && !selectedModel) {
+      const healthy = modelInfos.find((m) => m.status === "healthy");
+      setSelectedModel(healthy?.id || modelInfos[0].id);
     }
-  }, [models, selectedModel, chatSettings]);
+  }, [modelInfos, selectedModel]);
 
   const {
     conversations,
@@ -145,7 +139,7 @@ export const ChatPage = () => {
 
       <div className="flex-1 flex flex-col min-w-0">
         <ChatHeader
-          models={models}
+          models={modelInfos}
           selectedModel={selectedModel}
           onSelectModel={setSelectedModel}
           keys={apiKeys}
