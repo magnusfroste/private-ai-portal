@@ -7,6 +7,7 @@ export const Navbar = () => {
   const { settings } = useSiteSettings();
   const siteName = settings?.site_name || "Autoversio";
   const logoUrl = settings?.logo_url;
+  const ctaText = settings?.navbar_cta_text || "Start Free Trial";
 
   return (
     <nav className="fixed top-0 w-full z-50 glass-card border-b">
@@ -30,7 +31,7 @@ export const Navbar = () => {
             <Button variant="ghost">Sign In</Button>
           </Link>
           <Link to="/auth">
-            <Button className="glow">Start Free Trial</Button>
+            <Button className="glow">{ctaText}</Button>
           </Link>
         </div>
       </div>
