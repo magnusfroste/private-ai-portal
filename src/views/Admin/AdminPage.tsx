@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Shield, Users } from "lucide-react";
 import { AdminUser } from "@/models/types/admin.types";
 import { useAdminData } from "./hooks/useAdminData";
@@ -7,6 +7,11 @@ import { EditUserDialog } from "./components/EditUserDialog";
 import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
 import { ModelCurationPanel } from "./components/ModelCurationPanel";
 import { StripeConfigCard } from "./components/StripeConfigCard";
+import { CreditOverviewPanel } from "./components/CreditOverviewPanel";
+import { ApiKeyOverviewPanel } from "./components/ApiKeyOverviewPanel";
+import { UsageStatsPanel } from "./components/UsageStatsPanel";
+import { SiteSettingsPage } from "@/views/SiteSettings/SiteSettingsPage";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -54,32 +59,59 @@ export const AdminPage = () => {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-8">
+    <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <Users className="w-8 h-8 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold">User Management</h1>
-          <p className="text-muted-foreground text-sm">Manage users and trial keys</p>
+          <h1 className="text-3xl font-bold">Admin</h1>
+          <p className="text-muted-foreground text-sm">Hantera användare, modeller, krediter och inställningar</p>
         </div>
       </div>
 
-      <AdminSettingsPanel />
+      <Tabs defaultValue="users">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="users">Användare</TabsTrigger>
+          <TabsTrigger value="credits">Krediter</TabsTrigger>
+          <TabsTrigger value="keys">API-nycklar</TabsTrigger>
+          <TabsTrigger value="usage">Användning</TabsTrigger>
+          <TabsTrigger value="models">Modeller</TabsTrigger>
+          <TabsTrigger value="settings">Inställningar</TabsTrigger>
+        </TabsList>
 
-      <ModelCurationPanel />
+        <TabsContent value="users" className="mt-6 space-y-6">
+          <AdminSettingsPanel />
+          <StripeConfigCard />
+          {isLoading && (
+            <div className="text-center py-12 text-muted-foreground">Loading users...</div>
+          )}
+          {isError && (
+            <div className="text-center py-12 text-destructive">Failed to load users.</div>
+          )}
+          {!isLoading && !isError && (
+            <UserTable users={users} onEdit={handleEdit} isUpdating={isUpdating} />
+          )}
+        </TabsContent>
 
-      <StripeConfigCard />
+        <TabsContent value="credits" className="mt-6">
+          <CreditOverviewPanel />
+        </TabsContent>
 
-      {isLoading && (
-        <div className="text-center py-12 text-muted-foreground">Loading users...</div>
-      )}
+        <TabsContent value="keys" className="mt-6">
+          <ApiKeyOverviewPanel />
+        </TabsContent>
 
-      {isError && (
-        <div className="text-center py-12 text-destructive">Failed to load users.</div>
-      )}
+        <TabsContent value="usage" className="mt-6">
+          <UsageStatsPanel />
+        </TabsContent>
 
-      {!isLoading && !isError && (
-        <UserTable users={users} onEdit={handleEdit} isUpdating={isUpdating} />
-      )}
+        <TabsContent value="models" className="mt-6">
+          <ModelCurationPanel />
+        </TabsContent>
+
+        <TabsContent value="settings" className="mt-6">
+          <SiteSettingsPage embedded />
+        </TabsContent>
+      </Tabs>
 
       <EditUserDialog
         user={editUser}
