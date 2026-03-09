@@ -14,6 +14,7 @@ import { KeysPage } from "./views/Keys/KeysPage";
 import { AdminPage } from "./views/Admin/AdminPage";
 import { ChatPage } from "./views/Chat/ChatPage";
 import { SiteSettingsPage } from "./views/SiteSettings/SiteSettingsPage";
+import { ModelsPage } from "./views/Models/ModelsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
