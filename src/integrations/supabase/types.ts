@@ -138,6 +138,7 @@ export type Database = {
           huggingface_url: string | null
           id: string
           input_cost_per_million: number | null
+          is_default: boolean
           last_synced_at: string
           max_input_tokens: number | null
           max_output_tokens: number | null
@@ -153,6 +154,7 @@ export type Database = {
           huggingface_url?: string | null
           id: string
           input_cost_per_million?: number | null
+          is_default?: boolean
           last_synced_at?: string
           max_input_tokens?: number | null
           max_output_tokens?: number | null
@@ -168,6 +170,7 @@ export type Database = {
           huggingface_url?: string | null
           id?: string
           input_cost_per_million?: number | null
+          is_default?: boolean
           last_synced_at?: string
           max_input_tokens?: number | null
           max_output_tokens?: number | null
