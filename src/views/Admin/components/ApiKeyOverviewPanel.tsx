@@ -3,9 +3,7 @@ import { adminDataRepository, AdminKeyData } from "@/data/repositories/adminData
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
-import { format } from "date-fns";
 
 export const ApiKeyOverviewPanel = () => {
   const { data, isLoading } = useQuery<AdminKeyData>({
@@ -25,11 +23,11 @@ export const ApiKeyOverviewPanel = () => {
   const revokedCount = data?.keys?.filter((k) => k.revoked_at).length || 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex gap-4">
         <div className="rounded-lg border p-4 flex-1">
           <p className="text-sm text-muted-foreground">Aktiva nycklar</p>
-          <p className="text-2xl font-bold text-green-600">{activeCount}</p>
+          <p className="text-2xl font-bold text-primary">{activeCount}</p>
         </div>
         <div className="rounded-lg border p-4 flex-1">
           <p className="text-sm text-muted-foreground">Revokerade</p>
@@ -41,53 +39,44 @@ export const ApiKeyOverviewPanel = () => {
         </div>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Namn</TableHead>
-              <TableHead>Ägare</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Förbrukat</TableHead>
-              <TableHead>Skapad</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data?.keys?.map((k) => (
-              <TableRow key={k.id}>
-                <TableCell className="font-medium">{k.name}</TableCell>
-                <TableCell>
-                  <div>
-                    <div className="text-sm">{k.profiles?.full_name || "—"}</div>
-                    <div className="text-xs text-muted-foreground">{k.profiles?.email}</div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {k.revoked_at ? (
-                    <Badge variant="destructive">Revokerad</Badge>
-                  ) : k.is_active ? (
-                    <Badge variant="default">Aktiv</Badge>
-                  ) : (
-                    <Badge variant="secondary">Inaktiv</Badge>
-                  )}
-                </TableCell>
-                <TableCell className="text-sm">
-                  ${Number(k.used_credits_usd || 0).toFixed(4)}
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {format(new Date(k.created_at), "yyyy-MM-dd")}
-                </TableCell>
-              </TableRow>
-            ))}
-            {(!data?.keys || data.keys.length === 0) && (
+      <div>
+        <h3 className="text-lg font-semibold mb-3">Tokens per användare</h3>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  Inga API-nycklar
-                </TableCell>
+                <TableHead>Användare</TableHead>
+                <TableHead>Nycklar (aktiva/totalt)</TableHead>
+                <TableHead>Totala tokens</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {data?.userSummary?.map((u) => (
+                <TableRow key={u.user_id}>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{u.full_name || "—"}</div>
+                      <div className="text-xs text-muted-foreground">{u.email}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {u.active_keys} / {u.total_keys}
+                  </TableCell>
+                  <TableCell className="font-mono text-sm font-medium">
+                    {u.total_tokens.toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              ))}
+              {(!data?.userSummary || data.userSummary.length === 0) && (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                    Inga användare med nycklar
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

@@ -27,6 +27,15 @@ export interface AdminCreditData {
   totalRevenue: number;
 }
 
+export interface AdminKeyUserSummary {
+  user_id: string;
+  full_name: string | null;
+  email: string;
+  total_keys: number;
+  active_keys: number;
+  total_tokens: number;
+}
+
 export interface AdminKeyData {
   keys: {
     id: string;
@@ -34,11 +43,10 @@ export interface AdminKeyData {
     is_active: boolean;
     created_at: string;
     revoked_at: string | null;
-    used_credits_usd: number | null;
-    trial_credits_usd: number | null;
     user_id: string;
     profiles: { full_name: string | null; email: string } | null;
   }[];
+  userSummary: AdminKeyUserSummary[];
 }
 
 export interface AdminUsageData {
