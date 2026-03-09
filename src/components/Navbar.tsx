@@ -23,9 +23,14 @@ export const Navbar = () => {
         
         <div className="flex items-center gap-4">
           {settings?.models_public && (
-            <Link to="/models">
-              <Button variant="ghost" size="sm">Models</Button>
-            </Link>
+            <>
+              <Link to="/models">
+                <Button variant="ghost" size="sm">Models</Button>
+              </Link>
+              <Link to="/api">
+                <Button variant="ghost" size="sm">API</Button>
+              </Link>
+            </>
           )}
           <Link to="/auth">
             <Button variant="ghost">Sign In</Button>

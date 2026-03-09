@@ -42,6 +42,7 @@ const App = () => (
             <Route path="models" element={<DashboardModelsPage />} />
           </Route>
           <Route path="/models" element={<ModelsPage />} />
+          <Route path="/api" element={<ApiPage />} />
           {/* Redirect old routes */}
           <Route path="/account" element={<Navigate to="/dashboard/account" replace />} />
           <Route path="/admin" element={<Navigate to="/dashboard/admin" replace />} />
