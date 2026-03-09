@@ -169,8 +169,8 @@ const ConnectSection = ({ defaultModel, baseUrl }: { defaultModel: string; baseU
           <div className="space-y-3">
             <div className="bg-secondary/50 rounded-lg p-4 font-mono text-xs sm:text-sm space-y-2">
               <div className="flex items-center justify-between">
-                <span>export ANTHROPIC_BASE_URL=https://api.autoversio.ai</span>
-                <CopyButton text="export ANTHROPIC_BASE_URL=https://api.autoversio.ai" />
+                 <span>export ANTHROPIC_BASE_URL={baseUrl}</span>
+                 <CopyButton text={`export ANTHROPIC_BASE_URL=${baseUrl}`} />
               </div>
               <div className="flex items-center justify-between">
                 <span>export ANTHROPIC_API_KEY=&lt;your-api-key&gt;</span>
