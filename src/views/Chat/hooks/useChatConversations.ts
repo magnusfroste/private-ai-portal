@@ -122,7 +122,7 @@ export const useChatConversations = () => {
   const deleteConversation = useCallback(
     async (id: string) => {
       setConversations((prev) => prev.filter((c) => c.id !== id));
-      if (activeId === id) setActiveId(null);
+      if (activeId === id) wrappedSetActiveId(null);
       await supabase.from("chat_conversations").delete().eq("id", id);
     },
     [activeId]
