@@ -71,7 +71,7 @@ const Auth = () => {
           toast.error(error.message);
         }
       } else {
-        toast.success("Account created successfully! Welcome to Autoversio.");
+        toast.success(`Account created successfully! Welcome to ${siteName}.`);
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
