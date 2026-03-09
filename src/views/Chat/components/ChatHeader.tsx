@@ -1,4 +1,4 @@
-import { LayoutDashboard, PanelLeft } from "lucide-react";
+import { LayoutDashboard, MessageSquare, PanelLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChatModelSelector } from "./ChatModelSelector";
