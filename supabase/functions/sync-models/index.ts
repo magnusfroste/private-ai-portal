@@ -99,8 +99,8 @@ serve(async (req: Request) => {
     const now = new Date().toISOString();
 
     // Get existing models to preserve enabled state and huggingface_url
-    const { data: existing } = await supabase.from('curated_models').select('id, enabled, huggingface_url');
-    const existingMap = new Map((existing || []).map((m: { id: string; enabled: boolean; huggingface_url: string | null }) => [m.id, m]));
+    const { data: existing } = await supabase.from('curated_models').select('id, enabled, huggingface_url, is_default');
+    const existingMap = new Map((existing || []).map((m: { id: string; enabled: boolean; huggingface_url: string | null; is_default: boolean }) => [m.id, m]));
 
     const models = rawModels.map((m) => {
       const info = m.model_info || {};
@@ -108,10 +108,12 @@ serve(async (req: Request) => {
       const providerRaw = litellmModel.includes('/') ? litellmModel.split('/')[0] : 'unknown';
       const provider = providerRaw.charAt(0).toUpperCase() + providerRaw.slice(1);
       const healthStatus = healthMap.get(m.model_name) || 'unknown';
-      const prev = existingMap.get(m.model_name);
+      const stableId = info.id || m.model_name;
+      const prev = existingMap.get(stableId);
 
       return {
-        id: m.model_name,
+        id: info.id || m.model_name,
+        model_name: m.model_name,
         provider,
         max_input_tokens: info.max_input_tokens || info.max_tokens || null,
         max_output_tokens: info.max_output_tokens || null,

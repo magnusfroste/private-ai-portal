@@ -32,7 +32,7 @@ export const ModelCurationPanel = () => {
 
   const filtered = models.filter(
     (m) =>
-      m.id.toLowerCase().includes(search.toLowerCase()) ||
+      (m.model_name || m.id).toLowerCase().includes(search.toLowerCase()) ||
       m.provider.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -116,7 +116,7 @@ export const ModelCurationPanel = () => {
                 <StatusDot status={model.status} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-sm truncate">{model.id}</span>
+                    <span className="font-mono text-sm truncate">{model.model_name || model.id}</span>
                     <Badge variant="outline" className="text-[10px] shrink-0">
                       {model.provider}
                     </Badge>
