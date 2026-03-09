@@ -140,9 +140,9 @@ const ConnectSection = ({ defaultModel, baseUrl }: { defaultModel: string; baseU
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-1">
                   <p className="text-muted-foreground"># Base URL</p>
-                  <p>https://api.autoversio.ai/</p>
-                </div>
-                <CopyButton text="https://api.autoversio.ai/" />
+                   <p>{baseUrl}/</p>
+                 </div>
+                 <CopyButton text={`${baseUrl}/`} />
               </div>
             </div>
 
