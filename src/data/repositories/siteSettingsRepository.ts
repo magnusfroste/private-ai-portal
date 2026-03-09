@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { SiteSettings, defaultSiteSettings } from "@/models/types/siteSettings.types";
+import type { Json } from "@/integrations/supabase/types";
 
 const SETTINGS_KEY = "site_settings";
 
