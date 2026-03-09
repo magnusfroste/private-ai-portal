@@ -1,4 +1,4 @@
-import { LayoutDashboard, PanelLeft } from "lucide-react";
+import { LayoutDashboard, MessageSquare, PanelLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChatModelSelector } from "./ChatModelSelector";
@@ -47,6 +47,25 @@ export const ChatHeader = ({
         >
           <PanelLeft className="w-4 h-4" />
         </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/dashboard")}
+          className="gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <LayoutDashboard className="w-4 h-4" />
+          <span className="hidden sm:inline">Dashboard</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/chat")}
+          className="gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <MessageSquare className="w-4 h-4" />
+          <span className="hidden sm:inline">Chat</span>
+        </Button>
+        <span className="text-border hidden sm:inline">|</span>
         <ChatModelSelector
           models={models}
           selectedModel={selectedModel}
@@ -64,16 +83,6 @@ export const ChatHeader = ({
           />
         </div>
       </div>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate("/dashboard")}
-        className="gap-2 text-muted-foreground hover:text-foreground"
-      >
-        <LayoutDashboard className="w-4 h-4" />
-        <span className="hidden sm:inline">Dashboard</span>
-      </Button>
     </header>
   );
 };
