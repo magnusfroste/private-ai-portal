@@ -114,7 +114,7 @@ const CopyButton = ({ text }: { text: string }) => {
   );
 };
 
-const ConnectSection = ({ defaultModel }: { defaultModel: string }) => (
+const ConnectSection = ({ defaultModel, baseUrl }: { defaultModel: string; baseUrl: string }) => (
   <Card className="border-border/50 bg-card/60">
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-lg">
