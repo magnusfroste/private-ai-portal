@@ -17,6 +17,7 @@ import { SiteSettingsPage } from "./views/SiteSettings/SiteSettingsPage";
 import { ModelsPage } from "./views/Models/ModelsPage";
 import { DashboardModelsPage } from "./views/Models/DashboardModelsPage";
 import { ApiPage } from "./views/Models/ApiPage";
+import { DashboardApiPage } from "./views/Models/DashboardApiPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
