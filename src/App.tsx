@@ -29,7 +29,6 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/chat" element={<ChatPage />} />
-          <Route path="/models" element={<ModelsPage />} />
           <Route path="/dashboard" element={<AppLayout />}>
             <Route index element={<DashboardActivity />} />
             <Route path="logs" element={<LogsPage />} />
@@ -38,7 +37,9 @@ const App = () => (
             <Route path="keys" element={<KeysPage />} />
             <Route path="admin" element={<AdminPage />} />
             <Route path="site-settings" element={<SiteSettingsPage />} />
+            <Route path="models" element={<ModelsPage />} />
           </Route>
+          <Route path="/models" element={<ModelsPage />} />
           {/* Redirect old routes */}
           <Route path="/account" element={<Navigate to="/dashboard/account" replace />} />
           <Route path="/admin" element={<Navigate to="/dashboard/admin" replace />} />
