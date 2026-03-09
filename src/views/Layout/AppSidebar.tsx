@@ -1,4 +1,4 @@
-import { Activity, ScrollText, CreditCard, Key, Shield, User } from "lucide-react";
+import { Activity, ScrollText, CreditCard, Key, Shield, User, Settings } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useProfile } from "@/hooks/useProfile";
@@ -82,6 +82,16 @@ export const AppSidebar = () => {
                   >
                     <Shield className="w-4 h-4" />
                     <span>Admin</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={isActive("/dashboard/site-settings")}
+                    onClick={() => navigate("/dashboard/site-settings")}
+                    tooltip="Webbplatsinställningar"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Site Settings</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

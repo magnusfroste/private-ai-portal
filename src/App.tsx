@@ -13,6 +13,7 @@ import { AccountPage } from "./views/Account/AccountPage";
 import { KeysPage } from "./views/Keys/KeysPage";
 import { AdminPage } from "./views/Admin/AdminPage";
 import { ChatPage } from "./views/Chat/ChatPage";
+import { SiteSettingsPage } from "./views/SiteSettings/SiteSettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="account" element={<AccountPage />} />
             <Route path="keys" element={<KeysPage />} />
             <Route path="admin" element={<AdminPage />} />
+            <Route path="site-settings" element={<SiteSettingsPage />} />
           </Route>
           {/* Redirect old routes */}
           <Route path="/account" element={<Navigate to="/dashboard/account" replace />} />
