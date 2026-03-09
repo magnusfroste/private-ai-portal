@@ -55,7 +55,7 @@ serve(async (req: Request) => {
   if (type === "credits") {
     const { data: transactions, error } = await supabase
       .from("credit_transactions")
-      .select("*, profiles:user_id(full_name, email)")
+      .select("*")
       .order("created_at", { ascending: false })
       .limit(200);
 
@@ -64,20 +64,33 @@ serve(async (req: Request) => {
       return json({ error: "Failed to fetch transactions" }, 500);
     }
 
-    // Calculate totals
-    let totalRevenue = 0;
-    for (const t of transactions || []) {
-      totalRevenue += Number(t.amount_usd || 0);
+    // Fetch profiles for user_ids
+    const userIds = [...new Set((transactions || []).map((t: any) => t.user_id))];
+    const profileMap: Record<string, { full_name: string | null; email: string }> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+      for (const p of profiles || []) {
+        profileMap[p.id] = { full_name: p.full_name, email: p.email };
+      }
     }
 
-    return json({ transactions: transactions || [], totalRevenue });
+    let totalRevenue = 0;
+    const enriched = (transactions || []).map((t: any) => {
+      totalRevenue += Number(t.amount_usd || 0);
+      return { ...t, profiles: profileMap[t.user_id] || null };
+    });
+
+    return json({ transactions: enriched, totalRevenue });
   }
 
   // === API keys overview ===
   if (type === "keys") {
     const { data: keys, error } = await supabase
       .from("api_keys")
-      .select("id, name, is_active, created_at, revoked_at, used_credits_usd, trial_credits_usd, user_id, profiles:user_id(full_name, email)")
+      .select("id, name, is_active, created_at, revoked_at, used_credits_usd, trial_credits_usd, user_id")
       .order("created_at", { ascending: false })
       .limit(500);
 
@@ -86,7 +99,20 @@ serve(async (req: Request) => {
       return json({ error: "Failed to fetch keys" }, 500);
     }
 
-    return json({ keys: keys || [] });
+    const userIds = [...new Set((keys || []).map((k: any) => k.user_id))];
+    const profileMap: Record<string, { full_name: string | null; email: string }> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+      for (const p of profiles || []) {
+        profileMap[p.id] = { full_name: p.full_name, email: p.email };
+      }
+    }
+
+    const enriched = (keys || []).map((k: any) => ({ ...k, profiles: profileMap[k.user_id] || null }));
+    return json({ keys: enriched });
   }
 
   // === Usage statistics ===
