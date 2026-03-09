@@ -5,6 +5,8 @@ import { useAdminData } from "./hooks/useAdminData";
 import { UserTable } from "./components/UserTable";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
+import { ModelCurationPanel } from "./components/ModelCurationPanel";
+import { StripeConfigCard } from "./components/StripeConfigCard";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -62,6 +64,10 @@ export const AdminPage = () => {
       </div>
 
       <AdminSettingsPanel />
+
+      <ModelCurationPanel />
+
+      <StripeConfigCard />
 
       {isLoading && (
         <div className="text-center py-12 text-muted-foreground">Loading users...</div>
