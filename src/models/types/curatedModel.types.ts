@@ -1,0 +1,15 @@
+export interface CuratedModel {
+  id: string;
+  provider: string;
+  max_input_tokens: number | null;
+  max_output_tokens: number | null;
+  input_cost_per_million: number | null;
+  output_cost_per_million: number | null;
+  mode: string | null;
+  status: "healthy" | "unhealthy" | "unknown";
+  enabled: boolean;
+  huggingface_url: string | null;
+  last_synced_at: string;
+  created_at: string;
+  updated_at: string;
+}

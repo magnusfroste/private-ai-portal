@@ -131,6 +131,54 @@ export type Database = {
         }
         Relationships: []
       }
+      curated_models: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          huggingface_url: string | null
+          id: string
+          input_cost_per_million: number | null
+          last_synced_at: string
+          max_input_tokens: number | null
+          max_output_tokens: number | null
+          mode: string | null
+          output_cost_per_million: number | null
+          provider: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          huggingface_url?: string | null
+          id: string
+          input_cost_per_million?: number | null
+          last_synced_at?: string
+          max_input_tokens?: number | null
+          max_output_tokens?: number | null
+          mode?: string | null
+          output_cost_per_million?: number | null
+          provider?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          huggingface_url?: string | null
+          id?: string
+          input_cost_per_million?: number | null
+          last_synced_at?: string
+          max_input_tokens?: number | null
+          max_output_tokens?: number | null
+          mode?: string | null
+          output_cost_per_million?: number | null
+          provider?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company: string | null

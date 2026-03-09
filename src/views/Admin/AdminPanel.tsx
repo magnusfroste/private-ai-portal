@@ -8,6 +8,7 @@ import { UserTable } from "./components/UserTable";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
 import { StripeConfigCard } from "./components/StripeConfigCard";
+import { ModelCurationPanel } from "./components/ModelCurationPanel";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const AdminPanel = () => {
@@ -85,6 +86,9 @@ export const AdminPanel = () => {
         </div>
 
         <AdminSettingsPanel />
+        <div className="mt-6">
+          <ModelCurationPanel />
+        </div>
         <div className="mt-6">
           <StripeConfigCard />
         </div>
