@@ -43,8 +43,25 @@ serve(async (req: Request) => {
     const method = req.method;
 
     if (method === 'GET' || method === 'POST') {
-      const body = method === 'POST' ? await req.json() : {};
-      const action = body.action || 'status';
+      let body: Record<string, unknown> = {};
+
+      if (method === 'POST') {
+        const contentType = req.headers.get('content-type') || '';
+        const rawBody = await req.text();
+
+        if (rawBody.trim().length > 0 && contentType.includes('application/json')) {
+          try {
+            body = JSON.parse(rawBody) as Record<string, unknown>;
+          } catch {
+            return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+        }
+      }
+
+      const action = (body.action as string) || 'status';
 
       if (action === 'update_key') {
         // We can't update Supabase secrets from edge functions, 
