@@ -29,18 +29,12 @@ const Auth = () => {
   const logoUrl = settings?.logo_url;
 
   useEffect(() => {
-    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/dashboard");
-      }
+      if (session) navigate("/dashboard");
     });
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate("/dashboard");
-      }
+      if (session) navigate("/dashboard");
     });
 
     return () => subscription.unsubscribe();
@@ -49,36 +43,25 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const validated = authSchema.parse({ email, password, fullName });
-
       const { error } = await supabase.auth.signUp({
         email: validated.email,
         password: validated.password,
         options: {
-          data: {
-            full_name: validated.fullName || "",
-          },
+          data: { full_name: validated.fullName || "" },
           emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       });
-
       if (error) {
-        if (error.message.includes("already registered")) {
-          toast.error("This email is already registered. Please sign in instead.");
-        } else {
-          toast.error(error.message);
-        }
+        toast.error(error.message.includes("already registered")
+          ? "This email is already registered. Please sign in instead."
+          : error.message);
       } else {
         toast.success(`Account created successfully! Welcome to ${siteName}.`);
       }
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+      toast.error(error instanceof z.ZodError ? error.errors[0].message : "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -87,26 +70,16 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const validated = authSchema.omit({ fullName: true }).parse({ email, password });
-
       const { error } = await supabase.auth.signInWithPassword({
         email: validated.email,
         password: validated.password,
       });
-
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success("Welcome back!");
-      }
+      if (error) toast.error(error.message);
+      else toast.success("Welcome back!");
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+      toast.error(error instanceof z.ZodError ? error.errors[0].message : "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +105,7 @@ const Auth = () => {
           <CardHeader className="text-center">
             <CardTitle className="text-3xl">Welcome</CardTitle>
             <CardDescription>
-              Sign in or create an account to get started with your free trial
+              Sign in or create an account to get started
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -146,27 +119,11 @@ const Auth = () => {
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signin-email">Email</Label>
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      disabled={isLoading}
-                    />
+                    <Input id="signin-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signin-password">Password</Label>
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={isLoading}
-                    />
+                    <Input id="signin-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Signing in..." : "Sign In"}
@@ -178,49 +135,26 @@ const Auth = () => {
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Full Name</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="John Doe"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      disabled={isLoading}
-                    />
+                    <Input id="signup-name" type="text" placeholder="John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={isLoading} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      disabled={isLoading}
-                    />
+                    <Input id="signup-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isLoading} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={isLoading}
-                    />
+                    <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isLoading} />
                   </div>
-                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 space-y-2">
-                    <p className="text-sm font-semibold text-primary">Free Trial Includes:</p>
+                  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
+                    <p className="text-sm font-semibold text-accent">Free credit included:</p>
                     <ul className="text-sm space-y-1 text-muted-foreground">
                       <li>• $25 in credits (25M tokens)</li>
-                      <li>• 5 days full access</li>
-                      <li>• All LLM models</li>
+                      <li>• All LLM models included</li>
+                      <li>• No credit card required</li>
                     </ul>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Start Free Trial"}
+                    {isLoading ? "Creating account..." : "Get Started"}
                   </Button>
                 </form>
               </TabsContent>
