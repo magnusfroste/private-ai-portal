@@ -24,6 +24,9 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const { settings } = useSiteSettings();
+  const siteName = settings?.site_name || "Autoversio";
+  const logoUrl = settings?.logo_url;
 
   useEffect(() => {
     // Check if user is already logged in
