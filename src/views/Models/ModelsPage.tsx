@@ -47,7 +47,7 @@ const ModelRow = ({ model }: { model: CuratedModel }) => (
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-2 flex-wrap">
         <span className="font-mono text-sm font-semibold text-foreground truncate">
-          {model.id}
+          {model.model_name || model.id}
         </span>
         <Badge variant="outline" className="text-[10px]">{model.provider}</Badge>
         {model.mode && <Badge variant="secondary" className="text-[10px]">{model.mode}</Badge>}
