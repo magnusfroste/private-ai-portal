@@ -17,6 +17,7 @@ import { SiteSettingsPage } from "./views/SiteSettings/SiteSettingsPage";
 import { ModelsPage } from "./views/Models/ModelsPage";
 import { DashboardModelsPage } from "./views/Models/DashboardModelsPage";
 import { ApiPage } from "./views/Models/ApiPage";
+import { DashboardApiPage } from "./views/Models/DashboardApiPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="admin" element={<AdminPage />} />
             <Route path="site-settings" element={<SiteSettingsPage />} />
             <Route path="models" element={<DashboardModelsPage />} />
+            <Route path="api" element={<DashboardApiPage />} />
           </Route>
           <Route path="/models" element={<ModelsPage />} />
           <Route path="/api" element={<ApiPage />} />

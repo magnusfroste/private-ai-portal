@@ -1,4 +1,4 @@
-import { Activity, ScrollText, CreditCard, Key, Shield, User, Settings, Cpu } from "lucide-react";
+import { Activity, ScrollText, CreditCard, Key, Shield, User, Settings, Cpu, Terminal } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -23,6 +23,7 @@ const mainNav = [
   { title: "Credits", url: "/dashboard/credits", icon: CreditCard },
   { title: "API Keys", url: "/dashboard/keys", icon: Key },
   { title: "Models", url: "/dashboard/models", icon: Cpu },
+  { title: "API", url: "/dashboard/api", icon: Terminal },
 ];
 
 export const AppSidebar = () => {
