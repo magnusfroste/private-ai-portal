@@ -16,6 +16,7 @@ import { ChatPage } from "./views/Chat/ChatPage";
 import { SiteSettingsPage } from "./views/SiteSettings/SiteSettingsPage";
 import { ModelsPage } from "./views/Models/ModelsPage";
 import { DashboardModelsPage } from "./views/Models/DashboardModelsPage";
+import { ApiPage } from "./views/Models/ApiPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="models" element={<DashboardModelsPage />} />
           </Route>
           <Route path="/models" element={<ModelsPage />} />
+          <Route path="/api" element={<ApiPage />} />
           {/* Redirect old routes */}
           <Route path="/account" element={<Navigate to="/dashboard/account" replace />} />
           <Route path="/admin" element={<Navigate to="/dashboard/admin" replace />} />
