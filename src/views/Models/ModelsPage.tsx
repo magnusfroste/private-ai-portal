@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ExternalLink, Hash, DollarSign, Cpu } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -5,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCuratedModels } from "@/hooks/useCuratedModels";
 import { CuratedModel } from "@/models/types/curatedModel.types";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { supabase } from "@/integrations/supabase/client";
 
 const formatTokenCount = (tokens: number | null): string => {
   if (!tokens) return "—";
@@ -94,8 +97,25 @@ const ModelRow = ({ model }: { model: CuratedModel }) => (
 
 export const ModelsPage = () => {
   const { models, isLoading } = useCuratedModels(true);
-  const { settings } = useSiteSettings();
+  const { settings, isLoading: settingsLoading } = useSiteSettings();
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
   const siteName = settings?.site_name || "the portal";
+  const isPublic = settings?.models_public ?? false;
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setIsAuthenticated(!!data.session);
+      setAuthChecked(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (authChecked && !settingsLoading && !isPublic && !isAuthenticated) {
+      navigate("/auth");
+    }
+  }, [authChecked, settingsLoading, isPublic, isAuthenticated, navigate]);
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-3xl">

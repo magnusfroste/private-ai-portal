@@ -31,6 +31,9 @@ export interface SiteSettings {
   // Robots & Sitemap
   robots_txt: string;
   sitemap_entries: SitemapEntry[];
+
+  // Visibility
+  models_public: boolean;
 }
 
 export const defaultSiteSettings: SiteSettings = {
@@ -53,4 +56,5 @@ export const defaultSiteSettings: SiteSettings = {
   faq_schema: [],
   robots_txt: `User-agent: *\nAllow: /`,
   sitemap_entries: [{ url: "/", priority: "1.0", changefreq: "weekly" }],
+  models_public: false,
 };

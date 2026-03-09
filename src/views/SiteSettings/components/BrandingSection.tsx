@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { Upload } from "lucide-react";
 import { SiteSettings } from "@/models/types/siteSettings.types";
 
@@ -107,6 +108,17 @@ export const BrandingSection = ({ settings, onChange, onUpload, isUploading }: P
               <Upload className="w-4 h-4" />
             </Button>
           </div>
+        </div>
+        <div className="flex items-center justify-between pt-2 border-t border-border">
+          <div>
+            <Label htmlFor="models-public">Visa modeller publikt</Label>
+            <p className="text-xs text-muted-foreground">Tillåt att modellsidan visas utan inloggning</p>
+          </div>
+          <Switch
+            id="models-public"
+            checked={settings.models_public}
+            onCheckedChange={(checked) => onChange({ ...settings, models_public: checked })}
+          />
         </div>
       </CardContent>
     </Card>
