@@ -42,6 +42,7 @@ export interface SiteSettings {
 export const defaultSiteSettings: SiteSettings = {
   site_name: "Autoversio",
   tagline: "Secure Private LLM Access for Developers",
+  api_base_url: "https://api.autoversio.ai",
   logo_url: "",
   favicon_url: "/favicon.png",
   seo_title: "Autoversio - Secure Private LLM Access for Developers",
