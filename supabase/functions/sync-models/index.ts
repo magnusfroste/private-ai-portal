@@ -111,7 +111,8 @@ serve(async (req: Request) => {
       const prev = existingMap.get(m.model_name);
 
       return {
-        id: m.model_name,
+        id: info.id || m.model_name,
+        model_name: m.model_name,
         provider,
         max_input_tokens: info.max_input_tokens || info.max_tokens || null,
         max_output_tokens: info.max_output_tokens || null,
