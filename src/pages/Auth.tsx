@@ -10,6 +10,7 @@ import { Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const authSchema = z.object({
   email: z.string().email("Invalid email address").max(255, "Email too long"),
