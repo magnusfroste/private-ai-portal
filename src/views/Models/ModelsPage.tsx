@@ -248,7 +248,7 @@ export const ModelsPage = () => {
         )}
       </div>
 
-      <ConnectSection defaultModel={defaultModel} />
+      <ConnectSection defaultModel={defaultModel} baseUrl={settings?.api_base_url || "https://api.autoversio.ai"} />
     </div>
   );
 };
