@@ -22,6 +22,10 @@ export const SiteSettingsPage = () => {
   const { settings, isLoading, save, isSaving, uploadAsset, isUploading } = useSiteSettings();
   const [draft, setDraft] = useState<SiteSettings>(defaultSiteSettings);
 
+  const handleUpload = async (file: File, folder: string) => {
+    return uploadAsset({ file, folder });
+  };
+
   useEffect(() => {
     if (settings) setDraft(settings);
   }, [settings]);
