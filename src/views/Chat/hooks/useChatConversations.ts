@@ -24,15 +24,21 @@ export const useChatConversations = () => {
         .limit(50);
 
       if (!error && data) {
-        setConversations(
-          data.map((row) => ({
-            id: row.id,
-            title: row.title,
-            model: row.model || "",
-            messages: (row.messages as unknown as ChatMessage[]) || [],
-            createdAt: new Date(row.created_at).getTime(),
-          }))
-        );
+        const convs = data.map((row) => ({
+          id: row.id,
+          title: row.title,
+          model: row.model || "",
+          messages: (row.messages as unknown as ChatMessage[]) || [],
+          createdAt: new Date(row.created_at).getTime(),
+        }));
+        setConversations(convs);
+        // Auto-select last active or most recent
+        const stored = sessionStorage.getItem("chat-active-id");
+        if (stored && convs.some((c) => c.id === stored)) {
+          setActiveId(stored);
+        } else if (convs.length > 0) {
+          setActiveId(convs[0].id);
+        }
       }
       setLoaded(true);
     };
