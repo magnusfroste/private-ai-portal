@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "https://zlqnolzcceoymlpzbhsj.supabase.co/functions/v1/sitemap?base=https://autoversio.lovable.app"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
