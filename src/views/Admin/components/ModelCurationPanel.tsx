@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Cpu, RefreshCw, ExternalLink, Search } from "lucide-react";
+import { Cpu, RefreshCw, ExternalLink, Search, Star } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
