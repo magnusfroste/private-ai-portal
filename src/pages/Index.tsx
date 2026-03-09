@@ -20,7 +20,7 @@ const Index = () => {
       
       <footer className="border-t border-border/50 py-12">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>© {new Date().getFullYear()} {siteName}. {tagline}</p>
+          <p>© {new Date().getFullYear()} {siteName}. {settings?.footer_text || tagline}</p>
         </div>
       </footer>
     </div>
