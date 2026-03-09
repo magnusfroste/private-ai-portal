@@ -65,7 +65,7 @@ export const AppLayout = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate("/models")}
+                onClick={() => navigate("/dashboard/models")}
                 className="gap-2 text-muted-foreground hover:text-foreground"
               >
                 <Cpu className="w-4 h-4" />
