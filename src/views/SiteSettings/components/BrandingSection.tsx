@@ -44,6 +44,15 @@ export const BrandingSection = ({ settings, onChange, onUpload, isUploading }: P
           />
         </div>
         <div className="space-y-2">
+          <Label>API Base URL</Label>
+          <Input
+            value={settings.api_base_url}
+            onChange={(e) => onChange({ ...settings, api_base_url: e.target.value })}
+            placeholder="https://api.example.com"
+          />
+          <p className="text-xs text-muted-foreground">Bas-URL som visas i integrationsguiden på modellsidan</p>
+        </div>
+        <div className="space-y-2">
           <Label>Logo</Label>
           <div className="flex items-center gap-3">
             {settings.logo_url && (

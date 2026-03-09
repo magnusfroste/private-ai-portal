@@ -114,7 +114,7 @@ const CopyButton = ({ text }: { text: string }) => {
   );
 };
 
-const ConnectSection = ({ defaultModel }: { defaultModel: string }) => (
+const ConnectSection = ({ defaultModel, baseUrl }: { defaultModel: string; baseUrl: string }) => (
   <Card className="border-border/50 bg-card/60">
     <CardHeader>
       <CardTitle className="flex items-center gap-2 text-lg">
@@ -140,9 +140,9 @@ const ConnectSection = ({ defaultModel }: { defaultModel: string }) => (
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-1">
                   <p className="text-muted-foreground"># Base URL</p>
-                  <p>https://api.autoversio.ai/</p>
-                </div>
-                <CopyButton text="https://api.autoversio.ai/" />
+                   <p>{baseUrl}/</p>
+                 </div>
+                 <CopyButton text={`${baseUrl}/`} />
               </div>
             </div>
 
@@ -150,12 +150,12 @@ const ConnectSection = ({ defaultModel }: { defaultModel: string }) => (
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-1">
                   <p className="text-muted-foreground"># Example curl request</p>
-                  <p>curl https://api.autoversio.ai/v1/chat/completions \</p>
-                  <p className="ml-4">-H "Authorization: Bearer YOUR_API_KEY" \</p>
-                  <p className="ml-4">-H "Content-Type: application/json" \</p>
-                  <p className="ml-4">-d '{"{"}"model": "{defaultModel}", "messages": [{"{"}"role": "user", "content": "Hello"{"}"}]{"}"}'</p>
-                </div>
-                <CopyButton text={`curl https://api.autoversio.ai/v1/chat/completions \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "${defaultModel}", "messages": [{"role": "user", "content": "Hello"}]}'`} />
+                   <p>curl {baseUrl}/v1/chat/completions \</p>
+                   <p className="ml-4">-H "Authorization: Bearer YOUR_API_KEY" \</p>
+                   <p className="ml-4">-H "Content-Type: application/json" \</p>
+                   <p className="ml-4">-d '{"{"}"model": "{defaultModel}", "messages": [{"{"}"role": "user", "content": "Hello"{"}"}]{"}"}'</p>
+                 </div>
+                 <CopyButton text={`curl ${baseUrl}/v1/chat/completions \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "${defaultModel}", "messages": [{"role": "user", "content": "Hello"}]}'`} />
               </div>
             </div>
           </div>
@@ -169,8 +169,8 @@ const ConnectSection = ({ defaultModel }: { defaultModel: string }) => (
           <div className="space-y-3">
             <div className="bg-secondary/50 rounded-lg p-4 font-mono text-xs sm:text-sm space-y-2">
               <div className="flex items-center justify-between">
-                <span>export ANTHROPIC_BASE_URL=https://api.autoversio.ai</span>
-                <CopyButton text="export ANTHROPIC_BASE_URL=https://api.autoversio.ai" />
+                 <span>export ANTHROPIC_BASE_URL={baseUrl}</span>
+                 <CopyButton text={`export ANTHROPIC_BASE_URL=${baseUrl}`} />
               </div>
               <div className="flex items-center justify-between">
                 <span>export ANTHROPIC_API_KEY=&lt;your-api-key&gt;</span>
@@ -248,7 +248,7 @@ export const ModelsPage = () => {
         )}
       </div>
 
-      <ConnectSection defaultModel={defaultModel} />
+      <ConnectSection defaultModel={defaultModel} baseUrl={settings?.api_base_url || "https://api.autoversio.ai"} />
     </div>
   );
 };
