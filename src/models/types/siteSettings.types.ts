@@ -31,6 +31,9 @@ export interface SiteSettings {
   // Robots & Sitemap
   robots_txt: string;
   sitemap_entries: SitemapEntry[];
+
+  // Visibility
+  models_public: boolean;
 }
 
 export const defaultSiteSettings: SiteSettings = {
