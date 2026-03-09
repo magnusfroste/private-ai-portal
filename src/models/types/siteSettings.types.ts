@@ -130,6 +130,7 @@ export const defaultSiteSettings: SiteSettings = {
   cta_bullets: ["25M tokens included", "All models available", "No credit card"],
   cta_button_text: "Get started",
   navbar_cta_text: "Start Free Trial",
+  footer_text: "Secure Private LLM Access for Developers",
 
   // SEO
   seo_title: "Autoversio - Secure Private LLM Access for Developers",
