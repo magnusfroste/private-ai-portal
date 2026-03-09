@@ -9,6 +9,17 @@ export interface SitemapEntry {
   changefreq: string;
 }
 
+export interface HeroPillar {
+  title: string;
+  description: string;
+}
+
+export interface FeatureCard {
+  title: string;
+  description: string;
+  bullets: string[];
+}
+
 export interface SiteSettings {
   // Branding
   site_name: string;
@@ -18,6 +29,30 @@ export interface SiteSettings {
 
   // API
   api_base_url: string;
+
+  // Landing – Hero
+  hero_badge: string;
+  hero_headline: string;
+  hero_headline_accent: string;
+  hero_subtitle: string;
+  hero_cta_text: string;
+  hero_doc_url: string;
+  hero_doc_text: string;
+  hero_pillars: HeroPillar[];
+
+  // Landing – Features
+  features_headline: string;
+  features_headline_accent: string;
+  features_subtitle: string;
+  feature_cards: FeatureCard[];
+
+  // Landing – CTA
+  cta_headline: string;
+  cta_headline_accent: string;
+  cta_subtitle: string;
+  cta_bullets: string[];
+  cta_button_text: string;
+  navbar_cta_text: string;
 
   // SEO
   seo_title: string;
@@ -45,6 +80,57 @@ export const defaultSiteSettings: SiteSettings = {
   api_base_url: "https://api.autoversio.ai",
   logo_url: "",
   favicon_url: "/favicon.png",
+
+  // Hero
+  hero_badge: "Your data never leaves your control",
+  hero_headline: "Private AI access",
+  hero_headline_accent: "built for developers",
+  hero_subtitle: "Secure LLM proxy with OpenAI-compatible API. Access multiple models, transparent pricing, and full data privacy. Get started in minutes.",
+  hero_cta_text: "Get started",
+  hero_doc_url: "https://www.autoversio.com",
+  hero_doc_text: "Documentation",
+  hero_pillars: [
+    { title: "Private & Secure", description: "Your data stays yours. Full control over your AI infrastructure." },
+    { title: "Lightning Fast", description: "Optimized LiteLLM proxy infrastructure. Low latency, high throughput." },
+    { title: "Enterprise Ready", description: "Scale from prototype to production with transparent pricing." },
+  ],
+
+  // Features
+  features_headline: "Everything you need for",
+  features_headline_accent: "Private AI",
+  features_subtitle: "Sovereign, secure, and developer-friendly AI infrastructure — ready to scale.",
+  feature_cards: [
+    {
+      title: "OpenAI-compatible API",
+      description: "Access GPT, Claude, Llama, and more through a single unified endpoint. Drop-in replacement for your existing code.",
+      bullets: ["Single API endpoint", "Multiple providers", "Easy migration"],
+    },
+    {
+      title: "Simple Key Management",
+      description: "Generate and manage API keys directly from the portal. No complex setup required.",
+      bullets: ["Self-service portal", "Instant provisioning", "Full control"],
+    },
+    {
+      title: "Transparent Pricing",
+      description: "Pay-as-you-go at $1 per 1M tokens. No hidden fees, no surprises.",
+      bullets: ["$1 / 1M tokens", "No hidden costs", "$25 free credit"],
+    },
+    {
+      title: "Usage Analytics",
+      description: "Monitor token usage and costs in real-time with detailed analytics and spending controls.",
+      bullets: ["Real-time tracking", "Cost breakdown", "Budget alerts"],
+    },
+  ],
+
+  // CTA
+  cta_headline: "Start building with",
+  cta_headline_accent: "$25 free credit",
+  cta_subtitle: "No credit card required. Get instant access to all models and start integrating in minutes with our OpenAI-compatible API.",
+  cta_bullets: ["25M tokens included", "All models available", "No credit card"],
+  cta_button_text: "Get started",
+  navbar_cta_text: "Start Free Trial",
+
+  // SEO
   seo_title: "Autoversio - Secure Private LLM Access for Developers",
   seo_description: "Enterprise-grade private LLM proxy for secure AI development. Access multiple models with transparent pricing and full data privacy.",
   seo_keywords: "LLM, AI, proxy, private, secure, API",
