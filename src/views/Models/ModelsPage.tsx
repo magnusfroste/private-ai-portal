@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ExternalLink, Hash, DollarSign, Cpu } from "lucide-react";
+import { ExternalLink, Hash, DollarSign, Cpu, Copy, Terminal, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { useCuratedModels } from "@/hooks/useCuratedModels";
 import { CuratedModel } from "@/models/types/curatedModel.types";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const formatTokenCount = (tokens: number | null): string => {
   if (!tokens) return "—";
