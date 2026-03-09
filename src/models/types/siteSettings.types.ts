@@ -53,6 +53,7 @@ export interface SiteSettings {
   cta_bullets: string[];
   cta_button_text: string;
   navbar_cta_text: string;
+  footer_text: string;
 
   // SEO
   seo_title: string;
