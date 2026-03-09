@@ -65,7 +65,7 @@ export const SiteSettingsPage = () => {
           <TabsTrigger value="robots">Robots & Sitemap</TabsTrigger>
         </TabsList>
         <TabsContent value="branding" className="mt-4">
-          <BrandingSection settings={draft} onChange={setDraft} onUpload={uploadAsset} isUploading={isUploading} />
+          <BrandingSection settings={draft} onChange={setDraft} onUpload={handleUpload} isUploading={isUploading} />
         </TabsContent>
         <TabsContent value="seo" className="mt-4">
           <SeoSection settings={draft} onChange={setDraft} onUpload={uploadAsset} isUploading={isUploading} />
