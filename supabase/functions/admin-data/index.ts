@@ -90,7 +90,7 @@ serve(async (req: Request) => {
   if (type === "keys") {
     const { data: keys, error } = await supabase
       .from("api_keys")
-      .select("id, name, is_active, created_at, revoked_at, used_credits_usd, trial_credits_usd, user_id, profiles:user_id(full_name, email)")
+      .select("id, name, is_active, created_at, revoked_at, used_credits_usd, trial_credits_usd, user_id")
       .order("created_at", { ascending: false })
       .limit(500);
 
@@ -99,7 +99,20 @@ serve(async (req: Request) => {
       return json({ error: "Failed to fetch keys" }, 500);
     }
 
-    return json({ keys: keys || [] });
+    const userIds = [...new Set((keys || []).map((k: any) => k.user_id))];
+    const profileMap: Record<string, { full_name: string | null; email: string }> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+      for (const p of profiles || []) {
+        profileMap[p.id] = { full_name: p.full_name, email: p.email };
+      }
+    }
+
+    const enriched = (keys || []).map((k: any) => ({ ...k, profiles: profileMap[k.user_id] || null }));
+    return json({ keys: enriched });
   }
 
   // === Usage statistics ===
