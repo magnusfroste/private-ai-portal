@@ -21,7 +21,7 @@ export class SiteSettingsRepository {
     const { error } = await supabase
       .from("admin_settings")
       .upsert(
-        { key: SETTINGS_KEY, value: settings as unknown as Record<string, unknown> },
+        [{ key: SETTINGS_KEY, value: settings as unknown as Record<string, unknown> }],
         { onConflict: "key" }
       );
 
