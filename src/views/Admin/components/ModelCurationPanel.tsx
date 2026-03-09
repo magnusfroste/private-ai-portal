@@ -32,7 +32,7 @@ export const ModelCurationPanel = () => {
 
   const filtered = models.filter(
     (m) =>
-      m.id.toLowerCase().includes(search.toLowerCase()) ||
+      (m.model_name || m.id).toLowerCase().includes(search.toLowerCase()) ||
       m.provider.toLowerCase().includes(search.toLowerCase())
   );
 

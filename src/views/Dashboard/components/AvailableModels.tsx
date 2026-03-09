@@ -41,7 +41,7 @@ const ModelCard = ({ model }: { model: CuratedModel }) => (
       <div className="flex items-center gap-2 flex-wrap">
         <StatusDot status={model.status} />
         <span className="font-mono text-sm font-medium text-foreground truncate">
-          {model.id}
+          {model.model_name || model.id}
         </span>
         <Badge variant="outline" className="text-[10px] shrink-0">
           {model.provider}
