@@ -69,15 +69,22 @@ export const UserTable = ({ users, onEdit, isUpdating }: UserTableProps) => {
                 <TableCell className="text-muted-foreground text-sm">
                   {format(new Date(user.created_at), "yyyy-MM-dd")}
                 </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(user)}
-                    disabled={isUpdating}
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </Button>
+                <TableCell className="text-right space-y-1">
+                  <div className="flex items-center justify-end gap-2">
+                    {user.litellm_user_id && (
+                      <span className="text-muted-foreground text-xs font-mono truncate max-w-[120px]" title={user.litellm_user_id}>
+                        {user.litellm_user_id.slice(0, 8)}…
+                      </span>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEdit(user)}
+                      disabled={isUpdating}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             );
