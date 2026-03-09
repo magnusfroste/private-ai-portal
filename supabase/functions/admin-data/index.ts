@@ -86,17 +86,29 @@ serve(async (req: Request) => {
     return json({ transactions: enriched, totalRevenue });
   }
 
-  // === API keys overview ===
+  // === API keys overview — grouped by user with token sums ===
   if (type === "keys") {
     const { data: keys, error } = await supabase
       .from("api_keys")
-      .select("id, name, is_active, created_at, revoked_at, used_credits_usd, trial_credits_usd, user_id")
+      .select("id, name, is_active, created_at, revoked_at, user_id")
       .order("created_at", { ascending: false })
       .limit(500);
 
     if (error) {
       console.error("keys error:", error);
       return json({ error: "Failed to fetch keys" }, 500);
+    }
+
+    // Aggregate tokens_used per user from token_usage
+    const { data: tokenAgg, error: tokenErr } = await supabase
+      .from("token_usage")
+      .select("user_id, tokens_used");
+
+    const userTokens: Record<string, number> = {};
+    if (!tokenErr && tokenAgg) {
+      for (const row of tokenAgg) {
+        userTokens[row.user_id] = (userTokens[row.user_id] || 0) + Number(row.tokens_used || 0);
+      }
     }
 
     const userIds = [...new Set((keys || []).map((k: any) => k.user_id))];
@@ -111,8 +123,25 @@ serve(async (req: Request) => {
       }
     }
 
-    const enriched = (keys || []).map((k: any) => ({ ...k, profiles: profileMap[k.user_id] || null }));
-    return json({ keys: enriched });
+    const enriched = (keys || []).map((k: any) => ({
+      ...k,
+      profiles: profileMap[k.user_id] || null,
+    }));
+
+    // Build per-user summary
+    const userSummary = userIds.map((uid) => {
+      const userKeys = (keys || []).filter((k: any) => k.user_id === uid);
+      return {
+        user_id: uid,
+        full_name: profileMap[uid]?.full_name || null,
+        email: profileMap[uid]?.email || "unknown",
+        total_keys: userKeys.length,
+        active_keys: userKeys.filter((k: any) => k.is_active && !k.revoked_at).length,
+        total_tokens: userTokens[uid] || 0,
+      };
+    });
+
+    return json({ keys: enriched, userSummary });
   }
 
   // === Usage statistics ===
