@@ -1,4 +1,5 @@
 import { Activity, ScrollText, CreditCard, Key, Shield, User, Settings } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useProfile } from "@/hooks/useProfile";
@@ -29,6 +30,9 @@ export const AppSidebar = () => {
   const { profile } = useProfile();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { settings } = useSiteSettings();
+  const siteName = settings?.site_name || "Autoversio";
+  const logoUrl = settings?.logo_url;
 
   const { data: isAdmin } = useQuery({
     queryKey: ["is-admin"],
@@ -45,8 +49,12 @@ export const AppSidebar = () => {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
         <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2">
-          <Shield className="w-6 h-6 text-primary shrink-0" />
-          {!collapsed && <span className="text-lg font-bold gradient-text">Autoversio</span>}
+          {logoUrl ? (
+            <img src={logoUrl} alt={siteName} className="w-6 h-6 shrink-0 object-contain" />
+          ) : (
+            <Shield className="w-6 h-6 text-primary shrink-0" />
+          )}
+          {!collapsed && <span className="text-lg font-bold gradient-text">{siteName}</span>}
         </button>
       </SidebarHeader>
 

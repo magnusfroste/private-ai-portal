@@ -8,9 +8,11 @@ import { UserTable } from "./components/UserTable";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
 import { StripeConfigCard } from "./components/StripeConfigCard";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const AdminPanel = () => {
   const navigate = useNavigate();
+  const { settings } = useSiteSettings();
   const {
     users,
     isLoading,
@@ -61,7 +63,7 @@ export const AdminPanel = () => {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Shield className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold gradient-text">Autoversio</span>
+            <span className="text-xl font-bold gradient-text">{settings?.site_name || "Autoversio"}</span>
             <span className="text-sm text-muted-foreground ml-2">/ Admin</span>
           </div>
           <Button variant="ghost" onClick={() => navigate("/dashboard")}>

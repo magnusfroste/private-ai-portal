@@ -10,6 +10,7 @@ import { Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const authSchema = z.object({
   email: z.string().email("Invalid email address").max(255, "Email too long"),
@@ -23,6 +24,9 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const { settings } = useSiteSettings();
+  const siteName = settings?.site_name || "Autoversio";
+  const logoUrl = settings?.logo_url;
 
   useEffect(() => {
     // Check if user is already logged in
@@ -67,7 +71,7 @@ const Auth = () => {
           toast.error(error.message);
         }
       } else {
-        toast.success("Account created successfully! Welcome to Autoversio.");
+        toast.success(`Account created successfully! Welcome to ${siteName}.`);
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -116,8 +120,12 @@ const Auth = () => {
       
       <div className="w-full max-w-md relative z-10">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8 group">
-          <Shield className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
-          <span className="text-2xl font-bold gradient-text">Autoversio</span>
+          {logoUrl ? (
+            <img src={logoUrl} alt={siteName} className="h-8 group-hover:scale-110 transition-transform" />
+          ) : (
+            <Shield className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
+          )}
+          <span className="text-2xl font-bold gradient-text">{siteName}</span>
         </Link>
 
         <Card className="glass-card border-border/50">
