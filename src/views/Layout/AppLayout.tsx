@@ -62,6 +62,15 @@ export const AppLayout = () => {
                 <MessageSquare className="w-4 h-4" />
                 <span className="hidden sm:inline">Chat</span>
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/models")}
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <Cpu className="w-4 h-4" />
+                <span className="hidden sm:inline">Models</span>
+              </Button>
             </div>
             <div className="flex items-center gap-2">
               <DropdownMenu>
