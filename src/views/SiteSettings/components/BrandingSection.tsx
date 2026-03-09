@@ -52,6 +52,7 @@ export const BrandingSection = ({ settings, onChange, onUpload, isUploading }: P
           />
           <p className="text-xs text-muted-foreground">Bas-URL som visas i integrationsguiden på modellsidan</p>
         </div>
+        <div className="space-y-2">
           <Label>Logo</Label>
           <div className="flex items-center gap-3">
             {settings.logo_url && (
