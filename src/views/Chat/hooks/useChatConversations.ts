@@ -132,7 +132,7 @@ export const useChatConversations = () => {
     conversations,
     activeConversation,
     activeId,
-    setActiveId,
+    setActiveId: wrappedSetActiveId,
     createConversation,
     setMessages,
     deleteConversation,
