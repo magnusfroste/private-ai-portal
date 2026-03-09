@@ -68,7 +68,7 @@ export const SiteSettingsPage = () => {
           <BrandingSection settings={draft} onChange={setDraft} onUpload={handleUpload} isUploading={isUploading} />
         </TabsContent>
         <TabsContent value="seo" className="mt-4">
-          <SeoSection settings={draft} onChange={setDraft} onUpload={uploadAsset} isUploading={isUploading} />
+          <SeoSection settings={draft} onChange={setDraft} onUpload={handleUpload} isUploading={isUploading} />
         </TabsContent>
         <TabsContent value="aeo" className="mt-4">
           <AeoSection settings={draft} onChange={setDraft} />
