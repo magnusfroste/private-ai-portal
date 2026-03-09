@@ -1,14 +1,12 @@
 import { useMemo } from "react";
-import { Cpu, RefreshCw, DollarSign, Hash } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Cpu, RefreshCw, DollarSign, Hash, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { modelService } from "@/models/services/modelService";
-import { useChatSettings } from "@/hooks/useChatSettings";
-import { ModelInfo } from "@/models/types/model.types";
+import { useCuratedModels } from "@/hooks/useCuratedModels";
+import { CuratedModel } from "@/models/types/curatedModel.types";
 
 const formatTokenCount = (tokens: number | null): string => {
   if (!tokens) return "—";
@@ -23,7 +21,7 @@ const formatCost = (cost: number | null): string => {
   return `$${cost}`;
 };
 
-const StatusDot = ({ status }: { status: ModelInfo["status"] }) => {
+const StatusDot = ({ status }: { status: CuratedModel["status"] }) => {
   const colors = {
     healthy: "bg-emerald-500",
     unhealthy: "bg-destructive",
@@ -37,7 +35,7 @@ const StatusDot = ({ status }: { status: ModelInfo["status"] }) => {
   );
 };
 
-const ModelCard = ({ model }: { model: ModelInfo }) => (
+const ModelCard = ({ model }: { model: CuratedModel }) => (
   <div className="flex items-start gap-3 rounded-lg border border-border/50 bg-card/50 p-3 transition-colors hover:bg-accent/30">
     <div className="flex-1 min-w-0 space-y-1.5">
       <div className="flex items-center gap-2 flex-wrap">
@@ -52,6 +50,11 @@ const ModelCard = ({ model }: { model: ModelInfo }) => (
           <Badge variant="secondary" className="text-[10px] shrink-0">
             {model.mode}
           </Badge>
+        )}
+        {model.huggingface_url && (
+          <a href={model.huggingface_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
+            <ExternalLink className="w-3 h-3" />
+          </a>
         )}
       </div>
 
@@ -94,21 +97,7 @@ const ModelCard = ({ model }: { model: ModelInfo }) => (
 );
 
 export const AvailableModels = () => {
-  const { data: allModels = [], isLoading: loading, error, refetch } = useQuery({
-    queryKey: ["availableModels"],
-    queryFn: () => modelService.getAvailableModels(),
-    staleTime: 10 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
-
-  const { data: chatSettings } = useChatSettings();
-
-  const models = useMemo(() => {
-    const enabled = chatSettings?.enabledModels ?? [];
-    if (enabled.length === 0) return allModels;
-    return allModels.filter((m) => enabled.includes(m.id));
-  }, [allModels, chatSettings]);
-
+  const { models, isLoading: loading, error, refetch } = useCuratedModels(true);
   const errorMessage = error ? "Could not load available models" : null;
 
   return (
