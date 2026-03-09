@@ -8,6 +8,7 @@ import { BrandingSection } from "./components/BrandingSection";
 import { SeoSection } from "./components/SeoSection";
 import { AeoSection } from "./components/AeoSection";
 import { RobotsSitemapSection } from "./components/RobotsSitemapSection";
+import { LandingSection } from "./components/LandingSection";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Save, Loader2 } from "lucide-react";
