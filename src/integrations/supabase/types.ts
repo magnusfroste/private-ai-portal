@@ -143,6 +143,7 @@ export type Database = {
           max_input_tokens: number | null
           max_output_tokens: number | null
           mode: string | null
+          model_name: string | null
           output_cost_per_million: number | null
           provider: string
           status: string
@@ -159,6 +160,7 @@ export type Database = {
           max_input_tokens?: number | null
           max_output_tokens?: number | null
           mode?: string | null
+          model_name?: string | null
           output_cost_per_million?: number | null
           provider?: string
           status?: string
@@ -175,6 +177,7 @@ export type Database = {
           max_input_tokens?: number | null
           max_output_tokens?: number | null
           mode?: string | null
+          model_name?: string | null
           output_cost_per_million?: number | null
           provider?: string
           status?: string
