@@ -65,6 +65,10 @@ export const AdminPage = () => {
 
       <AdminSettingsPanel />
 
+      <ModelCurationPanel />
+
+      <StripeConfigCard />
+
       {isLoading && (
         <div className="text-center py-12 text-muted-foreground">Loading users...</div>
       )}
