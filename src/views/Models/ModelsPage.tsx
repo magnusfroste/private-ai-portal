@@ -97,8 +97,17 @@ const ModelRow = ({ model }: { model: CuratedModel }) => (
 
 export const ModelsPage = () => {
   const { models, isLoading } = useCuratedModels(true);
-  const { settings } = useSiteSettings();
+  const { settings, isLoading: settingsLoading } = useSiteSettings();
+  const { session, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const siteName = settings?.site_name || "the portal";
+  const isPublic = settings?.models_public ?? false;
+
+  useEffect(() => {
+    if (!authLoading && !settingsLoading && !isPublic && !session) {
+      navigate("/auth");
+    }
+  }, [authLoading, settingsLoading, isPublic, session, navigate]);
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-3xl">

@@ -56,4 +56,5 @@ export const defaultSiteSettings: SiteSettings = {
   faq_schema: [],
   robots_txt: `User-agent: *\nAllow: /`,
   sitemap_entries: [{ url: "/", priority: "1.0", changefreq: "weekly" }],
+  models_public: false,
 };

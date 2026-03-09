@@ -21,9 +21,11 @@ export const Navbar = () => {
         </Link>
         
         <div className="flex items-center gap-4">
-          <Link to="/models">
-            <Button variant="ghost" size="sm">Models</Button>
-          </Link>
+          {settings?.models_public && (
+            <Link to="/models">
+              <Button variant="ghost" size="sm">Models</Button>
+            </Link>
+          )}
           <Link to="/auth">
             <Button variant="ghost">Sign In</Button>
           </Link>
