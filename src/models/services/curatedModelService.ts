@@ -18,6 +18,10 @@ export class CuratedModelService {
     return curatedModelRepository.updateHuggingfaceUrl(id, url);
   }
 
+  async setDefault(id: string): Promise<void> {
+    return curatedModelRepository.setDefault(id);
+  }
+
   async syncModels(): Promise<number> {
     return curatedModelRepository.syncFromLitellm();
   }

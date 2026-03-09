@@ -8,6 +8,7 @@ export interface CuratedModel {
   mode: string | null;
   status: "healthy" | "unhealthy" | "unknown";
   enabled: boolean;
+  is_default: boolean;
   huggingface_url: string | null;
   last_synced_at: string;
   created_at: string;
