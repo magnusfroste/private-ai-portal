@@ -14,6 +14,7 @@ import { KeysPage } from "./views/Keys/KeysPage";
 import { AdminPage } from "./views/Admin/AdminPage";
 import { ChatPage } from "./views/Chat/ChatPage";
 import { SiteSettingsPage } from "./views/SiteSettings/SiteSettingsPage";
+import { ModelsPage } from "./views/Models/ModelsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/models" element={<ModelsPage />} />
           <Route path="/dashboard" element={<AppLayout />}>
             <Route index element={<DashboardActivity />} />
             <Route path="logs" element={<LogsPage />} />
