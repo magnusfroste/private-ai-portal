@@ -120,8 +120,12 @@ const Auth = () => {
       
       <div className="w-full max-w-md relative z-10">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8 group">
-          <Shield className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
-          <span className="text-2xl font-bold gradient-text">Autoversio</span>
+          {logoUrl ? (
+            <img src={logoUrl} alt={siteName} className="h-8 group-hover:scale-110 transition-transform" />
+          ) : (
+            <Shield className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
+          )}
+          <span className="text-2xl font-bold gradient-text">{siteName}</span>
         </Link>
 
         <Card className="glass-card border-border/50">

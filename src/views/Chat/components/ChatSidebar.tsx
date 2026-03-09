@@ -25,6 +25,10 @@ export const ChatSidebar = ({
   onClose,
 }: ChatSidebarProps) => {
   const navigate = useNavigate();
+  const { settings } = useSiteSettings();
+  const siteName = settings?.site_name || "Autoversio";
+  const logoUrl = settings?.logo_url;
+
   const handleSelect = (id: string) => {
     onSelect(id);
     onClose();
@@ -53,8 +57,12 @@ export const ChatSidebar = ({
       >
         <div className="p-4 flex items-center justify-between">
           <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2">
-            <Shield className="w-6 h-6 text-primary shrink-0" />
-            <span className="text-lg font-bold gradient-text">Autoversio</span>
+            {logoUrl ? (
+              <img src={logoUrl} alt={siteName} className="w-6 h-6 shrink-0 object-contain" />
+            ) : (
+              <Shield className="w-6 h-6 text-primary shrink-0" />
+            )}
+            <span className="text-lg font-bold gradient-text">{siteName}</span>
           </button>
           <Button
             variant="ghost"
