@@ -2,10 +2,12 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { TrialCTA } from "@/components/TrialCTA";
+import { DynamicHead } from "@/components/DynamicHead";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <DynamicHead />
       <Navbar />
       <Hero />
       <Features />

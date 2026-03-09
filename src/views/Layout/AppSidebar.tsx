@@ -84,6 +84,16 @@ export const AppSidebar = () => {
                     <span>Admin</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={isActive("/dashboard/site-settings")}
+                    onClick={() => navigate("/dashboard/site-settings")}
+                    tooltip="Webbplatsinställningar"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Site Settings</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

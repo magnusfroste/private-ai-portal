@@ -35,6 +35,7 @@ const App = () => (
             <Route path="account" element={<AccountPage />} />
             <Route path="keys" element={<KeysPage />} />
             <Route path="admin" element={<AdminPage />} />
+            <Route path="site-settings" element={<SiteSettingsPage />} />
           </Route>
           {/* Redirect old routes */}
           <Route path="/account" element={<Navigate to="/dashboard/account" replace />} />
