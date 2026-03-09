@@ -35,7 +35,7 @@ export const ChatModelSelector = ({ models, selectedModel, onSelect, disabled }:
           {selected ? (
             <span className="flex items-center gap-2 truncate">
               <StatusDot status={selected.status} />
-              <span className="truncate font-mono text-xs">{selected.id}</span>
+              <span className="truncate font-mono text-xs">{selected.model_name || selected.id}</span>
             </span>
           ) : (
             <SelectValue placeholder="Välj modell..." />
