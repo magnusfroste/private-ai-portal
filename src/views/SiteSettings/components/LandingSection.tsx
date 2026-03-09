@@ -221,6 +221,17 @@ export const LandingSection = ({ settings, onChange }: Props) => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Footer */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Footer</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Label>Footer-text</Label>
+          <Input value={settings.footer_text} onChange={(e) => onChange({ ...settings, footer_text: e.target.value })} placeholder="Visas efter © År Sidnamn." />
+        </CardContent>
+      </Card>
     </div>
   );
 };
