@@ -86,11 +86,34 @@ serve(async (req: Request) => {
     const litellmData = await litellmResponse.json();
     console.log('LiteLLM /user/new response:', { status: litellmResponse.status, data: litellmData });
 
-    if (!litellmResponse.ok) {
+    let litellmUserId: string;
+
+    if (litellmResponse.ok) {
+      litellmUserId = litellmData.user_id || user.id;
+    } else if (litellmResponse.status === 409) {
+      // User already exists in LiteLLM — fetch their info instead
+      console.log('LiteLLM user already exists, fetching info...');
+      const infoUrl = new URL('https://api.autoversio.ai/user/info');
+      infoUrl.searchParams.set('user_id', user.id);
+
+      const infoRes = await fetch(infoUrl.toString(), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${LITELLM_MASTER_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (infoRes.ok) {
+        const infoData = await infoRes.json();
+        litellmUserId = infoData.user_info?.user_id || user.id;
+      } else {
+        // Fallback: use the Supabase user ID as the LiteLLM user ID
+        litellmUserId = user.id;
+      }
+    } else {
       throw new Error(litellmData.error?.message || `LiteLLM error: ${litellmResponse.status}`);
     }
-
-    const litellmUserId = litellmData.user_id || user.id;
 
     // Store LiteLLM user ID in profile
     const { error: updateError } = await supabase
