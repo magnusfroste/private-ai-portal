@@ -12,6 +12,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const AdminPanel = () => {
   const navigate = useNavigate();
+  const { settings } = useSiteSettings();
   const {
     users,
     isLoading,
