@@ -157,6 +157,8 @@ export const ChatPage = () => {
           keys={apiKeys}
           selectedKeyId={selectedKeyId}
           onSelectKey={setSelectedKeyId}
+          systemPrompt={systemPrompt}
+          onChangeSystemPrompt={setSystemPrompt}
           disabled={isStreaming}
           onToggleSidebar={() => setSidebarOpen((v) => !v)}
           isAdmin={isAdmin}

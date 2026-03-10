@@ -149,7 +149,7 @@ export const useChatStream = ({ model, setMessages, apiKeyId, systemPrompt }: Us
       setIsStreaming(false);
       setIsReasoning(false);
     }
-  }, [model, setMessages, apiKeyId]);
+  }, [model, setMessages, apiKeyId, systemPrompt]);
 
   return { isStreaming, isReasoning, sendMessage, stopStreaming };
 };
