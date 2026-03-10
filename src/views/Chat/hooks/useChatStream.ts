@@ -7,6 +7,7 @@ interface UseChatStreamOptions {
   model: string;
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   apiKeyId?: string;
+  systemPrompt?: string;
 }
 
 export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOptions) => {
