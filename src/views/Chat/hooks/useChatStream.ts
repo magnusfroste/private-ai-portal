@@ -44,6 +44,9 @@ export const useChatStream = ({ model, setMessages, apiKeyId, systemPrompt }: Us
       if (apiKeyId) {
         body.api_key_id = apiKeyId;
       }
+      if (systemPrompt) {
+        body.system_prompt = systemPrompt;
+      }
 
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-playground`,
