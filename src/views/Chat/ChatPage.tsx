@@ -12,6 +12,7 @@ import { ChatSidebar } from "./components/ChatSidebar";
 import { useChatStream } from "./hooks/useChatStream";
 import { useChatConversations } from "./hooks/useChatConversations";
 import { useRef, useState, useCallback } from "react";
+import { DEFAULT_SYSTEM_PROMPT } from "./components/ChatSystemPrompt";
 
 export const ChatPage = () => {
   const { checkAuth } = useAuth();
