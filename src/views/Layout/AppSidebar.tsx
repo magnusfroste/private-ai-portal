@@ -23,7 +23,6 @@ const mainNav = [
   { title: "Credits", url: "/dashboard/credits", icon: CreditCard },
   { title: "API Keys", url: "/dashboard/keys", icon: Key },
   { title: "Models", url: "/dashboard/models", icon: Cpu },
-  { title: "API", url: "/dashboard/api", icon: Terminal },
 ];
 
 export const AppSidebar = () => {
