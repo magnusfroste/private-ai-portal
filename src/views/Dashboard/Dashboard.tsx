@@ -12,7 +12,7 @@ import { IntegrationGuide } from "./components/IntegrationGuide";
 import { AvailableModels } from "./components/AvailableModels";
 
 const Dashboard = () => {
-  const { checkAuth, signOut } = useAuth();
+  const { checkAuth } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
   const { apiKeys, loading: keysLoading, refetch } = useDashboardData();
   const { createKey, isCreatingKey, copyToClipboard } = useKeyManagement();
