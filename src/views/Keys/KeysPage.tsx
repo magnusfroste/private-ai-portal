@@ -92,7 +92,7 @@ export const KeysPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 max-w-3xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-1">API Keys</h1>
         <p className="text-muted-foreground text-sm">Manage your active API keys</p>
