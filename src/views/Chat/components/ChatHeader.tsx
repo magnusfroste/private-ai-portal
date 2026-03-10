@@ -87,6 +87,12 @@ export const ChatHeader = ({
             isAdmin={isAdmin}
           />
         </div>
+        <span className="text-border hidden sm:inline">|</span>
+        <ChatSystemPrompt
+          systemPrompt={systemPrompt}
+          onChangeSystemPrompt={onChangeSystemPrompt}
+          disabled={disabled}
+        />
       </div>
     </header>
   );
