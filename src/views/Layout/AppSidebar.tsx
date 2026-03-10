@@ -1,4 +1,4 @@
-import { Activity, ScrollText, CreditCard, Key, Shield, User, Settings, Cpu, Terminal } from "lucide-react";
+import { Activity, ScrollText, CreditCard, Key, Shield, User, Settings, Cpu } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
