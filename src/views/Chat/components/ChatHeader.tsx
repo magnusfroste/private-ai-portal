@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChatModelSelector } from "./ChatModelSelector";
 import { ChatKeySelector } from "./ChatKeySelector";
+import { ChatSystemPrompt } from "./ChatSystemPrompt";
 import type { ModelInfo } from "@/models/types/model.types";
 
 interface ApiKeyOption {
