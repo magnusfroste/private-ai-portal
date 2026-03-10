@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLitellmUser } from "@/hooks/useLitellmUser";
@@ -9,6 +9,7 @@ import { adminRepository } from "@/data/repositories/adminRepository";
 import { AppSidebar } from "./AppSidebar";
 import { LayoutDashboard, MessageSquare, User, Cpu, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ import {
 export const AppLayout = () => {
   const { checkAuth, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile } = useProfile();
   useLitellmUser();
 
@@ -36,6 +38,9 @@ export const AppLayout = () => {
     ? profile.full_name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : profile?.email?.[0]?.toUpperCase() || "?";
 
+  const isActive = (path: string, exact = false) => 
+    exact ? location.pathname === path : location.pathname.startsWith(path);
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -48,7 +53,7 @@ export const AppLayout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className={cn("gap-2 hover:text-foreground", isActive("/dashboard", true) ? "text-foreground" : "text-muted-foreground")}
               >
                 <LayoutDashboard className="w-4 h-4" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -57,7 +62,7 @@ export const AppLayout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/chat")}
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className={cn("gap-2 hover:text-foreground", isActive("/chat") ? "text-foreground" : "text-muted-foreground")}
               >
                 <MessageSquare className="w-4 h-4" />
                 <span className="hidden sm:inline">Chat</span>
@@ -68,7 +73,7 @@ export const AppLayout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard/models")}
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className={cn("gap-2 hover:text-foreground", isActive("/dashboard/models") ? "text-foreground" : "text-muted-foreground")}
               >
                 <Cpu className="w-4 h-4" />
                 <span className="hidden sm:inline">Models</span>
@@ -77,7 +82,7 @@ export const AppLayout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard/api")}
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className={cn("gap-2 hover:text-foreground", isActive("/dashboard/api") ? "text-foreground" : "text-muted-foreground")}
               >
                 <Terminal className="w-4 h-4" />
                 <span className="hidden sm:inline">API</span>
