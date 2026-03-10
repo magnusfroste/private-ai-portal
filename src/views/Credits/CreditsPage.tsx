@@ -105,7 +105,7 @@ export const CreditsPage = () => {
   const usagePercent = maxBudget > 0 ? Math.min((spent / maxBudget) * 100, 100) : 0;
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-8">
+    <div className="p-6 space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-1">Credits</h1>
         <p className="text-muted-foreground text-sm">Manage your API credit balance</p>

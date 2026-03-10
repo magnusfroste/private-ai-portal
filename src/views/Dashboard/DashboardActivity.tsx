@@ -76,7 +76,7 @@ export const DashboardActivity = () => {
     v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : v.toString();
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-8">
+    <div className="p-6 space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Activity</h1>

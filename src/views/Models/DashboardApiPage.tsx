@@ -11,7 +11,7 @@ export const DashboardApiPage = () => {
   const baseUrl = settings?.api_base_url || "https://api.autoversio.ai";
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-8">
+    <div className="p-6 space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-1">API</h1>
         <p className="text-muted-foreground text-sm">
