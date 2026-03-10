@@ -22,7 +22,6 @@ const mainNav = [
   { title: "Logs", url: "/dashboard/logs", icon: ScrollText },
   { title: "Credits", url: "/dashboard/credits", icon: CreditCard },
   { title: "API Keys", url: "/dashboard/keys", icon: Key },
-  { title: "Models", url: "/dashboard/models", icon: Cpu },
 ];
 
 export const AppSidebar = () => {
