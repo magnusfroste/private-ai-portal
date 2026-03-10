@@ -18,6 +18,7 @@ export const ChatPage = () => {
   const { checkAuth } = useAuth();
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedKeyId, setSelectedKeyId] = useState("");
+  const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
