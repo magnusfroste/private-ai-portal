@@ -10,7 +10,7 @@ interface UseChatStreamOptions {
   systemPrompt?: string;
 }
 
-export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOptions) => {
+export const useChatStream = ({ model, setMessages, apiKeyId, systemPrompt }: UseChatStreamOptions) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isReasoning, setIsReasoning] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
