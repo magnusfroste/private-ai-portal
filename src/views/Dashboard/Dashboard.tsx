@@ -5,14 +5,14 @@ import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "./hooks/useDashboardData";
 import { useKeyManagement } from "./hooks/useKeyManagement";
 import { useUserBudget } from "@/hooks/useUserBudget";
-import { DashboardHeader } from "./components/DashboardHeader";
+
 import { UserBudgetCard } from "./components/UserBudgetCard";
 import { ApiKeyList } from "./components/ApiKeyList";
 import { IntegrationGuide } from "./components/IntegrationGuide";
 import { AvailableModels } from "./components/AvailableModels";
 
 const Dashboard = () => {
-  const { checkAuth, signOut } = useAuth();
+  const { checkAuth } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
   const { apiKeys, loading: keysLoading, refetch } = useDashboardData();
   const { createKey, isCreatingKey, copyToClipboard } = useKeyManagement();
@@ -45,23 +45,24 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen">
-      <DashboardHeader profile={profile} onSignOut={signOut} />
-      
-      <div className="container mx-auto px-4 py-6">
-        <UserBudgetCard budget={budget} loading={budgetLoading} onRefresh={refetchBudget} />
+    <div className="p-6 max-w-3xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold mb-1">
+          Welcome back, {profile?.full_name || "Developer"}
+        </h1>
+        <p className="text-muted-foreground text-sm">{profile?.email}</p>
       </div>
 
-      <div className="container mx-auto px-4 pb-8">
-        <ApiKeyList
-          apiKeys={apiKeys}
-          onCopy={copyToClipboard}
-          onCreateKey={handleCreateKey}
-          isCreatingKey={isCreatingKey}
-          canCreateMore={canCreateMore}
-          remainingKeys={remainingKeys}
-        />
-      </div>
+      <UserBudgetCard budget={budget} loading={budgetLoading} onRefresh={refetchBudget} />
+
+      <ApiKeyList
+        apiKeys={apiKeys}
+        onCopy={copyToClipboard}
+        onCreateKey={handleCreateKey}
+        isCreatingKey={isCreatingKey}
+        canCreateMore={canCreateMore}
+        remainingKeys={remainingKeys}
+      />
 
       <AvailableModels />
 
