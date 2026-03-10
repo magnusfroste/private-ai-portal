@@ -5,7 +5,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "./hooks/useDashboardData";
 import { useKeyManagement } from "./hooks/useKeyManagement";
 import { useUserBudget } from "@/hooks/useUserBudget";
-import { DashboardHeader } from "./components/DashboardHeader";
+
 import { UserBudgetCard } from "./components/UserBudgetCard";
 import { ApiKeyList } from "./components/ApiKeyList";
 import { IntegrationGuide } from "./components/IntegrationGuide";
