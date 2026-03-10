@@ -38,6 +38,9 @@ export const AppLayout = () => {
     ? profile.full_name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : profile?.email?.[0]?.toUpperCase() || "?";
 
+  const isActive = (path: string, exact = false) => 
+    exact ? location.pathname === path : location.pathname.startsWith(path);
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
