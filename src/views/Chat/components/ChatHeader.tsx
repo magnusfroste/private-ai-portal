@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChatModelSelector } from "./ChatModelSelector";
 import { ChatKeySelector } from "./ChatKeySelector";
+import { ChatSystemPrompt } from "./ChatSystemPrompt";
 import type { ModelInfo } from "@/models/types/model.types";
 
 interface ApiKeyOption {
@@ -18,6 +19,8 @@ interface ChatHeaderProps {
   keys: ApiKeyOption[];
   selectedKeyId: string;
   onSelectKey: (keyId: string) => void;
+  systemPrompt: string;
+  onChangeSystemPrompt: (prompt: string) => void;
   disabled?: boolean;
   onToggleSidebar: () => void;
   isAdmin?: boolean;
@@ -30,6 +33,8 @@ export const ChatHeader = ({
   keys,
   selectedKeyId,
   onSelectKey,
+  systemPrompt,
+  onChangeSystemPrompt,
   disabled,
   onToggleSidebar,
   isAdmin,
@@ -82,6 +87,12 @@ export const ChatHeader = ({
             isAdmin={isAdmin}
           />
         </div>
+        <span className="text-border hidden sm:inline">|</span>
+        <ChatSystemPrompt
+          systemPrompt={systemPrompt}
+          onChangeSystemPrompt={onChangeSystemPrompt}
+          disabled={disabled}
+        />
       </div>
     </header>
   );

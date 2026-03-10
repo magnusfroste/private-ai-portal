@@ -7,9 +7,10 @@ interface UseChatStreamOptions {
   model: string;
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   apiKeyId?: string;
+  systemPrompt?: string;
 }
 
-export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOptions) => {
+export const useChatStream = ({ model, setMessages, apiKeyId, systemPrompt }: UseChatStreamOptions) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isReasoning, setIsReasoning] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -42,6 +43,9 @@ export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOpt
       const body: Record<string, unknown> = { messages: allMessages, model };
       if (apiKeyId) {
         body.api_key_id = apiKeyId;
+      }
+      if (systemPrompt) {
+        body.system_prompt = systemPrompt;
       }
 
       const resp = await fetch(
@@ -145,7 +149,7 @@ export const useChatStream = ({ model, setMessages, apiKeyId }: UseChatStreamOpt
       setIsStreaming(false);
       setIsReasoning(false);
     }
-  }, [model, setMessages, apiKeyId]);
+  }, [model, setMessages, apiKeyId, systemPrompt]);
 
   return { isStreaming, isReasoning, sendMessage, stopStreaming };
 };

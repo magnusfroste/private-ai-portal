@@ -12,11 +12,13 @@ import { ChatSidebar } from "./components/ChatSidebar";
 import { useChatStream } from "./hooks/useChatStream";
 import { useChatConversations } from "./hooks/useChatConversations";
 import { useRef, useState, useCallback } from "react";
+import { DEFAULT_SYSTEM_PROMPT } from "./components/ChatSystemPrompt";
 
 export const ChatPage = () => {
   const { checkAuth } = useAuth();
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedKeyId, setSelectedKeyId] = useState("");
+  const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -105,6 +107,7 @@ export const ChatPage = () => {
     model: selectedModel,
     setMessages,
     apiKeyId: selectedKeyId === "__master__" ? undefined : selectedKeyId,
+    systemPrompt,
   });
 
   useEffect(() => {
@@ -154,6 +157,8 @@ export const ChatPage = () => {
           keys={apiKeys}
           selectedKeyId={selectedKeyId}
           onSelectKey={setSelectedKeyId}
+          systemPrompt={systemPrompt}
+          onChangeSystemPrompt={setSystemPrompt}
           disabled={isStreaming}
           onToggleSidebar={() => setSidebarOpen((v) => !v)}
           isAdmin={isAdmin}
