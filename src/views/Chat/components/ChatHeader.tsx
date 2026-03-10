@@ -19,6 +19,8 @@ interface ChatHeaderProps {
   keys: ApiKeyOption[];
   selectedKeyId: string;
   onSelectKey: (keyId: string) => void;
+  systemPrompt: string;
+  onChangeSystemPrompt: (prompt: string) => void;
   disabled?: boolean;
   onToggleSidebar: () => void;
   isAdmin?: boolean;
