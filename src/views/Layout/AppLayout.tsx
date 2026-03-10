@@ -7,7 +7,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
 import { adminRepository } from "@/data/repositories/adminRepository";
 import { AppSidebar } from "./AppSidebar";
-import { LayoutDashboard, MessageSquare, User, Cpu } from "lucide-react";
+import { LayoutDashboard, MessageSquare, User, Cpu, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
