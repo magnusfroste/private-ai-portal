@@ -92,6 +92,11 @@ serve(async (req: Request) => {
       apiKeyForRequest = LITELLM_MASTER_KEY;
     }
 
+    // Build messages array with optional system prompt
+    const finalMessages = system_prompt
+      ? [{ role: 'system', content: system_prompt }, ...messages]
+      : messages;
+
     const response = await fetch('https://api.autoversio.ai/chat/completions', {
       method: 'POST',
       headers: {
@@ -100,7 +105,7 @@ serve(async (req: Request) => {
       },
       body: JSON.stringify({
         model: model || 'gpt-4o',
-        messages,
+        messages: finalMessages,
         stream: true,
       }),
     });
