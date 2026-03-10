@@ -62,6 +62,8 @@ export const AppLayout = () => {
                 <MessageSquare className="w-4 h-4" />
                 <span className="hidden sm:inline">Chat</span>
               </Button>
+            </div>
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
@@ -80,8 +82,6 @@ export const AppLayout = () => {
                 <Terminal className="w-4 h-4" />
                 <span className="hidden sm:inline">API</span>
               </Button>
-            </div>
-            <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold hover:bg-primary/20 transition-colors">
