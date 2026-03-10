@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLitellmUser } from "@/hooks/useLitellmUser";
@@ -9,6 +9,7 @@ import { adminRepository } from "@/data/repositories/adminRepository";
 import { AppSidebar } from "./AppSidebar";
 import { LayoutDashboard, MessageSquare, User, Cpu, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
