@@ -21,6 +21,7 @@ import {
 export const AppLayout = () => {
   const { checkAuth, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile } = useProfile();
   useLitellmUser();
 
