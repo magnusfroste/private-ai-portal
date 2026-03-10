@@ -53,7 +53,7 @@ export const AppLayout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className={cn("gap-2 hover:text-foreground", isActive("/dashboard", true) ? "text-foreground" : "text-muted-foreground")}
               >
                 <LayoutDashboard className="w-4 h-4" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -62,7 +62,7 @@ export const AppLayout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/chat")}
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className={cn("gap-2 hover:text-foreground", isActive("/chat") ? "text-foreground" : "text-muted-foreground")}
               >
                 <MessageSquare className="w-4 h-4" />
                 <span className="hidden sm:inline">Chat</span>
@@ -73,7 +73,7 @@ export const AppLayout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard/models")}
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className={cn("gap-2 hover:text-foreground", isActive("/dashboard/models") ? "text-foreground" : "text-muted-foreground")}
               >
                 <Cpu className="w-4 h-4" />
                 <span className="hidden sm:inline">Models</span>
@@ -82,7 +82,7 @@ export const AppLayout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard/api")}
-                className="gap-2 text-muted-foreground hover:text-foreground"
+                className={cn("gap-2 hover:text-foreground", isActive("/dashboard/api") ? "text-foreground" : "text-muted-foreground")}
               >
                 <Terminal className="w-4 h-4" />
                 <span className="hidden sm:inline">API</span>
