@@ -21,7 +21,7 @@ export const LogsPage = () => {
   }, [apiKeys]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 max-w-3xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-1">Logs</h1>
         <p className="text-muted-foreground text-sm">API-anrop och nyckel-händelser</p>
