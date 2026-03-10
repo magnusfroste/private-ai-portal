@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { Shield } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "./hooks/useDashboardData";
 import { useKeyManagement } from "./hooks/useKeyManagement";
@@ -12,15 +10,10 @@ import { IntegrationGuide } from "./components/IntegrationGuide";
 import { AvailableModels } from "./components/AvailableModels";
 
 const Dashboard = () => {
-  const { checkAuth } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
   const { apiKeys, loading: keysLoading, refetch } = useDashboardData();
   const { createKey, isCreatingKey, copyToClipboard } = useKeyManagement();
   const { budget, loading: budgetLoading, refetch: refetchBudget } = useUserBudget();
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
 
   const handleCreateKey = async (name: string, models: string[]) => {
     const success = await createKey(name, models);
