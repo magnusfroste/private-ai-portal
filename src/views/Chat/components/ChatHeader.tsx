@@ -33,6 +33,8 @@ export const ChatHeader = ({
   keys,
   selectedKeyId,
   onSelectKey,
+  systemPrompt,
+  onChangeSystemPrompt,
   disabled,
   onToggleSidebar,
   isAdmin,
