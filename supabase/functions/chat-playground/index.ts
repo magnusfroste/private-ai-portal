@@ -33,7 +33,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const { messages, model, api_key_id } = await req.json();
+    const { messages, model, api_key_id, system_prompt } = await req.json();
 
     // Determine which key to use
     let apiKeyForRequest: string;
