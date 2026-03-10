@@ -107,6 +107,7 @@ export const ChatPage = () => {
     model: selectedModel,
     setMessages,
     apiKeyId: selectedKeyId === "__master__" ? undefined : selectedKeyId,
+    systemPrompt,
   });
 
   useEffect(() => {
