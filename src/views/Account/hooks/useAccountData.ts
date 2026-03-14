@@ -35,6 +35,7 @@ export const useAccountData = (options?: UseAccountDataOptions) => {
       }
 
       const modelMap: Record<string, ModelUsage> = {};
+      const rawLogs: any[] = [];
       let total = 0;
 
       await Promise.all(
