@@ -109,5 +109,5 @@ export const useAccountData = (options?: UseAccountDataOptions) => {
     fetchUsageData();
   }, [fetchUsageData]);
 
-  return { usageByModel, totalSpend, loading };
+  return { usageByModel, totalSpend, allLogs, loading };
 };
