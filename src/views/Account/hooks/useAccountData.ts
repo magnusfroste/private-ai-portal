@@ -10,6 +10,7 @@ interface UseAccountDataOptions {
 export const useAccountData = (options?: UseAccountDataOptions) => {
   const [usageByModel, setUsageByModel] = useState<ModelUsage[]>([]);
   const [totalSpend, setTotalSpend] = useState(0);
+  const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const startIso = options?.startDate?.toISOString();
@@ -34,6 +35,7 @@ export const useAccountData = (options?: UseAccountDataOptions) => {
       }
 
       const modelMap: Record<string, ModelUsage> = {};
+      const rawLogs: any[] = [];
       let total = 0;
 
       await Promise.all(
@@ -47,6 +49,7 @@ export const useAccountData = (options?: UseAccountDataOptions) => {
             if (error || !data) return;
 
             const logs = data.spend_logs || [];
+            rawLogs.push(...logs);
             const filteredLogs = logs.filter((log: any) => {
               if (!log.startTime) return true;
               const logDate = new Date(log.startTime);
@@ -94,6 +97,7 @@ export const useAccountData = (options?: UseAccountDataOptions) => {
       const sorted = Object.values(modelMap).sort((a, b) => b.cost - a.cost);
       setUsageByModel(sorted);
       setTotalSpend(total);
+      setAllLogs(rawLogs);
     } catch (err) {
       console.error("Error fetching usage data:", err);
     } finally {
@@ -105,5 +109,5 @@ export const useAccountData = (options?: UseAccountDataOptions) => {
     fetchUsageData();
   }, [fetchUsageData]);
 
-  return { usageByModel, totalSpend, loading };
+  return { usageByModel, totalSpend, allLogs, loading };
 };

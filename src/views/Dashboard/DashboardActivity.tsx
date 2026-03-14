@@ -9,6 +9,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "./hooks/useDashboardData";
 import { useAccountData } from "@/views/Account/hooks/useAccountData";
 import { ActivityCard } from "./components/ActivityCard";
+import { MonthlyUsageChart } from "./components/MonthlyUsageChart";
 
 const PRESETS = [
   { label: "7d", days: 7 },
@@ -25,7 +26,7 @@ export const DashboardActivity = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [activePreset, setActivePreset] = useState<string>("Alla");
 
-  const { usageByModel, totalSpend, loading: usageLoading } = useAccountData({
+  const { usageByModel, totalSpend, allLogs, loading: usageLoading } = useAccountData({
     startDate,
     endDate,
   });
@@ -151,26 +152,30 @@ export const DashboardActivity = () => {
           <p className="text-muted-foreground text-sm animate-pulse">Laddar usage-data...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ActivityCard
-            title="Spend"
-            value={`$${totalSpend.toFixed(3)}`}
-            data={spendData}
-            formatLegend={(v) => v.toFixed(4)}
-          />
-          <ActivityCard
-            title="Requests"
-            value={totalRequests.toLocaleString()}
-            data={requestData}
-            formatLegend={(v) => v.toLocaleString()}
-          />
-          <ActivityCard
-            title="Tokens"
-            value={formatTokens(totalTokens)}
-            data={tokenData}
-            formatLegend={formatTokens}
-          />
-        </div>
+        <>
+          <MonthlyUsageChart logs={allLogs} />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <ActivityCard
+              title="Spend"
+              value={`$${totalSpend.toFixed(3)}`}
+              data={spendData}
+              formatLegend={(v) => v.toFixed(4)}
+            />
+            <ActivityCard
+              title="Requests"
+              value={totalRequests.toLocaleString()}
+              data={requestData}
+              formatLegend={(v) => v.toLocaleString()}
+            />
+            <ActivityCard
+              title="Tokens"
+              value={formatTokens(totalTokens)}
+              data={tokenData}
+              formatLegend={formatTokens}
+            />
+          </div>
+        </>
       )}
     </div>
   );
