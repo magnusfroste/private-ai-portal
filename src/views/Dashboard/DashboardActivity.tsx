@@ -26,7 +26,7 @@ export const DashboardActivity = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [activePreset, setActivePreset] = useState<string>("Alla");
 
-  const { usageByModel, totalSpend, loading: usageLoading } = useAccountData({
+  const { usageByModel, totalSpend, allLogs, loading: usageLoading } = useAccountData({
     startDate,
     endDate,
   });
