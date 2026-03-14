@@ -29,21 +29,48 @@ export class AdminRepository {
     return data.users;
   }
 
-  async updateUser(payload: UpdateUserPayload): Promise<AdminUser> {
+  async updateUser(payload: UpdateUserPayload, retries = 2): Promise<AdminUser> {
     const headers = await this.getAuthHeaders();
-    const response = await fetch(this.functionUrl, {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify(payload),
-    });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to update user");
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30_000);
+
+      try {
+        const response = await fetch(this.functionUrl, {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to update user");
+        }
+
+        const data = await response.json();
+        return data.user;
+      } catch (err: unknown) {
+        clearTimeout(timeout);
+        const isRetryable =
+          err instanceof DOMException && err.name === "AbortError" ||
+          err instanceof TypeError; // "Failed to fetch" = network error
+
+        if (isRetryable && attempt < retries) {
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+          continue;
+        }
+
+        if (err instanceof DOMException && err.name === "AbortError") {
+          throw new Error("Anropet tog för lång tid. Försök igen.");
+        }
+        throw err;
+      }
     }
 
-    const data = await response.json();
-    return data.user;
+    throw new Error("Alla försök misslyckades");
   }
 
   async checkIsAdmin(): Promise<boolean> {
