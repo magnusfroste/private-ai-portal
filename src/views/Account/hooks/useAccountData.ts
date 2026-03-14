@@ -97,6 +97,7 @@ export const useAccountData = (options?: UseAccountDataOptions) => {
       const sorted = Object.values(modelMap).sort((a, b) => b.cost - a.cost);
       setUsageByModel(sorted);
       setTotalSpend(total);
+      setAllLogs(rawLogs);
     } catch (err) {
       console.error("Error fetching usage data:", err);
     } finally {
