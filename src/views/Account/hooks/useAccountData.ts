@@ -10,6 +10,7 @@ interface UseAccountDataOptions {
 export const useAccountData = (options?: UseAccountDataOptions) => {
   const [usageByModel, setUsageByModel] = useState<ModelUsage[]>([]);
   const [totalSpend, setTotalSpend] = useState(0);
+  const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const startIso = options?.startDate?.toISOString();
