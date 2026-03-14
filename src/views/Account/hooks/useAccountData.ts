@@ -49,6 +49,7 @@ export const useAccountData = (options?: UseAccountDataOptions) => {
             if (error || !data) return;
 
             const logs = data.spend_logs || [];
+            rawLogs.push(...logs);
             const filteredLogs = logs.filter((log: any) => {
               if (!log.startTime) return true;
               const logDate = new Date(log.startTime);
