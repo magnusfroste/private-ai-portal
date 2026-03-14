@@ -9,6 +9,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useDashboardData } from "./hooks/useDashboardData";
 import { useAccountData } from "@/views/Account/hooks/useAccountData";
 import { ActivityCard } from "./components/ActivityCard";
+import { MonthlyUsageChart } from "./components/MonthlyUsageChart";
 
 const PRESETS = [
   { label: "7d", days: 7 },
