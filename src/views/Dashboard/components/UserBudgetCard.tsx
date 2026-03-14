@@ -37,6 +37,22 @@ export const UserBudgetCard = ({ budget, loading, onRefresh }: UserBudgetCardPro
     ? (budget.spend / budget.max_budget) * 100
     : 0;
 
+  const budgetWarning = usagePercent >= 100
+    ? { level: "critical" as const, icon: XCircle, title: "Budget exhausted", description: `You've used 100% of your $${budget.max_budget.toFixed(2)} budget. Purchase more credits to continue using the API.`, className: "border-destructive/60 bg-destructive/10 text-destructive" }
+    : usagePercent >= 90
+    ? { level: "danger" as const, icon: Flame, title: "Budget almost depleted", description: `You've used ${usagePercent.toFixed(1)}% of your budget. Only $${budget.budget_remaining.toFixed(2)} remaining.`, className: "border-orange-500/60 bg-orange-500/10 text-orange-400" }
+    : usagePercent >= 80
+    ? { level: "warning" as const, icon: AlertTriangle, title: "Approaching budget limit", description: `You've used ${usagePercent.toFixed(1)}% of your budget. Consider purchasing additional credits soon.`, className: "border-yellow-500/60 bg-yellow-500/10 text-yellow-400" }
+    : null;
+
+  const progressColor = usagePercent >= 100
+    ? "[&>div]:bg-destructive"
+    : usagePercent >= 90
+    ? "[&>div]:bg-orange-500"
+    : usagePercent >= 80
+    ? "[&>div]:bg-yellow-500"
+    : "[&>div]:bg-primary";
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -45,6 +61,16 @@ export const UserBudgetCard = ({ budget, loading, onRefresh }: UserBudgetCardPro
           <RefreshCw className="w-4 h-4" />
         </Button>
       </div>
+
+      {budgetWarning && (
+        <Alert className={`${budgetWarning.className} animate-in fade-in slide-in-from-top-2 duration-300`}>
+          <budgetWarning.icon className="h-4 w-4" />
+          <AlertTitle className="font-semibold">{budgetWarning.title}</AlertTitle>
+          <AlertDescription className="opacity-90">
+            {budgetWarning.description}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="glass-card">
@@ -79,7 +105,7 @@ export const UserBudgetCard = ({ budget, loading, onRefresh }: UserBudgetCardPro
             <DollarSign className="w-4 h-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-accent">
+            <div className={`text-3xl font-bold ${usagePercent >= 90 ? "text-destructive" : "text-accent"}`}>
               ${budget.budget_remaining.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -94,7 +120,7 @@ export const UserBudgetCard = ({ budget, loading, onRefresh }: UserBudgetCardPro
           <span className="text-muted-foreground">Budget usage</span>
           <span className="font-medium">{usagePercent.toFixed(1)}%</span>
         </div>
-        <Progress value={Math.min(usagePercent, 100)} className="h-2" />
+        <Progress value={Math.min(usagePercent, 100)} className={`h-2 ${progressColor}`} />
       </div>
     </div>
   );
