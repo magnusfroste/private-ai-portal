@@ -152,26 +152,30 @@ export const DashboardActivity = () => {
           <p className="text-muted-foreground text-sm animate-pulse">Laddar usage-data...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ActivityCard
-            title="Spend"
-            value={`$${totalSpend.toFixed(3)}`}
-            data={spendData}
-            formatLegend={(v) => v.toFixed(4)}
-          />
-          <ActivityCard
-            title="Requests"
-            value={totalRequests.toLocaleString()}
-            data={requestData}
-            formatLegend={(v) => v.toLocaleString()}
-          />
-          <ActivityCard
-            title="Tokens"
-            value={formatTokens(totalTokens)}
-            data={tokenData}
-            formatLegend={formatTokens}
-          />
-        </div>
+        <>
+          <MonthlyUsageChart logs={allLogs} />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <ActivityCard
+              title="Spend"
+              value={`$${totalSpend.toFixed(3)}`}
+              data={spendData}
+              formatLegend={(v) => v.toFixed(4)}
+            />
+            <ActivityCard
+              title="Requests"
+              value={totalRequests.toLocaleString()}
+              data={requestData}
+              formatLegend={(v) => v.toLocaleString()}
+            />
+            <ActivityCard
+              title="Tokens"
+              value={formatTokens(totalTokens)}
+              data={tokenData}
+              formatLegend={formatTokens}
+            />
+          </div>
+        </>
       )}
     </div>
   );
