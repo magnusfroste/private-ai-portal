@@ -67,8 +67,11 @@ export const UserBudgetCard = ({ budget, loading, onRefresh }: UserBudgetCardPro
         <Alert className={`${budgetWarning.className} animate-in fade-in slide-in-from-top-2 duration-300`}>
           <budgetWarning.icon className="h-4 w-4" />
           <AlertTitle className="font-semibold">{budgetWarning.title}</AlertTitle>
-          <AlertDescription className="opacity-90">
-            {budgetWarning.description}
+          <AlertDescription className="opacity-90 flex items-center justify-between gap-4">
+            <span>{budgetWarning.description}</span>
+            <Link to="/credits" className="inline-flex items-center gap-1 font-semibold underline underline-offset-2 hover:opacity-80 whitespace-nowrap shrink-0">
+              Buy credits <ArrowRight className="h-3 w-3" />
+            </Link>
           </AlertDescription>
         </Alert>
       )}
