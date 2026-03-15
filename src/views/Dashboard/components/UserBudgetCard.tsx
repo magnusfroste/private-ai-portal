@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { DollarSign, TrendingUp, Wallet, RefreshCw, AlertTriangle, XCircle, Flame } from "lucide-react";
+import { DollarSign, TrendingUp, Wallet, RefreshCw, AlertTriangle, XCircle, Flame, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -66,8 +67,11 @@ export const UserBudgetCard = ({ budget, loading, onRefresh }: UserBudgetCardPro
         <Alert className={`${budgetWarning.className} animate-in fade-in slide-in-from-top-2 duration-300`}>
           <budgetWarning.icon className="h-4 w-4" />
           <AlertTitle className="font-semibold">{budgetWarning.title}</AlertTitle>
-          <AlertDescription className="opacity-90">
-            {budgetWarning.description}
+          <AlertDescription className="opacity-90 flex items-center justify-between gap-4">
+            <span>{budgetWarning.description}</span>
+            <Link to="/credits" className="inline-flex items-center gap-1 font-semibold underline underline-offset-2 hover:opacity-80 whitespace-nowrap shrink-0">
+              Buy credits <ArrowRight className="h-3 w-3" />
+            </Link>
           </AlertDescription>
         </Alert>
       )}
