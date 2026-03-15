@@ -25,6 +25,45 @@ interface HealthEntry {
   status: string;
 }
 
+/**
+ * Try individual model health check with a short timeout.
+ * LiteLLM supports /health?model=<model_name> for per-model checks.
+ */
+async function checkModelHealth(
+  modelName: string,
+  authHeaders: Record<string, string>,
+  timeoutMs = 8000
+): Promise<string> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+    const res = await fetch(
+      `https://api.autoversio.ai/health?model=${encodeURIComponent(modelName)}`,
+      { headers: authHeaders, signal: controller.signal }
+    );
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      const body = await res.text();
+      console.warn(`Health check for ${modelName} returned ${res.status}: ${body}`);
+      return 'unknown';
+    }
+
+    const data = await res.json();
+    // /health?model=X returns { healthy_endpoints: [...], unhealthy_endpoints: [...] }
+    const healthy: HealthEntry[] = data.healthy_endpoints || [];
+    const unhealthy: HealthEntry[] = data.unhealthy_endpoints || [];
+
+    if (unhealthy.length > 0) return 'unhealthy';
+    if (healthy.length > 0) return 'healthy';
+    return 'unknown';
+  } catch (err) {
+    console.warn(`Health check timeout/error for ${modelName}:`, err);
+    return 'unknown';
+  }
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -54,7 +93,6 @@ serve(async (req: Request) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      // Check admin role using service role client
       const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
       const { data: hasRole } = await supabaseAdmin.rpc('has_role', { _user_id: user.id, _role: 'admin' });
       if (!hasRole) {
@@ -67,6 +105,7 @@ serve(async (req: Request) => {
 
     const authHeaders = { 'Authorization': `Bearer ${LITELLM_MASTER_KEY}` };
 
+    // Fetch models and global health in parallel
     const [modelsRes, healthRes] = await Promise.all([
       fetch('https://api.autoversio.ai/model/info', { headers: authHeaders }),
       fetch('https://api.autoversio.ai/health', { headers: authHeaders }).catch(() => null),
@@ -79,17 +118,24 @@ serve(async (req: Request) => {
       });
     }
 
+    // Build health status map from global /health response
     const healthMap = new Map<string, string>();
     if (healthRes && healthRes.ok) {
       try {
         const healthData = await healthRes.json();
-        for (const e of (healthData.healthy_endpoints || []) as HealthEntry[]) {
+        console.log('Health response keys:', Object.keys(healthData));
+        const healthy: HealthEntry[] = healthData.healthy_endpoints || [];
+        const unhealthy: HealthEntry[] = healthData.unhealthy_endpoints || [];
+        console.log(`Global health: ${healthy.length} healthy, ${unhealthy.length} unhealthy`);
+        for (const e of healthy) {
           healthMap.set(e.model, 'healthy');
         }
-        for (const e of (healthData.unhealthy_endpoints || []) as HealthEntry[]) {
+        for (const e of unhealthy) {
           healthMap.set(e.model, 'unhealthy');
         }
       } catch { /* ignore */ }
+    } else {
+      console.warn('Global /health failed or not ok:', healthRes?.status);
     }
 
     const data = await modelsRes.json();
@@ -102,19 +148,27 @@ serve(async (req: Request) => {
     const { data: existing } = await supabase.from('curated_models').select('id, enabled, huggingface_url, is_default');
     const existingMap = new Map((existing || []).map((m: { id: string; enabled: boolean; huggingface_url: string | null; is_default: boolean }) => [m.id, m]));
 
-    const models = rawModels.map((m) => {
+    // First pass: build models with global health data
+    const modelsWithStatus = rawModels.map((m) => {
       const info = m.model_info || {};
       const litellmModel = m.litellm_params?.model || m.model_name;
       const providerRaw = litellmModel.includes('/') ? litellmModel.split('/')[0] : 'unknown';
       const provider = providerRaw.charAt(0).toUpperCase() + providerRaw.slice(1);
-      const healthStatus = healthMap.get(m.model_name) || 'unknown';
       const stableId = info.id || m.model_name;
+
+      // Try matching health by model_name first, then by id, then by litellm_params.model
+      const healthStatus = healthMap.get(m.model_name) 
+        || healthMap.get(stableId)
+        || healthMap.get(litellmModel)
+        || null;
+
       const prev = existingMap.get(stableId);
 
       return {
-        id: info.id || m.model_name,
+        id: stableId,
         model_name: m.model_name,
         provider,
+        litellmModel,
         max_input_tokens: info.max_input_tokens || info.max_tokens || null,
         max_output_tokens: info.max_output_tokens || null,
         input_cost_per_million: info.input_cost_per_token
@@ -124,7 +178,7 @@ serve(async (req: Request) => {
           ? Math.round(info.output_cost_per_token * 1_000_000 * 1000) / 1000
           : null,
         mode: info.mode || null,
-        status: healthStatus,
+        status: healthStatus || 'unknown',
         enabled: prev?.enabled ?? false,
         huggingface_url: prev?.huggingface_url ?? null,
         last_synced_at: now,
@@ -132,10 +186,30 @@ serve(async (req: Request) => {
       };
     });
 
-    // Upsert all models
+    // Second pass: for models still "unknown", try individual health checks in parallel
+    const unknownModels = modelsWithStatus.filter((m) => m.status === 'unknown');
+    if (unknownModels.length > 0) {
+      console.log(`Running individual health checks for ${unknownModels.length} models:`, unknownModels.map(m => m.model_name));
+      const individualChecks = await Promise.all(
+        unknownModels.map(async (m) => {
+          const status = await checkModelHealth(m.model_name, authHeaders);
+          return { id: m.id, status };
+        })
+      );
+      const individualMap = new Map(individualChecks.map((c) => [c.id, c.status]));
+      for (const m of modelsWithStatus) {
+        if (m.status === 'unknown' && individualMap.has(m.id)) {
+          m.status = individualMap.get(m.id)!;
+        }
+      }
+    }
+
+    // Remove the temporary litellmModel field before upsert
+    const modelsToUpsert = modelsWithStatus.map(({ litellmModel, ...rest }) => rest);
+
     const { error: upsertError } = await supabase
       .from('curated_models')
-      .upsert(models, { onConflict: 'id' });
+      .upsert(modelsToUpsert, { onConflict: 'id' });
 
     if (upsertError) {
       console.error('Upsert error:', upsertError);
@@ -145,7 +219,12 @@ serve(async (req: Request) => {
       });
     }
 
-    return new Response(JSON.stringify({ synced: models.length }), {
+    const healthSummary = modelsToUpsert.reduce((acc, m) => {
+      acc[m.status] = (acc[m.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return new Response(JSON.stringify({ synced: modelsToUpsert.length, health: healthSummary }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
