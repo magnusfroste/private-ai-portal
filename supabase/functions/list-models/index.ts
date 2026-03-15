@@ -26,6 +26,34 @@ interface HealthEntry {
   status: string;
 }
 
+async function checkModelHealth(
+  modelName: string,
+  authHeaders: Record<string, string>,
+  timeoutMs = 8000
+): Promise<string> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(
+      `https://api.autoversio.ai/health?model=${encodeURIComponent(modelName)}`,
+      { headers: authHeaders, signal: controller.signal }
+    );
+    clearTimeout(timeout);
+    if (!res.ok) {
+      await res.text();
+      return 'unknown';
+    }
+    const data = await res.json();
+    const healthy: HealthEntry[] = data.healthy_endpoints || [];
+    const unhealthy: HealthEntry[] = data.unhealthy_endpoints || [];
+    if (unhealthy.length > 0) return 'unhealthy';
+    if (healthy.length > 0) return 'healthy';
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -61,7 +89,6 @@ serve(async (req: Request) => {
     if (healthRes && healthRes.ok) {
       try {
         const healthData = await healthRes.json();
-        // LiteLLM /health returns { healthy_endpoints: [...], unhealthy_endpoints: [...] }
         const healthy: HealthEntry[] = healthData.healthy_endpoints || [];
         const unhealthy: HealthEntry[] = healthData.unhealthy_endpoints || [];
         for (const e of healthy) {
@@ -81,14 +108,16 @@ serve(async (req: Request) => {
     const models = rawModels.map((m) => {
       const info = m.model_info || {};
       const litellmModel = m.litellm_params?.model || m.model_name;
-
       const providerRaw = litellmModel.includes('/')
         ? litellmModel.split('/')[0]
         : 'unknown';
       const provider = providerRaw.charAt(0).toUpperCase() + providerRaw.slice(1);
 
-      // Check health status by model_name
-      const healthStatus = healthMap.get(m.model_name) || 'unknown';
+      // Try matching health by model_name, id, or litellm_params.model
+      const healthStatus = healthMap.get(m.model_name)
+        || healthMap.get(info.id || '')
+        || healthMap.get(litellmModel)
+        || null;
 
       return {
         id: m.model_name,
@@ -102,17 +131,39 @@ serve(async (req: Request) => {
           ? Math.round(info.output_cost_per_token * 1_000_000 * 1000) / 1000
           : null,
         mode: info.mode || null,
-        status: healthStatus,
+        status: healthStatus || 'unknown',
+        litellmModel,
       };
-    }).sort((a, b) => {
-      // Sort healthy first, then unknown, then unhealthy
-      const order = { healthy: 0, unknown: 1, unhealthy: 2 };
-      const diff = (order[a.status] ?? 1) - (order[b.status] ?? 1);
-      if (diff !== 0) return diff;
-      return a.id.localeCompare(b.id);
     });
 
-    return new Response(JSON.stringify({ models }), {
+    // Individual health checks for unknown models
+    const unknownModels = models.filter((m) => m.status === 'unknown');
+    if (unknownModels.length > 0) {
+      const checks = await Promise.all(
+        unknownModels.map(async (m) => ({
+          id: m.id,
+          status: await checkModelHealth(m.id, authHeaders),
+        }))
+      );
+      const checkMap = new Map(checks.map((c) => [c.id, c.status]));
+      for (const m of models) {
+        if (m.status === 'unknown' && checkMap.has(m.id)) {
+          m.status = checkMap.get(m.id)!;
+        }
+      }
+    }
+
+    // Remove temp field and sort
+    const result = models
+      .map(({ litellmModel, ...rest }) => rest)
+      .sort((a, b) => {
+        const order: Record<string, number> = { healthy: 0, unknown: 1, unhealthy: 2 };
+        const diff = (order[a.status] ?? 1) - (order[b.status] ?? 1);
+        if (diff !== 0) return diff;
+        return a.id.localeCompare(b.id);
+      });
+
+    return new Response(JSON.stringify({ models: result }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
