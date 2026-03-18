@@ -11,6 +11,7 @@ interface ProxyStatus {
   key_prefix: string | null;
   connected: boolean;
   api_url?: string;
+  litellm_version?: string;
   model_count?: number;
   health_response?: string;
   error?: string;
@@ -99,6 +100,12 @@ export const ProxyConfigCard = () => {
                     <div>
                       <p className="text-muted-foreground text-xs">API URL</p>
                       <p className="font-mono text-xs truncate">{status.api_url}</p>
+                    </div>
+                  )}
+                  {status.litellm_version && (
+                    <div>
+                      <p className="text-muted-foreground text-xs">LiteLLM Version</p>
+                      <p className="font-medium">v{status.litellm_version}</p>
                     </div>
                   )}
                   {status.model_count !== undefined && (
