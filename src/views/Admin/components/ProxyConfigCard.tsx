@@ -1,10 +1,14 @@
-import { useState } from "react";
-import { Server, RefreshCw, CheckCircle2, XCircle, AlertTriangle, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Server, RefreshCw, CheckCircle2, XCircle, AlertTriangle, Plus, Save, Pencil } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { toast } from "sonner";
 
 interface ProxyStatus {
   has_key: boolean;
@@ -18,8 +22,17 @@ interface ProxyStatus {
 }
 
 export const ProxyConfigCard = () => {
+  const { settings, save, isSaving } = useSiteSettings();
   const [status, setStatus] = useState<ProxyStatus | null>(null);
   const [checking, setChecking] = useState(false);
+  const [editingUrl, setEditingUrl] = useState(false);
+  const [urlDraft, setUrlDraft] = useState("");
+
+  useEffect(() => {
+    if (settings?.api_base_url) {
+      setUrlDraft(settings.api_base_url);
+    }
+  }, [settings?.api_base_url]);
 
   const checkStatus = async () => {
     setChecking(true);
@@ -35,6 +48,15 @@ export const ProxyConfigCard = () => {
     }
   };
 
+  const handleSaveUrl = () => {
+    if (!settings) return;
+    const trimmed = urlDraft.replace(/\/+$/, "");
+    save({ ...settings, api_base_url: trimmed });
+    setEditingUrl(false);
+    setStatus(null); // Reset so user re-checks with new URL
+    toast.success("API URL sparad — klicka 'Kontrollera' för att testa");
+  };
+
   return (
     <Card className="glass-card">
       <CardHeader>
@@ -47,6 +69,39 @@ export const ProxyConfigCard = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* API Base URL - always visible */}
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">API Base URL</Label>
+          {editingUrl ? (
+            <div className="flex gap-2">
+              <Input
+                value={urlDraft}
+                onChange={(e) => setUrlDraft(e.target.value)}
+                placeholder="https://api.example.com"
+                className="font-mono text-sm"
+              />
+              <Button size="sm" onClick={handleSaveUrl} disabled={isSaving}>
+                <Save className="w-3.5 h-3.5 mr-1.5" />
+                Spara
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => { setEditingUrl(false); setUrlDraft(settings?.api_base_url || ""); }}>
+                Avbryt
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <code className="text-sm bg-muted px-2 py-1 rounded font-mono flex-1 truncate">
+                {settings?.api_base_url || "Ej konfigurerad"}
+              </code>
+              <Button size="sm" variant="ghost" onClick={() => setEditingUrl(true)}>
+                <Pencil className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
         {!status && !checking ? (
           <Button onClick={checkStatus} variant="outline" className="w-full md:w-auto">
             <RefreshCw className="w-4 h-4 mr-2" />
@@ -59,7 +114,6 @@ export const ProxyConfigCard = () => {
           </div>
         ) : status && (
           <div className="space-y-4">
-            {/* Proxy type */}
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">LiteLLM</Badge>
               <span className="text-xs text-muted-foreground">Aktiv proxy</span>
@@ -96,12 +150,6 @@ export const ProxyConfigCard = () => {
                       {status.connected ? "Ansluten ✓" : "Kunde inte nå proxy"}
                     </p>
                   </div>
-                  {status.api_url && (
-                    <div>
-                      <p className="text-muted-foreground text-xs">API URL</p>
-                      <p className="font-mono text-xs truncate">{status.api_url}</p>
-                    </div>
-                  )}
                   {status.litellm_version && (
                     <div>
                       <p className="text-muted-foreground text-xs">LiteLLM Version</p>
@@ -124,7 +172,6 @@ export const ProxyConfigCard = () => {
               </>
             )}
 
-            {/* Error details */}
             {status.error && (
               <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
                 <div className="flex items-start gap-2">
@@ -134,7 +181,6 @@ export const ProxyConfigCard = () => {
               </div>
             )}
 
-            {/* Missing key instructions */}
             {!status.has_key && (
               <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 space-y-3">
                 <div className="flex items-start gap-2">
@@ -163,7 +209,6 @@ export const ProxyConfigCard = () => {
               </Button>
             </div>
 
-            {/* Future proxy support */}
             <div className="rounded-lg border border-border/50 bg-muted/30 p-3 mt-2">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Plus className="w-3.5 h-3.5" />
