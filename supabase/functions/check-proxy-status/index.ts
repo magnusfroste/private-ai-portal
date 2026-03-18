@@ -69,25 +69,26 @@ Deno.serve(async (req) => {
     let error: string | undefined;
     let healthResponse: string | undefined;
 
-    // Try /health endpoint
+    let litellmVersion: string | undefined;
+
+    // Use /health/readiness (fast, no live model checks) instead of /health (times out)
     try {
-      const healthRes = await fetch(`${apiBaseUrl}/health`, {
-        headers: { Authorization: `Bearer ${masterKey}` },
-        signal: AbortSignal.timeout(15000),
+      const readinessRes = await fetch(`${apiBaseUrl}/health/readiness`, {
+        signal: AbortSignal.timeout(10000),
       });
 
-      healthResponse = `${healthRes.status} ${healthRes.statusText}`;
-
-      if (healthRes.ok) {
+      if (readinessRes.ok) {
         connected = true;
-        const body = await healthRes.text();
-        healthResponse += ` - ${body.substring(0, 200)}`;
+        const body = await readinessRes.json();
+        litellmVersion = body.litellm_version;
+        healthResponse = `${readinessRes.status} OK - LiteLLM v${litellmVersion || "?"}`;
       } else {
-        const body = await healthRes.text();
-        error = `Proxy svarade med ${healthRes.status}: ${body.substring(0, 200)}`;
+        const body = await readinessRes.text();
+        healthResponse = `${readinessRes.status} ${readinessRes.statusText}`;
+        error = `Proxy svarade med ${readinessRes.status}: ${body.substring(0, 200)}`;
       }
     } catch (err) {
-      error = `Kunde inte nå ${apiBaseUrl}/health: ${err.message}`;
+      error = `Kunde inte nå ${apiBaseUrl}: ${err.message}`;
     }
 
     // If health worked, try model count
