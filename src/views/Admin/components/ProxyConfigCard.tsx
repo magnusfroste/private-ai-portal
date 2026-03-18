@@ -11,6 +11,7 @@ interface ProxyStatus {
   key_prefix: string | null;
   connected: boolean;
   api_url?: string;
+  litellm_version?: string;
   model_count?: number;
   health_response?: string;
   error?: string;
