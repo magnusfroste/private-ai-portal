@@ -7,6 +7,7 @@ import { EditUserDialog } from "./components/EditUserDialog";
 import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
 import { ModelCurationPanel } from "./components/ModelCurationPanel";
 import { StripeConfigCard } from "./components/StripeConfigCard";
+import { ProxyConfigCard } from "./components/ProxyConfigCard";
 import { CreditOverviewPanel } from "./components/CreditOverviewPanel";
 import { ApiKeyOverviewPanel } from "./components/ApiKeyOverviewPanel";
 import { UsageStatsPanel } from "./components/UsageStatsPanel";
@@ -79,8 +80,6 @@ export const AdminPage = () => {
         </TabsList>
 
         <TabsContent value="users" className="mt-6 space-y-6">
-          <AdminSettingsPanel />
-          <StripeConfigCard />
           {isLoading && (
             <div className="text-center py-12 text-muted-foreground">Loading users...</div>
           )}
@@ -108,7 +107,10 @@ export const AdminPage = () => {
           <ModelCurationPanel />
         </TabsContent>
 
-        <TabsContent value="settings" className="mt-6">
+        <TabsContent value="settings" className="mt-6 space-y-6">
+          <AdminSettingsPanel />
+          <ProxyConfigCard />
+          <StripeConfigCard />
           <SiteSettingsPage embedded />
         </TabsContent>
       </Tabs>
