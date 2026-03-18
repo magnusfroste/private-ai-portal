@@ -113,6 +113,7 @@ Deno.serve(async (req) => {
         key_prefix: keyPrefix,
         connected,
         api_url: apiBaseUrl,
+        litellm_version: litellmVersion,
         model_count: modelCount,
         health_response: healthResponse,
         error,
