@@ -107,7 +107,10 @@ export const AdminPage = () => {
           <ModelCurationPanel />
         </TabsContent>
 
-        <TabsContent value="settings" className="mt-6">
+        <TabsContent value="settings" className="mt-6 space-y-6">
+          <AdminSettingsPanel />
+          <ProxyConfigCard />
+          <StripeConfigCard />
           <SiteSettingsPage embedded />
         </TabsContent>
       </Tabs>
