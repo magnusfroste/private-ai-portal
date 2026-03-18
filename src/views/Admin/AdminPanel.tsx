@@ -8,6 +8,7 @@ import { UserTable } from "./components/UserTable";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
 import { StripeConfigCard } from "./components/StripeConfigCard";
+import { ProxyConfigCard } from "./components/ProxyConfigCard";
 import { ModelCurationPanel } from "./components/ModelCurationPanel";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
