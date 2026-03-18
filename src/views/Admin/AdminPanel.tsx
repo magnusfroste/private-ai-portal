@@ -88,6 +88,9 @@ export const AdminPanel = () => {
 
         <AdminSettingsPanel />
         <div className="mt-6">
+          <ProxyConfigCard />
+        </div>
+        <div className="mt-6">
           <ModelCurationPanel />
         </div>
         <div className="mt-6">
