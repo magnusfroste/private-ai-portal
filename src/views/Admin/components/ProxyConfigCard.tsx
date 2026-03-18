@@ -102,6 +102,12 @@ export const ProxyConfigCard = () => {
                       <p className="font-mono text-xs truncate">{status.api_url}</p>
                     </div>
                   )}
+                  {status.litellm_version && (
+                    <div>
+                      <p className="text-muted-foreground text-xs">LiteLLM Version</p>
+                      <p className="font-medium">v{status.litellm_version}</p>
+                    </div>
+                  )}
                   {status.model_count !== undefined && (
                     <div>
                       <p className="text-muted-foreground text-xs">Modeller</p>
