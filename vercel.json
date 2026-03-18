@@ -9,8 +9,8 @@
       "destination": "https://sjopaiquzqotymqmrcke.supabase.co/functions/v1/sitemap?base=https://tokenportal.lovable.app"
     },
     {
-      "source": "/((?!assets|src|favicon|og-image|placeholder).*)",
-      "destination": "https://sjopaiquzqotymqmrcke.supabase.co/functions/v1/render-html?base=https://tokenportal.lovable.app&path=/$1"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
