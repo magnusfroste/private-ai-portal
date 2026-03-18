@@ -80,8 +80,6 @@ export const AdminPage = () => {
         </TabsList>
 
         <TabsContent value="users" className="mt-6 space-y-6">
-          <AdminSettingsPanel />
-          <StripeConfigCard />
           {isLoading && (
             <div className="text-center py-12 text-muted-foreground">Loading users...</div>
           )}
