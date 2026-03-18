@@ -11,7 +11,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify user is admin
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const authHeader = req.headers.get("Authorization") || "";
@@ -27,7 +26,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check admin role
     const { data: isAdmin } = await supabase.rpc("has_role", {
       _user_id: user.id,
       _role: "admin",
@@ -43,64 +41,81 @@ Deno.serve(async (req) => {
     // Check if LITELLM_MASTER_KEY is set
     const masterKey = Deno.env.get("LITELLM_MASTER_KEY");
     const hasKey = !!masterKey && masterKey.length > 0;
+    const keyPrefix = hasKey ? masterKey!.substring(0, 6) + "..." : null;
 
     if (!hasKey) {
       return new Response(
-        JSON.stringify({ has_key: false, connected: false }),
+        JSON.stringify({ has_key: false, connected: false, key_prefix: null }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Try to reach the LiteLLM proxy
+    // Get the API base URL from admin_settings
+    const serviceClient = createClient(
+      supabaseUrl,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data: settingsData } = await serviceClient
+      .from("admin_settings")
+      .select("value")
+      .eq("key", "site_settings")
+      .maybeSingle();
+
+    const settings = settingsData?.value as Record<string, unknown> | null;
+    const apiBaseUrl = (settings?.api_base_url as string) || "https://api.autoversio.ai";
+
     let connected = false;
     let modelCount: number | undefined;
     let error: string | undefined;
+    let healthResponse: string | undefined;
 
+    // Try /health endpoint
     try {
-      // Get the API base URL from admin_settings
-      const serviceClient = createClient(
-        supabaseUrl,
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-      );
-      const { data: settingsData } = await serviceClient
-        .from("admin_settings")
-        .select("value")
-        .eq("key", "site_settings")
-        .maybeSingle();
-
-      const settings = settingsData?.value as Record<string, unknown> | null;
-      const apiBaseUrl = (settings?.api_base_url as string) || "https://api.autoversio.ai";
-
       const healthRes = await fetch(`${apiBaseUrl}/health`, {
         headers: { Authorization: `Bearer ${masterKey}` },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(15000),
       });
+
+      healthResponse = `${healthRes.status} ${healthRes.statusText}`;
 
       if (healthRes.ok) {
         connected = true;
-        // Try to get model count
-        try {
-          const modelsRes = await fetch(`${apiBaseUrl}/v1/models`, {
-            headers: { Authorization: `Bearer ${masterKey}` },
-            signal: AbortSignal.timeout(8000),
-          });
-          if (modelsRes.ok) {
-            const modelsData = await modelsRes.json();
-            modelCount = modelsData?.data?.length || 0;
-          }
-        } catch {
-          // Model count is optional
-        }
+        const body = await healthRes.text();
+        healthResponse += ` - ${body.substring(0, 200)}`;
       } else {
-        const text = await healthRes.text();
-        error = `Proxy svarade med ${healthRes.status}`;
+        const body = await healthRes.text();
+        error = `Proxy svarade med ${healthRes.status}: ${body.substring(0, 200)}`;
       }
     } catch (err) {
-      error = `Kunde inte nå proxy: ${err.message}`;
+      error = `Kunde inte nå ${apiBaseUrl}/health: ${err.message}`;
+    }
+
+    // If health worked, try model count
+    if (connected) {
+      try {
+        const modelsRes = await fetch(`${apiBaseUrl}/v1/models`, {
+          headers: { Authorization: `Bearer ${masterKey}` },
+          signal: AbortSignal.timeout(10000),
+        });
+        if (modelsRes.ok) {
+          const modelsData = await modelsRes.json();
+          modelCount = modelsData?.data?.length || 0;
+        }
+      } catch {
+        // Model count is optional
+      }
     }
 
     return new Response(
-      JSON.stringify({ has_key: true, connected, model_count: modelCount, error }),
+      JSON.stringify({
+        has_key: true,
+        key_prefix: keyPrefix,
+        connected,
+        api_url: apiBaseUrl,
+        model_count: modelCount,
+        health_response: healthResponse,
+        error,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
