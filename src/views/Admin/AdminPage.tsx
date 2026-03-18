@@ -7,6 +7,7 @@ import { EditUserDialog } from "./components/EditUserDialog";
 import { AdminSettingsPanel } from "./components/AdminSettingsPanel";
 import { ModelCurationPanel } from "./components/ModelCurationPanel";
 import { StripeConfigCard } from "./components/StripeConfigCard";
+import { ProxyConfigCard } from "./components/ProxyConfigCard";
 import { CreditOverviewPanel } from "./components/CreditOverviewPanel";
 import { ApiKeyOverviewPanel } from "./components/ApiKeyOverviewPanel";
 import { UsageStatsPanel } from "./components/UsageStatsPanel";
