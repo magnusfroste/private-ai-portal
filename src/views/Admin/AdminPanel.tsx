@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, ArrowLeft, Users } from "lucide-react";
+import { Shield, ArrowLeft, Users, Settings, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminUser } from "@/models/types/admin.types";
 import { useAdminData } from "./hooks/useAdminData";
 import { UserTable } from "./components/UserTable";
@@ -76,48 +77,52 @@ export const AdminPanel = () => {
       </nav>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Users className="w-8 h-8 text-primary" />
-          <div>
-            <h1 className="text-3xl font-bold">Användarhantering</h1>
-            <p className="text-muted-foreground">
-              Hantera användare och trial-nycklar
-            </p>
-          </div>
-        </div>
+        <Tabs defaultValue="users" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="users" className="flex items-center gap-1.5">
+              <Users className="w-4 h-4" />
+              Användare
+            </TabsTrigger>
+            <TabsTrigger value="models" className="flex items-center gap-1.5">
+              <Cpu className="w-4 h-4" />
+              Modeller
+            </TabsTrigger>
+            <TabsTrigger value="config" className="flex items-center gap-1.5">
+              <Settings className="w-4 h-4" />
+              Konfiguration
+            </TabsTrigger>
+          </TabsList>
 
-        <AdminSettingsPanel />
-        <div className="mt-6">
-          <ProxyConfigCard />
-        </div>
-        <div className="mt-6">
-          <ModelCurationPanel />
-        </div>
-        <div className="mt-6">
-          <StripeConfigCard />
-        </div>
+          <TabsContent value="users" className="space-y-6">
+            {isLoading && (
+              <div className="text-center py-12 text-muted-foreground">
+                Laddar användare...
+              </div>
+            )}
+            {isError && (
+              <div className="text-center py-12 text-destructive">
+                Kunde inte ladda användare. Försök igen.
+              </div>
+            )}
+            {!isLoading && !isError && (
+              <UserTable
+                users={users}
+                onEdit={handleEdit}
+                isUpdating={isUpdating}
+              />
+            )}
+          </TabsContent>
 
-        <div className="mt-8">
-          {isLoading && (
-            <div className="text-center py-12 text-muted-foreground">
-              Laddar användare...
-            </div>
-          )}
+          <TabsContent value="models">
+            <ModelCurationPanel />
+          </TabsContent>
 
-          {isError && (
-            <div className="text-center py-12 text-destructive">
-              Kunde inte ladda användare. Försök igen.
-            </div>
-          )}
-
-          {!isLoading && !isError && (
-            <UserTable
-              users={users}
-              onEdit={handleEdit}
-              isUpdating={isUpdating}
-            />
-          )}
-        </div>
+          <TabsContent value="config" className="space-y-6">
+            <AdminSettingsPanel />
+            <ProxyConfigCard />
+            <StripeConfigCard />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <EditUserDialog
