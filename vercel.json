@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/robots.txt",
-      "destination": "https://zlqnolzcceoymlpzbhsj.supabase.co/functions/v1/robots?base=https://autoversio.lovable.app"
+      "destination": "https://sjopaiquzqotymqmrcke.supabase.co/functions/v1/robots?base=https://tokenportal.lovable.app"
     },
     {
       "source": "/sitemap.xml",
