@@ -14,6 +14,33 @@ LiteLLM is trusted by thousands of companies and powers production AI infrastruc
 
 ---
 
+## Why This Portal? Key Differentiators
+
+### 🔒 Private AI - Your Data Stays Yours
+
+Unlike public APIs where your prompts and data are processed by third parties, this portal gives you **full control over your AI infrastructure**:
+
+- **Self-hosted LLMs**: Run models on your own infrastructure
+- **Bring Your Own Keys**: Use your own provider API keys
+- **No telemetry**: No third-party logging or data collection
+- **Data sovereignty**: Comply with GDPR, HIPAA, and other regulations
+
+### 🌉 API Compatibility Bridge
+
+LiteLLM acts as a universal translator between different LLM APIs:
+
+- **Claude Messages → OpenAI Completions**: Claude Code uses Anthropic's Messages API, but LiteLLM bridges this to any OpenAI-compatible endpoint
+- **Format normalization**: Standardize across providers with different API formats
+- **Provider agnostic**: Switch between OpenAI, Anthropic, Azure, and self-hosted models without code changes
+
+### 💰 Cost Control & Transparency
+
+- Per-user budgets with automatic enforcement
+- Real-time spend tracking
+- No surprise bills with transparent pricing
+
+---
+
 ## Portal Overview
 
 This is a **customer-facing portal** built on top of LiteLLM proxy, providing:
@@ -23,6 +50,7 @@ This is a **customer-facing portal** built on top of LiteLLM proxy, providing:
 - Each key is a LiteLLM virtual key with configurable spend limits
 - Real-time usage tracking per key
 - Easy integration guide with OpenAI SDK and Claude Code
+- **Claude Code compatible**: Set `ANTHROPIC_BASE_URL` to proxy for private AI workflows
 
 ### 💬 Chat Playground
 - Direct browser-based chat interface to test models
@@ -140,6 +168,77 @@ Per-user spend limits enforced by LiteLLM's built-in budget system.
 
 ---
 
+## LiteLLM Secrets in Supabase
+
+The portal communicates with LiteLLM proxy through **Supabase Edge Functions**. Sensitive credentials are stored securely as **Supabase Secrets**.
+
+### Self-Hosted LiteLLM
+
+Unlike managed AI services, **LiteLLM is self-hosted** on your own infrastructure. This means:
+
+- Full control over your LLM deployment
+- Private data never leaves your servers
+- Can connect to self-hosted models (Ollama, vLLM, LocalAI, etc.)
+- Same security model as running local private AI models
+
+### Required Secrets
+
+| Secret Name | Description |
+|------------|-------------|
+| `LITELLM_MASTER_KEY` | Master key for LiteLLM proxy authentication |
+| `LITELLM_API_BASE` | Base URL for your self-hosted LiteLLM instance |
+
+### Stripe Secrets
+
+| Secret Name | Description |
+|------------|-------------|
+| `STRIPE_SECRET_KEY` | Stripe API secret key for payments |
+| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret for payment events |
+| `STRIPE_PRICE_ID` | Stripe Price ID for credit packages |
+
+### Additional Provider Secrets (Optional)
+
+Depending on which LLM providers you configure in LiteLLM:
+
+| Secret Name | Provider |
+|------------|----------|
+| `OPENAI_API_KEY` | OpenAI |
+| `ANTHROPIC_API_KEY` | Anthropic |
+| `AZURE_API_KEY` | Azure OpenAI |
+| `GOOGLE_API_KEY` | Google AI |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_KEY` | AWS Bedrock |
+| `OLLAMA_API_KEY` | Ollama (local models) |
+| `LOCALAI_API_KEY` | LocalAI (local models) |
+
+### Setting Up Secrets
+
+1. Go to **Supabase Dashboard → Your Project → Edge Functions → Secrets**
+2. Add each required secret as a key-value pair
+3. The Edge Functions will automatically have access to these environment variables
+
+### How It Works
+
+```
+Portal (Frontend)
+    ↓
+Supabase Auth + Database
+    ↓
+Supabase Edge Functions
+    ├─ chat-playground
+    ├─ create-litellm-user
+    ├─ check-proxy-status
+    └─ stripe-status
+    ↓ (uses LITELLM_MASTER_KEY)
+Self-Hosted LiteLLM Proxy
+    ├─ Virtual API keys with budgets
+    ├─ User authentication
+    └─ Rate limiting
+    ↓ (uses provider API keys or local models)
+LLM Providers / Self-Hosted Models
+```
+
+---
+
 ## Summary
 
 This portal transforms LiteLLM proxy into a **full-featured SaaS product** with:
@@ -148,3 +247,4 @@ This portal transforms LiteLLM proxy into a **full-featured SaaS product** with:
 - Built-in chat interface for model testing
 - Credit-based billing system
 - Admin controls for platform management
+- Secure credential management via Supabase Secrets
