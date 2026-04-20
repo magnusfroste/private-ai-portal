@@ -18,6 +18,8 @@ export const useAllKeysUsage = () => {
     queryKey: ["all-keys-usage"],
     staleTime: 60_000,
     gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return [];
