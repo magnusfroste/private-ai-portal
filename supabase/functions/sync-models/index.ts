@@ -235,12 +235,32 @@ serve(async (req: Request) => {
       });
     }
 
+    // Delete rows that no longer exist in LiteLLM
+    const liveIds = new Set(modelsToUpsert.map((m) => m.id));
+    const staleIds = (existing || [])
+      .map((row) => row.id)
+      .filter((id) => !liveIds.has(id));
+
+    let deleted = 0;
+    if (staleIds.length > 0) {
+      const { error: deleteError, count } = await supabase
+        .from('curated_models')
+        .delete({ count: 'exact' })
+        .in('id', staleIds);
+      if (deleteError) {
+        console.error('Delete error:', deleteError);
+      } else {
+        deleted = count ?? staleIds.length;
+        console.log(`Deleted ${deleted} stale models:`, staleIds);
+      }
+    }
+
     const healthSummary = modelsToUpsert.reduce((acc, m) => {
       acc[m.status] = (acc[m.status] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    return new Response(JSON.stringify({ synced: modelsToUpsert.length, health: healthSummary }), {
+    return new Response(JSON.stringify({ synced: modelsToUpsert.length, deleted, health: healthSummary }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
