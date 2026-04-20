@@ -144,9 +144,24 @@ serve(async (req: Request) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const now = new Date().toISOString();
 
-    // Get existing models to preserve enabled state and huggingface_url
-    const { data: existing } = await supabase.from('curated_models').select('id, enabled, huggingface_url, is_default');
-    const existingMap = new Map((existing || []).map((m: { id: string; enabled: boolean; huggingface_url: string | null; is_default: boolean }) => [m.id, m]));
+    // Get existing models to preserve enabled state and huggingface_url.
+    // Match by both `id` AND `model_name` so we carry settings forward even if
+    // LiteLLM's internal id changed (e.g. after a redeploy).
+    const { data: existing } = await supabase
+      .from('curated_models')
+      .select('id, model_name, enabled, huggingface_url, is_default');
+    type ExistingRow = { id: string; model_name: string | null; enabled: boolean; huggingface_url: string | null; is_default: boolean };
+    const existingById = new Map<string, ExistingRow>();
+    const existingByName = new Map<string, ExistingRow>();
+    for (const row of (existing || []) as ExistingRow[]) {
+      existingById.set(row.id, row);
+      // Prefer rows that actually have settings set when multiple share a name
+      const nameKey = row.model_name || row.id;
+      const prev = existingByName.get(nameKey);
+      if (!prev || (!prev.enabled && row.enabled) || (!prev.is_default && row.is_default)) {
+        existingByName.set(nameKey, row);
+      }
+    }
 
     // First pass: build models with global health data
     const modelsWithStatus = rawModels.map((m) => {
