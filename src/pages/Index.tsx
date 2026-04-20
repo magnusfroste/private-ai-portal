@@ -19,8 +19,20 @@ const Index = () => {
       <TrialCTA />
       
       <footer className="border-t border-border/50 py-12">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
+        <div className="container mx-auto px-4 text-center text-muted-foreground space-y-2">
           <p>© {new Date().getFullYear()} {siteName}. {settings?.footer_text || tagline}</p>
+          {settings?.footer_link_url && settings?.footer_link_text && (
+            <p>
+              <a
+                href={settings.footer_link_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm hover:text-primary underline-offset-4 hover:underline transition-colors"
+              >
+                {settings.footer_link_text}
+              </a>
+            </p>
+          )}
         </div>
       </footer>
     </div>
