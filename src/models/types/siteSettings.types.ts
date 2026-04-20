@@ -102,8 +102,8 @@ export const defaultSiteSettings: SiteSettings = {
   features_subtitle: "Sovereign, secure, and developer-friendly AI infrastructure — ready to scale.",
   feature_cards: [
     {
-      title: "OpenAI-compatible API",
-      description: "Access GPT, Claude, Llama, and more through a single unified endpoint. Drop-in replacement for your existing code.",
+      title: "Open Weights models",
+      description: "Access only open weights models through a single unified endpoint. Drop-in replacement for your existing code.",
       bullets: ["Single API endpoint", "Multiple providers", "Easy migration"],
     },
     {
