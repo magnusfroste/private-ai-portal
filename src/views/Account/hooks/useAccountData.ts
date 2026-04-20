@@ -20,14 +20,15 @@ export const useAccountData = (options?: UseAccountDataOptions) => {
   const startIso = options?.startDate?.toISOString();
   const endIso = options?.endDate?.toISOString();
 
-  const { usageByModel, totalSpend, allLogs, dailyBreakdown } = useMemo(() => {
+  const { usageByModel, totalSpend, allLogs, dailyBreakdown, modelSpendTotals } = useMemo(() => {
     const modelMap: Record<string, ModelUsage> = {};
     const rawLogs: any[] = [];
     const dayMap: Record<string, DailySpendPoint> = {};
+    const modelTotals: Record<string, ModelUsage> = {};
     let total = 0;
 
     if (!data) {
-      return { usageByModel: [], totalSpend: 0, allLogs: [], dailyBreakdown: [] };
+      return { usageByModel: [], totalSpend: 0, allLogs: [], dailyBreakdown: [], modelSpendTotals: [] };
     }
 
     for (const entry of data) {
@@ -79,19 +80,30 @@ export const useAccountData = (options?: UseAccountDataOptions) => {
         dayMap[day.date].spend += Number(day.spend || 0);
         dayMap[day.date].total_tokens += Number(day.total_tokens || 0);
         dayMap[day.date].api_requests += Number(day.api_requests || 0);
+
+        // Per-model totals from server-aggregated breakdown (more accurate than spend_logs)
+        for (const m of day.models || []) {
+          const key = m.model || "unknown";
+          if (!modelTotals[key]) modelTotals[key] = { model: key, cost: 0, tokens: 0, requests: 0 };
+          modelTotals[key].cost += Number(m.spend || 0);
+          modelTotals[key].tokens += Number(m.total_tokens || 0);
+          modelTotals[key].requests += Number(m.api_requests || 0);
+        }
       }
     }
 
     const sortedModels = Object.values(modelMap).sort((a, b) => b.cost - a.cost);
     const sortedDays = Object.values(dayMap).sort((a, b) => a.date.localeCompare(b.date));
+    const sortedModelTotals = Object.values(modelTotals).sort((a, b) => b.cost - a.cost);
 
     return {
       usageByModel: sortedModels,
       totalSpend: total,
       allLogs: rawLogs,
       dailyBreakdown: sortedDays,
+      modelSpendTotals: sortedModelTotals,
     };
   }, [data, startIso, endIso]);
 
-  return { usageByModel, totalSpend, allLogs, dailyBreakdown, loading: isLoading };
+  return { usageByModel, totalSpend, allLogs, dailyBreakdown, modelSpendTotals, loading: isLoading };
 };
