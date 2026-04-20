@@ -144,9 +144,24 @@ serve(async (req: Request) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const now = new Date().toISOString();
 
-    // Get existing models to preserve enabled state and huggingface_url
-    const { data: existing } = await supabase.from('curated_models').select('id, enabled, huggingface_url, is_default');
-    const existingMap = new Map((existing || []).map((m: { id: string; enabled: boolean; huggingface_url: string | null; is_default: boolean }) => [m.id, m]));
+    // Get existing models to preserve enabled state and huggingface_url.
+    // Match by both `id` AND `model_name` so we carry settings forward even if
+    // LiteLLM's internal id changed (e.g. after a redeploy).
+    const { data: existing } = await supabase
+      .from('curated_models')
+      .select('id, model_name, enabled, huggingface_url, is_default');
+    type ExistingRow = { id: string; model_name: string | null; enabled: boolean; huggingface_url: string | null; is_default: boolean };
+    const existingById = new Map<string, ExistingRow>();
+    const existingByName = new Map<string, ExistingRow>();
+    for (const row of (existing || []) as ExistingRow[]) {
+      existingById.set(row.id, row);
+      // Prefer rows that actually have settings set when multiple share a name
+      const nameKey = row.model_name || row.id;
+      const prev = existingByName.get(nameKey);
+      if (!prev || (!prev.enabled && row.enabled) || (!prev.is_default && row.is_default)) {
+        existingByName.set(nameKey, row);
+      }
+    }
 
     // First pass: build models with global health data
     const modelsWithStatus = rawModels.map((m) => {
@@ -162,7 +177,7 @@ serve(async (req: Request) => {
         || healthMap.get(litellmModel)
         || null;
 
-      const prev = existingMap.get(stableId);
+      const prev = existingById.get(stableId) || existingByName.get(m.model_name);
 
       return {
         id: stableId,
@@ -180,6 +195,7 @@ serve(async (req: Request) => {
         mode: info.mode || null,
         status: healthStatus || 'unknown',
         enabled: prev?.enabled ?? false,
+        is_default: prev?.is_default ?? false,
         huggingface_url: prev?.huggingface_url ?? null,
         last_synced_at: now,
         updated_at: now,
@@ -219,12 +235,32 @@ serve(async (req: Request) => {
       });
     }
 
+    // Delete rows that no longer exist in LiteLLM
+    const liveIds = new Set(modelsToUpsert.map((m) => m.id));
+    const staleIds = (existing || [])
+      .map((row) => row.id)
+      .filter((id) => !liveIds.has(id));
+
+    let deleted = 0;
+    if (staleIds.length > 0) {
+      const { error: deleteError, count } = await supabase
+        .from('curated_models')
+        .delete({ count: 'exact' })
+        .in('id', staleIds);
+      if (deleteError) {
+        console.error('Delete error:', deleteError);
+      } else {
+        deleted = count ?? staleIds.length;
+        console.log(`Deleted ${deleted} stale models:`, staleIds);
+      }
+    }
+
     const healthSummary = modelsToUpsert.reduce((acc, m) => {
       acc[m.status] = (acc[m.status] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    return new Response(JSON.stringify({ synced: modelsToUpsert.length, health: healthSummary }), {
+    return new Response(JSON.stringify({ synced: modelsToUpsert.length, deleted, health: healthSummary }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
