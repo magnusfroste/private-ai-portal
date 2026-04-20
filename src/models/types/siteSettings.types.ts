@@ -133,6 +133,8 @@ export const defaultSiteSettings: SiteSettings = {
   cta_button_text: "Get started",
   navbar_cta_text: "Start Free Trial",
   footer_text: "Secure Private LLM Access for Developers",
+  footer_link_text: "",
+  footer_link_url: "",
 
   // SEO
   seo_title: "Autoversio - Secure Private LLM Access for Developers",
