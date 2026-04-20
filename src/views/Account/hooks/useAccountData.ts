@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
+import { useAllKeysUsage } from "@/hooks/useAllKeysUsage";
 import { ModelUsage } from "@/models/types/usage.types";
 
 interface UseAccountDataOptions {
@@ -7,107 +7,91 @@ interface UseAccountDataOptions {
   endDate?: Date;
 }
 
+export interface DailySpendPoint {
+  date: string;
+  spend: number;
+  total_tokens: number;
+  api_requests: number;
+}
+
 export const useAccountData = (options?: UseAccountDataOptions) => {
-  const [usageByModel, setUsageByModel] = useState<ModelUsage[]>([]);
-  const [totalSpend, setTotalSpend] = useState(0);
-  const [allLogs, setAllLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading } = useAllKeysUsage();
 
   const startIso = options?.startDate?.toISOString();
   const endIso = options?.endDate?.toISOString();
 
-  const fetchUsageData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+  const { usageByModel, totalSpend, allLogs, dailyBreakdown } = useMemo(() => {
+    const modelMap: Record<string, ModelUsage> = {};
+    const rawLogs: any[] = [];
+    const dayMap: Record<string, DailySpendPoint> = {};
+    let total = 0;
 
-      const { data: keys, error: keysError } = await supabase
-        .from("api_keys")
-        .select("id, name")
-        .eq("user_id", session.user.id);
+    if (!data) {
+      return { usageByModel: [], totalSpend: 0, allLogs: [], dailyBreakdown: [] };
+    }
 
-      if (keysError) throw keysError;
-      if (!keys || keys.length === 0) {
-        setUsageByModel([]);
-        setTotalSpend(0);
-        return;
+    for (const entry of data) {
+      if (!entry.payload) continue;
+      const logs = entry.payload.spend_logs || [];
+      rawLogs.push(...logs);
+
+      const filteredLogs = logs.filter((log) => {
+        if (!log.startTime) return true;
+        const logDate = new Date(log.startTime);
+        if (startIso && logDate < new Date(startIso)) return false;
+        if (endIso) {
+          const end = new Date(endIso);
+          end.setHours(23, 59, 59, 999);
+          if (logDate > end) return false;
+        }
+        return true;
+      });
+
+      if (filteredLogs.length > 0) {
+        for (const log of filteredLogs) {
+          const model = log.model || "unknown";
+          if (!modelMap[model]) modelMap[model] = { model, cost: 0, tokens: 0, requests: 0 };
+          modelMap[model].cost += Number(log.spend || 0);
+          modelMap[model].tokens += Number(log.total_tokens || 0);
+          modelMap[model].requests += 1;
+          total += Number(log.spend || 0);
+        }
+      } else if (!startIso && !endIso) {
+        const keySpend = entry.payload.info?.spend || 0;
+        const keyTokens = entry.payload.info?.total_tokens || 0;
+        if (keySpend > 0) {
+          const fallbackModel = "aggregated";
+          if (!modelMap[fallbackModel]) modelMap[fallbackModel] = { model: fallbackModel, cost: 0, tokens: 0, requests: 0 };
+          modelMap[fallbackModel].cost += keySpend;
+          modelMap[fallbackModel].tokens += keyTokens;
+          modelMap[fallbackModel].requests += 1;
+          total += keySpend;
+        }
       }
 
-      const modelMap: Record<string, ModelUsage> = {};
-      const rawLogs: any[] = [];
-      let total = 0;
-
-      await Promise.all(
-        keys.map(async (key) => {
-          try {
-            const { data, error } = await supabase.functions.invoke("get-key-usage", {
-              body: { keyId: key.id },
-              headers: { Authorization: `Bearer ${session.access_token}` },
-            });
-
-            if (error || !data) return;
-
-            const logs = data.spend_logs || [];
-            rawLogs.push(...logs);
-            const filteredLogs = logs.filter((log: any) => {
-              if (!log.startTime) return true;
-              const logDate = new Date(log.startTime);
-              if (startIso && logDate < new Date(startIso)) return false;
-              if (endIso) {
-                const end = new Date(endIso);
-                end.setHours(23, 59, 59, 999);
-                if (logDate > end) return false;
-              }
-              return true;
-            });
-
-            if (filteredLogs.length > 0) {
-              filteredLogs.forEach((log: any) => {
-                const model = log.model || "unknown";
-                if (!modelMap[model]) {
-                  modelMap[model] = { model, cost: 0, tokens: 0, requests: 0 };
-                }
-                modelMap[model].cost += Number(log.spend || 0);
-                modelMap[model].tokens += Number(log.total_tokens || 0);
-                modelMap[model].requests += 1;
-              });
-              total += filteredLogs.reduce((s: number, l: any) => s + (l.spend || 0), 0);
-            } else if (!startIso && !endIso) {
-              // Fallback only when no date filter
-              const keySpend = data.info?.spend || 0;
-              const keyTokens = data.info?.total_tokens || 0;
-              if (keySpend > 0) {
-                const fallbackModel = "aggregated";
-                if (!modelMap[fallbackModel]) {
-                  modelMap[fallbackModel] = { model: fallbackModel, cost: 0, tokens: 0, requests: 0 };
-                }
-                modelMap[fallbackModel].cost += keySpend;
-                modelMap[fallbackModel].tokens += keyTokens;
-                modelMap[fallbackModel].requests += 1;
-                total += keySpend;
-              }
-            }
-          } catch (err) {
-            console.error(`Error fetching usage for key ${key.name}:`, err);
-          }
-        })
-      );
-
-      const sorted = Object.values(modelMap).sort((a, b) => b.cost - a.cost);
-      setUsageByModel(sorted);
-      setTotalSpend(total);
-      setAllLogs(rawLogs);
-    } catch (err) {
-      console.error("Error fetching usage data:", err);
-    } finally {
-      setLoading(false);
+      // Aggregate daily_breakdown across all keys
+      for (const day of entry.payload.daily_breakdown || []) {
+        if (startIso && new Date(day.date) < new Date(startIso.slice(0, 10))) continue;
+        if (endIso && new Date(day.date) > new Date(endIso.slice(0, 10))) continue;
+        if (!dayMap[day.date]) {
+          dayMap[day.date] = { date: day.date, spend: 0, total_tokens: 0, api_requests: 0 };
+        }
+        dayMap[day.date].spend += Number(day.spend || 0);
+        dayMap[day.date].total_tokens += Number(day.total_tokens || 0);
+        dayMap[day.date].api_requests += Number(day.api_requests || 0);
+      }
     }
-  }, [startIso, endIso]);
 
-  useEffect(() => {
-    fetchUsageData();
-  }, [fetchUsageData]);
+    const sortedModels = Object.values(modelMap).sort((a, b) => b.cost - a.cost);
+    const sortedDays = Object.values(dayMap).sort((a, b) => a.date.localeCompare(b.date));
 
-  return { usageByModel, totalSpend, allLogs, loading };
+    return {
+      usageByModel: sortedModels,
+      totalSpend: total,
+      allLogs: rawLogs,
+      dailyBreakdown: sortedDays,
+    };
+  }, [data, startIso, endIso]);
+
+  return { usageByModel, totalSpend, allLogs, dailyBreakdown, loading: isLoading };
 };
