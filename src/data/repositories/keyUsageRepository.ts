@@ -26,11 +26,19 @@ export interface SpendLog {
   api_key?: string;
 }
 
+export interface DailyModelBreakdown {
+  model: string;
+  spend: number;
+  total_tokens: number;
+  api_requests: number;
+}
+
 export interface DailyBreakdown {
   date: string;
   spend: number;
   total_tokens: number;
   api_requests: number;
+  models?: DailyModelBreakdown[];
 }
 
 export interface KeyUsagePayload {

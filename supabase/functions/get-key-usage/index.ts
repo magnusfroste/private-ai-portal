@@ -37,6 +37,12 @@ interface KeyUsageResponse {
     spend: number;
     total_tokens: number;
     api_requests: number;
+    models?: Array<{
+      model: string;
+      spend: number;
+      total_tokens: number;
+      api_requests: number;
+    }>;
   }>;
 }
 
@@ -195,16 +201,29 @@ serve(async (req) => {
     const promptTokens = keyInfo.prompt_tokens ?? aggregatedPromptTokens;
     const completionTokens = keyInfo.completion_tokens ?? aggregatedCompletionTokens;
 
-    // Build a compact daily breakdown for charts
+    // Build a compact daily breakdown for charts (incl. per-model split)
+    type LitellmDayResult = {
+      date: string;
+      metrics?: { spend?: number; total_tokens?: number; api_requests?: number };
+      breakdown?: {
+        models?: Record<string, { metrics?: { spend?: number; total_tokens?: number; api_requests?: number } }>;
+      };
+    };
     const dailyBreakdown = Array.isArray(dailyData?.results)
-      ? dailyData.results
-          .map((r: { date: string; metrics?: { spend?: number; total_tokens?: number; api_requests?: number } }) => ({
+      ? (dailyData.results as LitellmDayResult[])
+          .map((r) => ({
             date: r.date,
             spend: r.metrics?.spend ?? 0,
             total_tokens: r.metrics?.total_tokens ?? 0,
             api_requests: r.metrics?.api_requests ?? 0,
+            models: Object.entries(r.breakdown?.models || {}).map(([model, v]) => ({
+              model,
+              spend: v.metrics?.spend ?? 0,
+              total_tokens: v.metrics?.total_tokens ?? 0,
+              api_requests: v.metrics?.api_requests ?? 0,
+            })),
           }))
-          .sort((a: { date: string }, b: { date: string }) => a.date.localeCompare(b.date))
+          .sort((a, b) => a.date.localeCompare(b.date))
       : [];
 
     const response: KeyUsageResponse = {
