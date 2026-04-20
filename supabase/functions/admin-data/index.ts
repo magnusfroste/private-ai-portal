@@ -144,44 +144,134 @@ serve(async (req: Request) => {
     return json({ keys: enriched, userSummary });
   }
 
-  // === Usage statistics ===
+  // === Usage statistics — fetched server-side from LiteLLM proxy ===
+  // Uses /global/spend/report (pre-aggregated) for speed instead of scanning
+  // local token_usage table. Falls back to token_usage if proxy unavailable.
   if (type === "usage") {
-    // Top models by cost
-    const { data: usage, error } = await supabase
-      .from("token_usage")
-      .select("model, cost_usd, tokens_used, user_id")
-      .order("timestamp", { ascending: false })
-      .limit(1000);
+    const LITELLM_BASE = "https://api.autoversio.ai";
+    const LITELLM_MASTER_KEY = Deno.env.get("LITELLM_MASTER_KEY") || "";
 
-    if (error) {
-      console.error("usage error:", error);
-      return json({ error: "Failed to fetch usage" }, 500);
-    }
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - 30);
+    const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
-    const modelStats: Record<string, { cost: number; tokens: number; requests: number }> = {};
-    const userStats: Record<string, { cost: number; requests: number }> = {};
     let totalCost = 0;
     let totalTokens = 0;
+    let totalRequests = 0;
+    const modelStats: Record<string, { cost: number; tokens: number; requests: number }> = {};
+    const userStats: Record<string, { cost: number; requests: number }> = {};
 
-    for (const row of usage || []) {
-      const model = row.model || "unknown";
-      const cost = Number(row.cost_usd || 0);
-      const tokens = Number(row.tokens_used || 0);
+    if (LITELLM_MASTER_KEY) {
+      try {
+        // /global/spend/report aggregates by model server-side
+        const modelUrl = `${LITELLM_BASE}/global/spend/report?start_date=${fmt(start)}&end_date=${fmt(end)}&group_by=model`;
+        const tagUrl = `${LITELLM_BASE}/global/spend/report?start_date=${fmt(start)}&end_date=${fmt(end)}&group_by=api_key`;
 
-      totalCost += cost;
-      totalTokens += tokens;
+        const [modelRes, tagRes] = await Promise.all([
+          fetch(modelUrl, { headers: { Authorization: `Bearer ${LITELLM_MASTER_KEY}` } }),
+          fetch(tagUrl, { headers: { Authorization: `Bearer ${LITELLM_MASTER_KEY}` } }),
+        ]);
 
-      if (!modelStats[model]) modelStats[model] = { cost: 0, tokens: 0, requests: 0 };
-      modelStats[model].cost += cost;
-      modelStats[model].tokens += tokens;
-      modelStats[model].requests += 1;
+        if (modelRes.ok) {
+          const modelData = await modelRes.json();
+          const rows = Array.isArray(modelData) ? modelData : (modelData.results || modelData.data || []);
+          for (const r of rows) {
+            // Each row may contain breakdown.models or direct model fields
+            const breakdown = r.breakdown?.models || r.models || [];
+            if (Array.isArray(breakdown) && breakdown.length > 0) {
+              for (const m of breakdown) {
+                const name = m.model || m.name || "unknown";
+                if (!modelStats[name]) modelStats[name] = { cost: 0, tokens: 0, requests: 0 };
+                modelStats[name].cost += Number(m.spend ?? m.metrics?.spend ?? 0);
+                modelStats[name].tokens += Number(m.total_tokens ?? m.metrics?.total_tokens ?? 0);
+                modelStats[name].requests += Number(m.api_requests ?? m.metrics?.api_requests ?? 0);
+              }
+            } else if (r.model) {
+              const name = r.model;
+              if (!modelStats[name]) modelStats[name] = { cost: 0, tokens: 0, requests: 0 };
+              modelStats[name].cost += Number(r.spend ?? 0);
+              modelStats[name].tokens += Number(r.total_tokens ?? 0);
+              modelStats[name].requests += Number(r.api_requests ?? 0);
+            }
+          }
+        } else {
+          console.warn("global/spend/report (model) failed:", modelRes.status);
+        }
 
-      if (!userStats[row.user_id]) userStats[row.user_id] = { cost: 0, requests: 0 };
-      userStats[row.user_id].cost += cost;
-      userStats[row.user_id].requests += 1;
+        // Aggregate per api_key, then map to user_ids via api_keys table
+        if (tagRes.ok) {
+          const tagData = await tagRes.json();
+          const rows = Array.isArray(tagData) ? tagData : (tagData.results || tagData.data || []);
+          const keyAgg: Record<string, { cost: number; requests: number }> = {};
+          for (const r of rows) {
+            const breakdown = r.breakdown?.api_keys || r.api_keys || [];
+            const list = Array.isArray(breakdown) && breakdown.length > 0 ? breakdown : [r];
+            for (const k of list) {
+              const token = k.api_key || k.key || k.token;
+              if (!token) continue;
+              if (!keyAgg[token]) keyAgg[token] = { cost: 0, requests: 0 };
+              keyAgg[token].cost += Number(k.spend ?? k.metrics?.spend ?? 0);
+              keyAgg[token].requests += Number(k.api_requests ?? k.metrics?.api_requests ?? 0);
+            }
+          }
+
+          // Resolve tokens → user_ids
+          const tokens = Object.keys(keyAgg);
+          if (tokens.length > 0) {
+            const { data: keyRows } = await supabase
+              .from("api_keys")
+              .select("user_id, key_value, litellm_token")
+              .or(tokens.map((t) => `litellm_token.eq.${t},key_value.eq.${t}`).join(","));
+
+            for (const kr of keyRows || []) {
+              const token = kr.litellm_token || kr.key_value;
+              const agg = keyAgg[token];
+              if (!agg) continue;
+              if (!userStats[kr.user_id]) userStats[kr.user_id] = { cost: 0, requests: 0 };
+              userStats[kr.user_id].cost += agg.cost;
+              userStats[kr.user_id].requests += agg.requests;
+            }
+          }
+        } else {
+          console.warn("global/spend/report (api_key) failed:", tagRes.status);
+        }
+
+        // Compute totals from modelStats
+        for (const s of Object.values(modelStats)) {
+          totalCost += s.cost;
+          totalTokens += s.tokens;
+          totalRequests += s.requests;
+        }
+      } catch (err) {
+        console.error("LiteLLM global/spend/report error:", err);
+      }
     }
 
-    // Get top users by cost
+    // Fallback: if proxy gave nothing, use local token_usage (legacy path)
+    if (totalRequests === 0) {
+      const { data: usage } = await supabase
+        .from("token_usage")
+        .select("model, cost_usd, tokens_used, user_id")
+        .order("timestamp", { ascending: false })
+        .limit(1000);
+      for (const row of usage || []) {
+        const model = row.model || "unknown";
+        const cost = Number(row.cost_usd || 0);
+        const tokens = Number(row.tokens_used || 0);
+        totalCost += cost;
+        totalTokens += tokens;
+        totalRequests += 1;
+        if (!modelStats[model]) modelStats[model] = { cost: 0, tokens: 0, requests: 0 };
+        modelStats[model].cost += cost;
+        modelStats[model].tokens += tokens;
+        modelStats[model].requests += 1;
+        if (!userStats[row.user_id]) userStats[row.user_id] = { cost: 0, requests: 0 };
+        userStats[row.user_id].cost += cost;
+        userStats[row.user_id].requests += 1;
+      }
+    }
+
     const topUserIds = Object.entries(userStats)
       .sort((a, b) => b[1].cost - a[1].cost)
       .slice(0, 10)
@@ -193,7 +283,6 @@ serve(async (req: Request) => {
         .from("profiles")
         .select("id, email, full_name")
         .in("id", topUserIds);
-
       topUsers = topUserIds.map((uid) => {
         const p = profiles?.find((pr: any) => pr.id === uid);
         return {
@@ -210,7 +299,7 @@ serve(async (req: Request) => {
       .slice(0, 15)
       .map(([model, stats]) => ({ model, ...stats }));
 
-    return json({ totalCost, totalTokens, totalRequests: (usage || []).length, topModels, topUsers });
+    return json({ totalCost, totalTokens, totalRequests, topModels, topUsers });
   }
 
   return json({ error: "Invalid type parameter. Use: credits, keys, usage" }, 400);

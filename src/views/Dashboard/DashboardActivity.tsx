@@ -10,6 +10,7 @@ import { useDashboardData } from "./hooks/useDashboardData";
 import { useAccountData } from "@/views/Account/hooks/useAccountData";
 import { ActivityCard } from "./components/ActivityCard";
 import { MonthlyUsageChart } from "./components/MonthlyUsageChart";
+import { DailySpendChart } from "@/views/Account/components/DailySpendChart";
 
 const PRESETS = [
   { label: "7d", days: 7 },
@@ -26,7 +27,7 @@ export const DashboardActivity = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [activePreset, setActivePreset] = useState<string>("Alla");
 
-  const { usageByModel, totalSpend, allLogs, loading: usageLoading } = useAccountData({
+  const { usageByModel, totalSpend, allLogs, dailyBreakdown, loading: usageLoading } = useAccountData({
     startDate,
     endDate,
   });
@@ -153,6 +154,8 @@ export const DashboardActivity = () => {
         </div>
       ) : (
         <>
+          <DailySpendChart data={dailyBreakdown} loading={usageLoading} />
+
           <MonthlyUsageChart logs={allLogs} />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
