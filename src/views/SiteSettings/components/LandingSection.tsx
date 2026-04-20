@@ -227,9 +227,21 @@ export const LandingSection = ({ settings, onChange }: Props) => {
         <CardHeader>
           <CardTitle className="text-lg">Footer</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <Label>Footer-text</Label>
-          <Input value={settings.footer_text} onChange={(e) => onChange({ ...settings, footer_text: e.target.value })} placeholder="Visas efter © År Sidnamn." />
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Footer-text</Label>
+            <Input value={settings.footer_text} onChange={(e) => onChange({ ...settings, footer_text: e.target.value })} placeholder="Visas efter © År Sidnamn." />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-border">
+            <div className="space-y-2">
+              <Label>Footer-länk text</Label>
+              <Input value={settings.footer_link_text} onChange={(e) => onChange({ ...settings, footer_link_text: e.target.value })} placeholder="t.ex. Integritetspolicy" />
+            </div>
+            <div className="space-y-2">
+              <Label>Footer-länk URL</Label>
+              <Input value={settings.footer_link_url} onChange={(e) => onChange({ ...settings, footer_link_url: e.target.value })} placeholder="https://..." />
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
