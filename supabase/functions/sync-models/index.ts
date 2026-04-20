@@ -177,7 +177,7 @@ serve(async (req: Request) => {
         || healthMap.get(litellmModel)
         || null;
 
-      const prev = existingMap.get(stableId);
+      const prev = existingById.get(stableId) || existingByName.get(m.model_name);
 
       return {
         id: stableId,
@@ -195,6 +195,7 @@ serve(async (req: Request) => {
         mode: info.mode || null,
         status: healthStatus || 'unknown',
         enabled: prev?.enabled ?? false,
+        is_default: prev?.is_default ?? false,
         huggingface_url: prev?.huggingface_url ?? null,
         last_synced_at: now,
         updated_at: now,
