@@ -54,6 +54,8 @@ export interface SiteSettings {
   cta_button_text: string;
   navbar_cta_text: string;
   footer_text: string;
+  footer_link_text: string;
+  footer_link_url: string;
 
   // SEO
   seo_title: string;
