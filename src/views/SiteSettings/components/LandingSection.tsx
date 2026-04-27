@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
-import { SiteSettings, HeroPillar, FeatureCard } from "@/models/types/siteSettings.types";
+import { SiteSettings, HeroPillar, FeatureCard, FooterLink } from "@/models/types/siteSettings.types";
 
 interface Props {
   settings: SiteSettings;
@@ -55,6 +55,20 @@ export const LandingSection = ({ settings, onChange }: Props) => {
 
   const removeCtaBullet = (index: number) => {
     onChange({ ...settings, cta_bullets: settings.cta_bullets.filter((_, i) => i !== index) });
+  };
+
+  const updateFooterLink = (index: number, field: keyof FooterLink, value: string) => {
+    const links = [...(settings.footer_links || [])];
+    links[index] = { ...links[index], [field]: value };
+    onChange({ ...settings, footer_links: links });
+  };
+
+  const addFooterLink = () => {
+    onChange({ ...settings, footer_links: [...(settings.footer_links || []), { text: "", url: "" }] });
+  };
+
+  const removeFooterLink = (index: number) => {
+    onChange({ ...settings, footer_links: (settings.footer_links || []).filter((_, i) => i !== index) });
   };
 
   return (
@@ -232,15 +246,32 @@ export const LandingSection = ({ settings, onChange }: Props) => {
             <Label>Footer-text</Label>
             <Input value={settings.footer_text} onChange={(e) => onChange({ ...settings, footer_text: e.target.value })} placeholder="Visas efter © År Sidnamn." />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-border">
-            <div className="space-y-2">
-              <Label>Footer-länk text</Label>
-              <Input value={settings.footer_link_text} onChange={(e) => onChange({ ...settings, footer_link_text: e.target.value })} placeholder="t.ex. Integritetspolicy" />
+          <div className="space-y-3 pt-4 border-t border-border">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold">Footer-länkar</Label>
+              <Button type="button" variant="outline" size="sm" onClick={addFooterLink}>
+                <Plus className="w-3 h-3 mr-1" /> Lägg till
+              </Button>
             </div>
-            <div className="space-y-2">
-              <Label>Footer-länk URL</Label>
-              <Input value={settings.footer_link_url} onChange={(e) => onChange({ ...settings, footer_link_url: e.target.value })} placeholder="https://..." />
-            </div>
+            {(settings.footer_links || []).map((link, i) => (
+              <div key={i} className="flex gap-2 items-start">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <Input
+                    placeholder="Text (t.ex. Integritetspolicy)"
+                    value={link.text}
+                    onChange={(e) => updateFooterLink(i, "text", e.target.value)}
+                  />
+                  <Input
+                    placeholder="URL eller /sökväg"
+                    value={link.url}
+                    onChange={(e) => updateFooterLink(i, "url", e.target.value)}
+                  />
+                </div>
+                <Button type="button" variant="ghost" size="icon" onClick={() => removeFooterLink(i)} className="shrink-0">
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
