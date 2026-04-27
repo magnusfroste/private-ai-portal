@@ -9,6 +9,8 @@ export const useSiteSettings = () => {
   const settingsQuery = useQuery({
     queryKey: ["site-settings"],
     queryFn: () => siteSettingsService.getSettings(),
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
   });
 
   const saveMutation = useMutation({

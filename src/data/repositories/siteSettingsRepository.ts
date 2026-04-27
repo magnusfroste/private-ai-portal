@@ -15,7 +15,13 @@ export class SiteSettingsRepository {
     if (error) throw error;
     if (!data) return defaultSiteSettings;
 
-    return { ...defaultSiteSettings, ...(data.value as Record<string, unknown>) } as SiteSettings;
+    const merged = { ...defaultSiteSettings, ...(data.value as Record<string, unknown>) } as SiteSettings;
+
+    // Migrate legacy single footer link → footer_links array
+    if ((!merged.footer_links || merged.footer_links.length === 0) && merged.footer_link_text && merged.footer_link_url) {
+      merged.footer_links = [{ text: merged.footer_link_text, url: merged.footer_link_url }];
+    }
+    return merged;
   }
 
   async saveSettings(settings: SiteSettings): Promise<void> {
