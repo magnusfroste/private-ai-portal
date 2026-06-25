@@ -212,9 +212,15 @@ Depending on which LLM providers you configure in LiteLLM:
 
 ### Setting Up Secrets
 
+Since the admin user is already created in Supabase, connecting the portal to your LiteLLM proxy is straightforward:
+
 1. Go to **Supabase Dashboard → Your Project → Edge Functions → Secrets**
-2. Add each required secret as a key-value pair
-3. The Edge Functions will automatically have access to these environment variables
+2. Add `LITELLM_MASTER_KEY` with your LiteLLM master key
+3. Add `LITELLM_API_BASE` with the URL to your LiteLLM proxy (e.g. `https://litellm.yourdomain.com`)
+4. Add any provider secrets you need from the tables below
+5. The Edge Functions will automatically have access to these environment variables
+
+> **Tip:** You can also set secrets via the Supabase CLI: `supabase secrets set LITELLM_MASTER_KEY=your-key LITELLM_API_BASE=https://litellm.yourdomain.com`
 
 ### How It Works
 
