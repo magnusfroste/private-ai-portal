@@ -34,14 +34,14 @@ export const IntegrationGuide = ({ onCopy }: IntegrationGuideProps) => {
                 <Label>Endpoint URL</Label>
                 <div className="flex gap-2">
                   <Input
-                    value={`${baseUrl}/`}
+                    value={`${baseUrl}/v1`}
                     readOnly
                     className="font-mono"
                   />
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => onCopy(`${baseUrl}/`)}
+                    onClick={() => onCopy(`${baseUrl}/v1`)}
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
