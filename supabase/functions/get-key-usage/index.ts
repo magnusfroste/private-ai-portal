@@ -1,12 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
+import { getProxyBaseUrl } from "../_shared/proxyConfig.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const LITELLM_BASE = 'https://api.autoversio.ai';
 
 interface KeyUsageResponse {
   info: {
@@ -51,13 +51,13 @@ interface KeyUsageResponse {
  * Designed to scale to 1M+ spend logs (PR #9603 in LiteLLM).
  * Filtering by api_key happens server-side so we transfer ~kilobytes instead of megabytes.
  */
-async function fetchDailyActivity(litellmToken: string, masterKey: string) {
+async function fetchDailyActivity(base: string, litellmToken: string, masterKey: string) {
   const end = new Date();
   const start = new Date();
   start.setDate(start.getDate() - 30); // last 30 days
   const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
-  const url = `${LITELLM_BASE}/user/daily/activity?api_key=${encodeURIComponent(litellmToken)}&start_date=${fmt(start)}&end_date=${fmt(end)}&page_size=100`;
+  const url = `${base}/user/daily/activity?api_key=${encodeURIComponent(litellmToken)}&start_date=${fmt(start)}&end_date=${fmt(end)}&page_size=100`;
   const res = await fetch(url, {
     headers: { 'Authorization': `Bearer ${masterKey}` },
   });
@@ -73,8 +73,8 @@ async function fetchDailyActivity(litellmToken: string, masterKey: string) {
  * /spend/logs filtered server-side by api_key for the recent-requests list.
  * Limited result set (small page) so this stays fast.
  */
-async function fetchRecentLogs(litellmToken: string, masterKey: string, limit = 50) {
-  const url = `${LITELLM_BASE}/spend/logs?api_key=${encodeURIComponent(litellmToken)}&page_size=${limit}`;
+async function fetchRecentLogs(base: string, litellmToken: string, masterKey: string, limit = 50) {
+  const url = `${base}/spend/logs?api_key=${encodeURIComponent(litellmToken)}&page_size=${limit}`;
   const res = await fetch(url, {
     headers: { 'Authorization': `Bearer ${masterKey}` },
   });
@@ -84,7 +84,6 @@ async function fetchRecentLogs(litellmToken: string, masterKey: string, limit = 
   }
   const data = await res.json();
   const arr = Array.isArray(data) ? data : (data.response || data.data || []);
-  // If server didn't filter, do it client-side as a fallback (older LiteLLM versions)
   return arr
     .filter((log: { api_key?: string }) => !log.api_key || log.api_key === litellmToken)
     .slice(0, limit);
@@ -153,13 +152,15 @@ serve(async (req) => {
 
     const keyIdentifier = apiKeyData.litellm_token || apiKeyData.key_value;
 
+    const LITELLM_BASE = await getProxyBaseUrl(supabase);
+
     // Fetch key info, daily activity, and recent logs in parallel
     const [keyInfoRes, dailyData, recentLogs] = await Promise.all([
       fetch(`${LITELLM_BASE}/key/info?key=${keyIdentifier}`, {
         headers: { 'Authorization': `Bearer ${litellmMasterKey}` },
       }),
-      fetchDailyActivity(keyIdentifier, litellmMasterKey),
-      fetchRecentLogs(keyIdentifier, litellmMasterKey, 50),
+      fetchDailyActivity(LITELLM_BASE, keyIdentifier, litellmMasterKey),
+      fetchRecentLogs(LITELLM_BASE, keyIdentifier, litellmMasterKey, 50),
     ]);
 
     if (!keyInfoRes.ok) {

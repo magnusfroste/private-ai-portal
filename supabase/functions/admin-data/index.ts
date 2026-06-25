@@ -148,7 +148,8 @@ serve(async (req: Request) => {
   // Uses /global/spend/report (pre-aggregated) for speed instead of scanning
   // local token_usage table. Falls back to token_usage if proxy unavailable.
   if (type === "usage") {
-    const LITELLM_BASE = "https://api.autoversio.ai";
+    const { getProxyBaseUrl } = await import("../_shared/proxyConfig.ts");
+    const LITELLM_BASE = await getProxyBaseUrl(supabaseAdmin).catch(() => "");
     const LITELLM_MASTER_KEY = Deno.env.get("LITELLM_MASTER_KEY") || "";
 
     const end = new Date();
@@ -162,7 +163,7 @@ serve(async (req: Request) => {
     const modelStats: Record<string, { cost: number; tokens: number; requests: number }> = {};
     const userStats: Record<string, { cost: number; requests: number }> = {};
 
-    if (LITELLM_MASTER_KEY) {
+    if (LITELLM_MASTER_KEY && LITELLM_BASE) {
       try {
         // /global/spend/report aggregates by model server-side
         const modelUrl = `${LITELLM_BASE}/global/spend/report?start_date=${fmt(start)}&end_date=${fmt(end)}&group_by=model`;

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getProxyBaseUrl } from "../_shared/proxyConfig.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,6 +31,7 @@ interface HealthEntry {
  * LiteLLM supports /health?model=<model_name> for per-model checks.
  */
 async function checkModelHealth(
+  base: string,
   modelName: string,
   authHeaders: Record<string, string>,
   timeoutMs = 8000
@@ -39,7 +41,7 @@ async function checkModelHealth(
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     const res = await fetch(
-      `https://api.autoversio.ai/health?model=${encodeURIComponent(modelName)}`,
+      `${base}/health?model=${encodeURIComponent(modelName)}`,
       { headers: authHeaders, signal: controller.signal }
     );
     clearTimeout(timeout);
@@ -104,11 +106,13 @@ serve(async (req: Request) => {
     }
 
     const authHeaders = { 'Authorization': `Bearer ${LITELLM_MASTER_KEY}` };
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const LITELLM_BASE = await getProxyBaseUrl(supabaseAdmin);
 
     // Fetch models and global health in parallel
     const [modelsRes, healthRes] = await Promise.all([
-      fetch('https://api.autoversio.ai/model/info', { headers: authHeaders }),
-      fetch('https://api.autoversio.ai/health', { headers: authHeaders }).catch(() => null),
+      fetch(`${LITELLM_BASE}/model/info`, { headers: authHeaders }),
+      fetch(`${LITELLM_BASE}/health`, { headers: authHeaders }).catch(() => null),
     ]);
 
     if (!modelsRes.ok) {
@@ -141,7 +145,7 @@ serve(async (req: Request) => {
     const data = await modelsRes.json();
     const rawModels: LiteLLMModelInfo[] = data.data || [];
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const supabase = supabaseAdmin;
     const now = new Date().toISOString();
 
     // Get existing models to preserve enabled state and huggingface_url.
@@ -208,7 +212,7 @@ serve(async (req: Request) => {
       console.log(`Running individual health checks for ${unknownModels.length} models:`, unknownModels.map(m => m.model_name));
       const individualChecks = await Promise.all(
         unknownModels.map(async (m) => {
-          const status = await checkModelHealth(m.model_name, authHeaders);
+          const status = await checkModelHealth(LITELLM_BASE, m.model_name, authHeaders);
           return { id: m.id, status };
         })
       );

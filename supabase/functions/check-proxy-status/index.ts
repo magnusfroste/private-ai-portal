@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     const settings = settingsData?.value as Record<string, unknown> | null;
-    const apiBaseUrl = (settings?.api_base_url as string) || "https://api.autoversio.ai";
+    const apiBaseUrl = (settings?.api_base_url as string)?.trim() || (Deno.env.get("LITELLM_BASE_URL") || "").replace(/\/+$/, "");
 
     let connected = false;
     let modelCount: number | undefined;
