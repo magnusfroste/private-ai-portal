@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getProxyBaseUrl } from "../_shared/proxyConfig.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,9 +87,10 @@ serve(async (req: Request) => {
 
     if (LITELLM_MASTER_KEY) {
       const usersWithLitellm = profiles.filter((p: any) => p.litellm_user_id);
-      await Promise.all(usersWithLitellm.map(async (p: any) => {
+      const proxyBase = await getProxyBaseUrl(supabase).catch(() => null);
+      if (proxyBase) await Promise.all(usersWithLitellm.map(async (p: any) => {
         try {
-          const url = new URL('https://api.autoversio.ai/user/info');
+          const url = new URL(`${proxyBase}/user/info`);
           url.searchParams.set('user_id', p.litellm_user_id);
           const resp = await fetch(url.toString(), {
             headers: { 'Authorization': `Bearer ${LITELLM_MASTER_KEY}` },
@@ -151,7 +153,8 @@ serve(async (req: Request) => {
 
       if (profile?.litellm_user_id && LITELLM_MASTER_KEY) {
         try {
-          const resp = await fetch('https://api.autoversio.ai/user/update', {
+          const proxyBase = await getProxyBaseUrl(supabase);
+          const resp = await fetch(`${proxyBase}/user/update`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${LITELLM_MASTER_KEY}`,

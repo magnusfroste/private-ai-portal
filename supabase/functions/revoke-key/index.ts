@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
+import { getProxyBaseUrl } from "../_shared/proxyConfig.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -77,7 +78,8 @@ serve(async (req) => {
     let litellmRevoked = false;
 
     try {
-      const response = await fetch('https://api.autoversio.ai/key/delete', {
+      const proxyBase = await getProxyBaseUrl(supabase);
+      const response = await fetch(`${proxyBase}/key/delete`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${litellmMasterKey}`,

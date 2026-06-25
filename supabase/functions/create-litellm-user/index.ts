@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getProxyBaseUrl } from "../_shared/proxyConfig.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -69,7 +70,8 @@ serve(async (req: Request) => {
     const defaultBudget = budgetSetting ? Number(budgetSetting.value) : 25;
 
     // Create LiteLLM internal user with configured budget
-    const litellmResponse = await fetch('https://api.autoversio.ai/user/new', {
+    const proxyBase = await getProxyBaseUrl(supabase);
+    const litellmResponse = await fetch(`${proxyBase}/user/new`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LITELLM_MASTER_KEY}`,
@@ -93,7 +95,7 @@ serve(async (req: Request) => {
     } else if (litellmResponse.status === 409) {
       // User already exists in LiteLLM — fetch their info instead
       console.log('LiteLLM user already exists, fetching info...');
-      const infoUrl = new URL('https://api.autoversio.ai/user/info');
+      const infoUrl = new URL(`${proxyBase}/user/info`);
       infoUrl.searchParams.set('user_id', user.id);
 
       const infoRes = await fetch(infoUrl.toString(), {

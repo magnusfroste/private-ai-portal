@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getProxyBaseUrl } from "../_shared/proxyConfig.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -55,7 +56,8 @@ serve(async (req: Request) => {
     }
 
     // Fetch user info from LiteLLM
-    const url = new URL('https://api.autoversio.ai/user/info');
+    const proxyBase = await getProxyBaseUrl(supabase);
+    const url = new URL(`${proxyBase}/user/info`);
     url.searchParams.set('user_id', profile.litellm_user_id);
 
     const litellmResponse = await fetch(url.toString(), {

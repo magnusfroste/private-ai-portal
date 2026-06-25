@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getProxyBaseUrl } from "../_shared/proxyConfig.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -97,7 +98,8 @@ serve(async (req: Request) => {
       ? [{ role: 'system', content: system_prompt }, ...messages]
       : messages;
 
-    const response = await fetch('https://api.autoversio.ai/chat/completions', {
+    const proxyBase = await getProxyBaseUrl(supabase);
+    const response = await fetch(`${proxyBase}/chat/completions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKeyForRequest}`,

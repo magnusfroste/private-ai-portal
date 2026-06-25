@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getProxyBaseUrl } from "../_shared/proxyConfig.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,6 +28,7 @@ interface HealthEntry {
 }
 
 async function checkModelHealth(
+  base: string,
   modelName: string,
   authHeaders: Record<string, string>,
   timeoutMs = 8000
@@ -35,7 +37,7 @@ async function checkModelHealth(
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
     const res = await fetch(
-      `https://api.autoversio.ai/health?model=${encodeURIComponent(modelName)}`,
+      `${base}/health?model=${encodeURIComponent(modelName)}`,
       { headers: authHeaders, signal: controller.signal }
     );
     clearTimeout(timeout);
@@ -70,10 +72,12 @@ serve(async (req: Request) => {
 
     const authHeaders = { 'Authorization': `Bearer ${LITELLM_MASTER_KEY}` };
 
+    const LITELLM_BASE = await getProxyBaseUrl();
+
     // Fetch models and health in parallel
     const [modelsRes, healthRes] = await Promise.all([
-      fetch('https://api.autoversio.ai/model/info', { headers: authHeaders }),
-      fetch('https://api.autoversio.ai/health', { headers: authHeaders }).catch(() => null),
+      fetch(`${LITELLM_BASE}/model/info`, { headers: authHeaders }),
+      fetch(`${LITELLM_BASE}/health`, { headers: authHeaders }).catch(() => null),
     ]);
 
     if (!modelsRes.ok) {
@@ -142,7 +146,7 @@ serve(async (req: Request) => {
       const checks = await Promise.all(
         unknownModels.map(async (m) => ({
           id: m.id,
-          status: await checkModelHealth(m.id, authHeaders),
+          status: await checkModelHealth(LITELLM_BASE, m.id, authHeaders),
         }))
       );
       const checkMap = new Map(checks.map((c) => [c.id, c.status]));

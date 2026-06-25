@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
+import { getProxyBaseUrl } from "../_shared/proxyConfig.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -69,6 +70,7 @@ serve(async (req) => {
 
     const deactivated: string[] = [];
     const now = new Date().toISOString();
+    const proxyBase = await getProxyBaseUrl(supabase);
 
     // Check each key against LiteLLM
     for (const key of activeKeys) {
@@ -76,7 +78,7 @@ serve(async (req) => {
 
       try {
         const response = await fetch(
-          `https://api.autoversio.ai/key/info?key=${keyIdentifier}`,
+          `${proxyBase}/key/info?key=${keyIdentifier}`,
           {
             method: 'GET',
             headers: {

@@ -78,7 +78,9 @@ serve(async (req) => {
       const LITELLM_MASTER_KEY = Deno.env.get('LITELLM_MASTER_KEY') || '';
       if (LITELLM_MASTER_KEY) {
         try {
-          const litellmResponse = await fetch('https://api.autoversio.ai/user/update', {
+          const { getProxyBaseUrl } = await import("../_shared/proxyConfig.ts");
+          const proxyBase = await getProxyBaseUrl(supabaseAdmin);
+          const litellmResponse = await fetch(`${proxyBase}/user/update`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${LITELLM_MASTER_KEY}`,

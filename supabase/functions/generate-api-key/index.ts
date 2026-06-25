@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getProxyBaseUrl } from "../_shared/proxyConfig.ts";
 
 interface GenerateKeyRequest {
   keyName: string;
@@ -39,6 +40,7 @@ const respondWithError = (status: number, code: string, message: string): Respon
 
 // Function to create a new API key using LiteLLM's key management API
 async function createLiteLLMKey(
+  base: string,
   keyName: string,
   masterKey: string,
   litellmUserId: string,
@@ -49,8 +51,8 @@ async function createLiteLLMKey(
   token: string;
   key_alias: string;
 }> {
-  console.log('Calling LiteLLM API at https://api.autoversio.ai/key/generate');
-  
+  console.log(`Calling LiteLLM API at ${base}/key/generate`);
+
   const requestBody: {
     key_alias: string;
     user_id: string;
@@ -70,8 +72,8 @@ async function createLiteLLMKey(
   }
 
   console.log('Request body:', requestBody);
-  
-  const response = await fetch('https://api.autoversio.ai/key/generate', {
+
+  const response = await fetch(`${base}/key/generate`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${masterKey}`,
@@ -153,8 +155,10 @@ serve(async (req: Request) => {
 
     try {
       // 2. Generate key through LiteLLM's API (no expiry — budget controls access)
+      const proxyBase = await getProxyBaseUrl(supabase);
       const liteLLMResponse = await createLiteLLMKey(
-        body.keyName, 
+        proxyBase,
+        body.keyName,
         LITELLM_MASTER_KEY,
         profile.litellm_user_id,
         body.models,
