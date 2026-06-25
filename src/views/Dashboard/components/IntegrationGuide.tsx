@@ -13,6 +13,7 @@ interface IntegrationGuideProps {
 export const IntegrationGuide = ({ onCopy }: IntegrationGuideProps) => {
   const { data: settings } = useSiteSettings();
   const baseUrl = settings?.api_base_url || "https://your-lite-llm-proxy.example.com";
+  return (
     <div className="container mx-auto px-4 pb-8">
       <Card className="glass-card">
         <CardHeader>
