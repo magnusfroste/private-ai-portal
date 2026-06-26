@@ -149,7 +149,7 @@ serve(async (req: Request) => {
   // local token_usage table. Falls back to token_usage if proxy unavailable.
   if (type === "usage") {
     const { getProxyBaseUrl } = await import("../_shared/proxyConfig.ts");
-    const LITELLM_BASE = await getProxyBaseUrl(supabaseAdmin).catch(() => "");
+    const LITELLM_BASE = await getProxyBaseUrl(supabase).catch(() => "");
     const LITELLM_MASTER_KEY = Deno.env.get("LITELLM_MASTER_KEY") || "";
 
     const end = new Date();
