@@ -41,7 +41,7 @@ export const ChatInput = ({ onSend, onStop, disabled }: ChatInputProps) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Skriv ett meddelande..."
+            placeholder="Type a message..."
             disabled={disabled}
             rows={1}
             className="w-full resize-none rounded-lg border border-border/50 bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 disabled:opacity-50"
@@ -53,7 +53,7 @@ export const ChatInput = ({ onSend, onStop, disabled }: ChatInputProps) => {
             variant="destructive"
             onClick={onStop}
             className="shrink-0 h-10 w-10"
-            title="Avbryt"
+            title="Stop"
           >
             <Square className="w-4 h-4" />
           </Button>

@@ -38,7 +38,7 @@ export const ChatModelSelector = ({ models, selectedModel, onSelect, disabled }:
               <span className="truncate font-mono text-xs">{selected.model_name || selected.id}</span>
             </span>
           ) : (
-            <SelectValue placeholder="Välj modell..." />
+            <SelectValue placeholder="Select model..." />
           )}
         </SelectTrigger>
         <SelectContent>

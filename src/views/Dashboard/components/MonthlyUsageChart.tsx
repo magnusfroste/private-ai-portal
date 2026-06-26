@@ -23,8 +23,8 @@ interface MonthlyUsageChartProps {
 }
 
 const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "Maj", "Jun",
-  "Jul", "Aug", "Sep", "Okt", "Nov", "Dec",
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
 export const MonthlyUsageChart = ({ logs }: MonthlyUsageChartProps) => {
@@ -106,7 +106,7 @@ export const MonthlyUsageChart = ({ logs }: MonthlyUsageChartProps) => {
             <p className="text-2xl font-bold tracking-tight">
               {formatTokens(totalTokens)}
               <span className="text-sm font-normal text-muted-foreground ml-2">
-                senaste 6 mån
+                last 6 months
               </span>
             </p>
           </div>

@@ -15,8 +15,8 @@ import { DailySpendChart } from "@/views/Account/components/DailySpendChart";
 const PRESETS = [
   { label: "7d", days: 7 },
   { label: "30d", days: 30 },
-  { label: "Denna månad", fromDate: () => startOfMonth(new Date()) },
-  { label: "Alla", days: null },
+  { label: "This month", fromDate: () => startOfMonth(new Date()) },
+  { label: "All", days: null },
 ] as const;
 
 export const DashboardActivity = () => {
@@ -34,7 +34,7 @@ export const DashboardActivity = () => {
 
   const applyPreset = (preset: typeof PRESETS[number]) => {
     setActivePreset(preset.label);
-    if (preset.label === "Alla") {
+    if (preset.label === "All") {
       setStartDate(undefined);
       setEndDate(undefined);
     } else if ("fromDate" in preset) {
@@ -108,7 +108,7 @@ export const DashboardActivity = () => {
                 className={cn("text-xs gap-1.5", startDate && "text-foreground")}
               >
                 <CalendarIcon className="h-3.5 w-3.5" />
-                {startDate ? format(startDate, "d MMM") : "Från"}
+                {startDate ? format(startDate, "d MMM") : "From"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
@@ -131,7 +131,7 @@ export const DashboardActivity = () => {
                 className={cn("text-xs gap-1.5", endDate && "text-foreground")}
               >
                 <CalendarIcon className="h-3.5 w-3.5" />
-                {endDate ? format(endDate, "d MMM") : "Till"}
+                {endDate ? format(endDate, "d MMM") : "To"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
@@ -150,7 +150,7 @@ export const DashboardActivity = () => {
 
       {usageLoading ? (
         <div className="flex items-center justify-center py-12">
-          <p className="text-muted-foreground text-sm animate-pulse">Laddar usage-data...</p>
+          <p className="text-muted-foreground text-sm animate-pulse">Loading usage data...</p>
         </div>
       ) : (
         <>

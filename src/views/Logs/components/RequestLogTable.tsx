@@ -11,11 +11,11 @@ export const RequestLogTable = ({ logs }: RequestLogTableProps) => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Tid</TableHead>
-          <TableHead>Modell</TableHead>
-          <TableHead>API-nyckel</TableHead>
+          <TableHead>Time</TableHead>
+          <TableHead>Model</TableHead>
+          <TableHead>API key</TableHead>
           <TableHead className="text-right">Tokens</TableHead>
-          <TableHead className="text-right">Kostnad</TableHead>
+          <TableHead className="text-right">Cost</TableHead>
           <TableHead>Status</TableHead>
         </TableRow>
       </TableHeader>

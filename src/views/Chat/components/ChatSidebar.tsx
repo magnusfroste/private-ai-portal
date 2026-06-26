@@ -81,7 +81,7 @@ export const ChatSidebar = ({
             className="w-full justify-start gap-2 text-sm"
           >
             <Plus className="w-4 h-4" />
-            Ny chatt
+            New chat
           </Button>
         </div>
 
@@ -113,7 +113,7 @@ export const ChatSidebar = ({
 
           {conversations.length === 0 && (
             <p className="text-xs text-muted-foreground text-center py-8">
-              Inga chattar ännu
+              No chats yet
             </p>
           )}
         </div>

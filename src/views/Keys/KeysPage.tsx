@@ -35,7 +35,7 @@ export const KeysPage = () => {
         }
 
         if (data.deactivated?.length > 0) {
-          toast.info(`${data.deactivated.length} nyckel/nycklar inaktiverade (ej längre giltiga)`);
+          toast.info(`${data.deactivated.length} key(s) deactivated (no longer valid)`);
           await refetch();
         }
       } catch (err) {

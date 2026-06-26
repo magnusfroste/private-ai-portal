@@ -1,10 +1,10 @@
 import { MessageSquare } from "lucide-react";
 
 const PROMPTS = [
-  { label: "Testa en enkel fråga", text: "Berätta kort om dig själv och vilka du kan hjälpa." },
-  { label: "Kodgenerering", text: "Skriv en Python-funktion som sorterar en lista med objekt efter datum." },
-  { label: "Analysera text", text: "Sammanfatta fördelarna med microservice-arkitektur i 3 punkter." },
-  { label: "Kreativt skrivande", text: "Skriv en kort produktbeskrivning för en AI-driven API-gateway." },
+  { label: "Try a simple question", text: "Tell me briefly about yourself and who you can help." },
+  { label: "Code generation", text: "Write a Python function that sorts a list of objects by date." },
+  { label: "Analyze text", text: "Summarize the benefits of microservice architecture in 3 bullet points." },
+  { label: "Creative writing", text: "Write a short product description for an AI-powered API gateway." },
 ];
 
 interface ChatEmptyStateProps {
@@ -16,7 +16,7 @@ export const ChatEmptyState = ({ onSelectPrompt }: ChatEmptyStateProps) => {
     <div className="flex flex-col items-center justify-center h-full px-4">
       <MessageSquare className="w-10 h-10 text-muted-foreground/40 mb-4" />
       <h2 className="text-lg font-semibold text-foreground mb-1">Chat Playground</h2>
-      <p className="text-sm text-muted-foreground mb-8">Testa modellerna direkt — välj en modell ovan och börja chatta.</p>
+      <p className="text-sm text-muted-foreground mb-8">Test the models directly — pick a model above and start chatting.</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg w-full">
         {PROMPTS.map((p) => (

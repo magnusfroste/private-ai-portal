@@ -75,12 +75,12 @@ export const IntegrationGuide = ({ onCopy }: IntegrationGuideProps) => {
 
             <TabsContent value="claude-code" className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Claude Code fungerar direkt med proxyn. Proxyn översätter automatiskt
-                Anthropic Messages API-anrop till backend-formatet — inga extra steg behövs.
+                Claude Code works directly with the proxy. The proxy automatically translates
+                Anthropic Messages API calls to the backend format — no extra steps required.
               </p>
 
               <div className="space-y-2">
-                <Label>1. Sätt miljövariabler</Label>
+                <Label>1. Set environment variables</Label>
                 <div className="bg-secondary/50 rounded-lg p-4 font-mono text-sm space-y-2">
                   <div className="flex items-center justify-between">
                     <span>export ANTHROPIC_BASE_URL={baseUrl}</span>
@@ -94,7 +94,7 @@ export const IntegrationGuide = ({ onCopy }: IntegrationGuideProps) => {
                     </Button>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>export ANTHROPIC_API_KEY=&lt;din-api-nyckel&gt;</span>
+                    <span>export ANTHROPIC_API_KEY=&lt;your-api-key&gt;</span>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -108,7 +108,7 @@ export const IntegrationGuide = ({ onCopy }: IntegrationGuideProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label>2. Starta Claude Code</Label>
+                <Label>2. Start Claude Code</Label>
                 <div className="bg-secondary/50 rounded-lg p-4 font-mono text-sm">
                   <div className="flex items-center justify-between">
                     <span>claude</span>
@@ -125,9 +125,9 @@ export const IntegrationGuide = ({ onCopy }: IntegrationGuideProps) => {
               </div>
 
               <p className="text-sm text-muted-foreground">
-                Ersätt <code className="text-accent">&lt;din-api-nyckel&gt;</code> med
-                en API-nyckel från listan ovan. Claude Code kommer sedan att använda
-                proxyn för alla API-anrop.
+                Replace <code className="text-accent">&lt;your-api-key&gt;</code> with
+                an API key from the list above. Claude Code will then use
+                the proxy for all API calls.
               </p>
             </TabsContent>
           </Tabs>

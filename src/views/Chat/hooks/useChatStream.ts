@@ -36,7 +36,7 @@ export const useChatStream = ({ model, setMessages, apiKeyId, systemPrompt }: Us
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.error("Du måste vara inloggad");
+        toast.error("You must be signed in");
         return;
       }
 
@@ -62,13 +62,13 @@ export const useChatStream = ({ model, setMessages, apiKeyId, systemPrompt }: Us
       );
 
       if (!resp.ok) {
-        const err = await resp.json().catch(() => ({ error: "Okänt fel" }));
-        toast.error(err.error || `Fel: ${resp.status}`);
+        const err = await resp.json().catch(() => ({ error: "Unknown error" }));
+        toast.error(err.error || `Error: ${resp.status}`);
         return;
       }
 
       if (!resp.body) {
-        toast.error("Ingen streaming-support");
+        toast.error("No streaming support");
         return;
       }
 
@@ -142,7 +142,7 @@ export const useChatStream = ({ model, setMessages, apiKeyId, systemPrompt }: Us
         return;
       }
       console.error("Chat stream error:", e);
-      toast.error("Kunde inte ansluta till modellen");
+      toast.error("Could not connect to the model");
     } finally {
       abortRef.current = null;
       streamingRef.current = false;

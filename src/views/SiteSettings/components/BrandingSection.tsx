@@ -30,7 +30,7 @@ export const BrandingSection = ({ settings, onChange, onUpload, isUploading }: P
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label>Sidnamn</Label>
+          <Label>Site name</Label>
           <Input
             value={settings.site_name}
             onChange={(e) => onChange({ ...settings, site_name: e.target.value })}
@@ -50,7 +50,7 @@ export const BrandingSection = ({ settings, onChange, onUpload, isUploading }: P
             onChange={(e) => onChange({ ...settings, api_base_url: e.target.value })}
             placeholder="https://api.example.com"
           />
-          <p className="text-xs text-muted-foreground">Bas-URL som visas i integrationsguiden på modellsidan</p>
+          <p className="text-xs text-muted-foreground">Base URL shown in the integration guide on the models page</p>
         </div>
         <div className="space-y-2">
           <Label>Logo</Label>
@@ -61,7 +61,7 @@ export const BrandingSection = ({ settings, onChange, onUpload, isUploading }: P
             <Input
               value={settings.logo_url}
               onChange={(e) => onChange({ ...settings, logo_url: e.target.value })}
-              placeholder="URL eller ladda upp"
+              placeholder="URL or upload"
               className="flex-1"
             />
             <input
@@ -94,7 +94,7 @@ export const BrandingSection = ({ settings, onChange, onUpload, isUploading }: P
             <Input
               value={settings.favicon_url}
               onChange={(e) => onChange({ ...settings, favicon_url: e.target.value })}
-              placeholder="URL eller ladda upp"
+              placeholder="URL or upload"
               className="flex-1"
             />
             <input
@@ -120,8 +120,8 @@ export const BrandingSection = ({ settings, onChange, onUpload, isUploading }: P
         </div>
         <div className="flex items-center justify-between pt-2 border-t border-border">
           <div>
-            <Label htmlFor="models-public">Visa modeller publikt</Label>
-            <p className="text-xs text-muted-foreground">Tillåt att modellsidan visas utan inloggning</p>
+            <Label htmlFor="models-public">Show models publicly</Label>
+            <p className="text-xs text-muted-foreground">Allow the models page to be viewed without sign-in</p>
           </div>
           <Switch
             id="models-public"

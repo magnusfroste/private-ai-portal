@@ -22,7 +22,7 @@ export const ChatKeySelector = ({ keys, selectedKeyId, onSelect, disabled, isAdm
     return (
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Key className="w-3.5 h-3.5" />
-        <span>Ingen aktiv nyckel</span>
+        <span>No active key</span>
       </div>
     );
   }
@@ -32,7 +32,7 @@ export const ChatKeySelector = ({ keys, selectedKeyId, onSelect, disabled, isAdm
       <Key className="w-3.5 h-3.5 text-muted-foreground" />
       <Select value={selectedKeyId} onValueChange={onSelect} disabled={disabled}>
         <SelectTrigger className="w-[180px] h-7 text-xs border-border/50 bg-background">
-          <SelectValue placeholder="Välj nyckel..." />
+          <SelectValue placeholder="Select key..." />
         </SelectTrigger>
         <SelectContent>
           {isAdmin && (

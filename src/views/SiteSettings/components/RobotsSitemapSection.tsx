@@ -51,9 +51,9 @@ export const RobotsSitemapSection = ({ settings, onChange }: Props) => {
         </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label>Sitemap-poster</Label>
+            <Label>Sitemap entries</Label>
             <Button type="button" variant="outline" size="sm" onClick={addEntry}>
-              <Plus className="w-3 h-3 mr-1" /> Lägg till
+              <Plus className="w-3 h-3 mr-1" /> Add
             </Button>
           </div>
           {settings.sitemap_entries.map((entry, i) => (
@@ -65,7 +65,7 @@ export const RobotsSitemapSection = ({ settings, onChange }: Props) => {
                 className="flex-1"
               />
               <Input
-                placeholder="Prioritet"
+                placeholder="Priority"
                 value={entry.priority}
                 onChange={(e) => updateEntry(i, "priority", e.target.value)}
                 className="w-20"

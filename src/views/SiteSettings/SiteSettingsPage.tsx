@@ -62,20 +62,20 @@ export const SiteSettingsPage = ({ embedded = false }: SiteSettingsPageProps) =>
       <div className="flex items-center justify-between">
         {!embedded && (
           <div>
-            <h1 className="text-2xl font-bold">Webbplatsinställningar</h1>
-            <p className="text-muted-foreground text-sm">Hantera branding, SEO, AEO och konfiguration</p>
+            <h1 className="text-2xl font-bold">Website settings</h1>
+            <p className="text-muted-foreground text-sm">Manage branding, SEO, AEO and configuration</p>
           </div>
         )}
         <Button onClick={() => save(draft)} disabled={isSaving} className={embedded ? "ml-auto" : ""}>
           {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-          Spara
+          Save
         </Button>
       </div>
 
       <Tabs defaultValue="branding">
         <TabsList>
           <TabsTrigger value="branding">Branding</TabsTrigger>
-          <TabsTrigger value="landing">Landningssida</TabsTrigger>
+          <TabsTrigger value="landing">Landing page</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="aeo">AEO</TabsTrigger>
           <TabsTrigger value="robots">Robots & Sitemap</TabsTrigger>

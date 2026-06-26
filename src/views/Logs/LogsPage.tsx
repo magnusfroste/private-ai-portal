@@ -50,7 +50,7 @@ export const LogsPage = () => {
       <div>
         <h1 className="text-3xl font-bold mb-1">Logs</h1>
         <p className="text-muted-foreground text-sm">
-          API-anrop
+          API calls
           {requestLogs.length > 0 && (
             <span className="ml-1.5 text-xs">({filtered.length}/{requestLogs.length})</span>
           )}
@@ -62,7 +62,7 @@ export const LogsPage = () => {
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Sök modell, nyckel, request ID..."
+              placeholder="Search model, key, request ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 w-64 h-9 text-sm"
@@ -71,10 +71,10 @@ export const LogsPage = () => {
 
           <Select value={modelFilter} onValueChange={setModelFilter}>
             <SelectTrigger className="w-48 h-9 text-sm">
-              <SelectValue placeholder="Modell" />
+              <SelectValue placeholder="Model" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alla modeller</SelectItem>
+              <SelectItem value="all">All models</SelectItem>
               {uniqueModels.map((m) => (
                 <SelectItem key={m} value={m}>
                   {m}
@@ -85,10 +85,10 @@ export const LogsPage = () => {
 
           <Select value={keyFilter} onValueChange={setKeyFilter}>
             <SelectTrigger className="w-40 h-9 text-sm">
-              <SelectValue placeholder="Nyckel" />
+              <SelectValue placeholder="Key" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alla nycklar</SelectItem>
+              <SelectItem value="all">All keys</SelectItem>
               {uniqueKeys.map((k) => (
                 <SelectItem key={k} value={k}>
                   {k}
@@ -102,7 +102,7 @@ export const LogsPage = () => {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alla</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="success">Success</SelectItem>
               <SelectItem value="failure">Failure</SelectItem>
             </SelectContent>
@@ -116,7 +116,7 @@ export const LogsPage = () => {
         </div>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-muted-foreground py-8">
-          {requestLogs.length === 0 ? "Inga API-anrop hittades" : "Inga resultat matchar filtren"}
+          {requestLogs.length === 0 ? "No API calls found" : "No results match the filters"}
         </p>
       ) : (
         <RequestLogTable logs={filtered} />

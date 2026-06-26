@@ -78,7 +78,7 @@ export const useChatConversations = () => {
       .from("chat_conversations")
       .insert({
         user_id: user.id,
-        title: "Ny chatt",
+        title: "New chat",
         model,
         messages: [],
       })
@@ -89,7 +89,7 @@ export const useChatConversations = () => {
 
     const conv: Conversation = {
       id: data.id,
-      title: "Ny chatt",
+      title: "New chat",
       messages: [],
       model,
       createdAt: new Date(data.created_at).getTime(),

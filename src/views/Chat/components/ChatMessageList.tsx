@@ -23,7 +23,7 @@ const CopyButton = ({ text }: { text: string }) => {
     <button
       onClick={handleCopy}
       className="absolute top-2 right-2 p-1.5 rounded bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
-      title="Kopiera"
+      title="Copy"
     >
       {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
     </button>
@@ -126,7 +126,7 @@ const ReasoningBlock = ({ reasoning, isLive }: { reasoning: string; isLive: bool
         className="flex items-center gap-2 w-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
         <Brain className="w-3.5 h-3.5 text-primary/70" />
-        <span className="font-medium">Tankekedja</span>
+        <span className="font-medium">Chain of thought</span>
         {isLive && (
           <span className="flex gap-0.5 ml-1">
             <span className="w-1 h-1 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -203,7 +203,7 @@ export const ChatMessageList = ({ messages, isStreaming, isReasoning }: ChatMess
               <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
               <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
             </div>
-            <span className="text-xs">Modellen tänker...</span>
+            <span className="text-xs">The model is thinking...</span>
           </div>
         </div>
       )}

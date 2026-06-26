@@ -50,7 +50,7 @@ export const KeyCreationDialog = ({
         <DialogHeader>
           <DialogTitle>Create New API Key</DialogTitle>
           <DialogDescription>
-            Skapa en ny API-nyckel för att komma igång.
+            Create a new API key to get started.
           </DialogDescription>
         </DialogHeader>
 
@@ -75,7 +75,7 @@ export const KeyCreationDialog = ({
             />
           </div>
           <div className="text-sm text-muted-foreground">
-            Nyckeln ger tillgång till alla tillgängliga modeller.
+            The key grants access to all available models.
           </div>
             <Button
               onClick={handleCreate}

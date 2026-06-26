@@ -36,7 +36,7 @@ export const AeoSection = ({ settings, onChange }: Props) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">AEO / Strukturerad data</CardTitle>
+        <CardTitle className="text-lg">AEO / Structured data</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -52,7 +52,7 @@ export const AeoSection = ({ settings, onChange }: Props) => {
           <div className="flex items-center justify-between">
             <Label>FAQ Schema</Label>
             <Button type="button" variant="outline" size="sm" onClick={addFaq}>
-              <Plus className="w-3 h-3 mr-1" /> Lägg till
+              <Plus className="w-3 h-3 mr-1" /> Add
             </Button>
           </div>
           {settings.faq_schema.map((faq, i) => (
@@ -60,12 +60,12 @@ export const AeoSection = ({ settings, onChange }: Props) => {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 space-y-2">
                   <Input
-                    placeholder="Fråga"
+                    placeholder="Question"
                     value={faq.question}
                     onChange={(e) => updateFaq(i, "question", e.target.value)}
                   />
                   <Textarea
-                    placeholder="Svar"
+                    placeholder="Answer"
                     value={faq.answer}
                     onChange={(e) => updateFaq(i, "answer", e.target.value)}
                     rows={2}
