@@ -19,7 +19,7 @@ export const ChatPage = () => {
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedKeyId, setSelectedKeyId] = useState("");
   const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -138,7 +138,7 @@ export const ChatPage = () => {
   };
 
   return (
-    <div className="flex h-full bg-background">
+    <div className="flex h-full bg-background overflow-hidden">
       <div className="flex-1 flex flex-col min-w-0 h-full">
         <ChatHeader
           models={modelInfos}
@@ -151,6 +151,7 @@ export const ChatPage = () => {
           onChangeSystemPrompt={setSystemPrompt}
           disabled={isStreaming}
           onToggleSidebar={() => setSidebarOpen((v) => !v)}
+          sidebarOpen={sidebarOpen}
           isAdmin={isAdmin}
         />
 

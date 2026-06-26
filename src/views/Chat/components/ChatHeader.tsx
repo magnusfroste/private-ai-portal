@@ -22,6 +22,7 @@ interface ChatHeaderProps {
   onChangeSystemPrompt: (prompt: string) => void;
   disabled?: boolean;
   onToggleSidebar: () => void;
+  sidebarOpen?: boolean;
   isAdmin?: boolean;
 }
 
@@ -36,6 +37,7 @@ export const ChatHeader = ({
   onChangeSystemPrompt,
   disabled,
   onToggleSidebar,
+  sidebarOpen,
   isAdmin,
 }: ChatHeaderProps) => (
   <header className="h-12 flex items-center gap-3 px-4 border-b border-border/50 bg-background/80 backdrop-blur-sm shrink-0">
@@ -44,7 +46,7 @@ export const ChatHeader = ({
       size="icon"
       onClick={onToggleSidebar}
       className="h-8 w-8 order-last ml-auto"
-      title="Conversations"
+      title={sidebarOpen ? "Hide conversations" : "Show conversations"}
     >
       <PanelRight className="w-4 h-4" />
     </Button>
