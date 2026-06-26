@@ -1,4 +1,4 @@
-import { Plus, MessageSquare, Trash2, X } from "lucide-react";
+import { Plus, MessageSquare, Trash2, X, PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Conversation } from "../types";
 import { cn } from "@/lib/utils";
@@ -27,19 +27,16 @@ export const ChatSidebar = ({
   };
 
   return (
-    <>
-      {/* Overlay */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40"
-          onClick={onClose}
-        />
+    <aside
+      className={cn(
+        "border-l border-border/50 bg-card flex flex-col h-full transition-all duration-200 ease-in-out shrink-0",
+        open ? "w-72" : "w-0"
       )}
-
-      <aside
+    >
+      <div
         className={cn(
-          "fixed inset-y-0 right-0 z-50 w-72 border-l border-border/50 bg-card flex flex-col h-full transition-transform duration-200 ease-in-out",
-          open ? "translate-x-0" : "translate-x-full"
+          "flex flex-col h-full overflow-hidden",
+          open ? "opacity-100" : "opacity-0"
         )}
       >
         <div className="p-3 flex items-center justify-between border-b border-border/50">
@@ -49,8 +46,9 @@ export const ChatSidebar = ({
             size="icon"
             onClick={onClose}
             className="shrink-0 h-8 w-8"
+            title="Hide conversations"
           >
-            <X className="w-4 h-4" />
+            <PanelRightOpen className="w-4 h-4" />
           </Button>
         </div>
 
@@ -97,7 +95,7 @@ export const ChatSidebar = ({
             </p>
           )}
         </div>
-      </aside>
-    </>
+      </div>
+    </aside>
   );
 };
