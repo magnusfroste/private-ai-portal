@@ -138,7 +138,7 @@ export const ChatPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-full bg-background">
       <ChatSidebar
         conversations={conversations}
         activeId={activeId}
