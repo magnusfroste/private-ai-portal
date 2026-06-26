@@ -1,6 +1,4 @@
-import { Plus, MessageSquare, Trash2, X, Shield } from "lucide-react";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { useNavigate } from "react-router-dom";
+import { Plus, MessageSquare, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Conversation } from "../types";
 import { cn } from "@/lib/utils";
@@ -24,59 +22,41 @@ export const ChatSidebar = ({
   open,
   onClose,
 }: ChatSidebarProps) => {
-  const navigate = useNavigate();
-  const { settings } = useSiteSettings();
-  const siteName = settings?.site_name || "Private AI";
-  const logoUrl = settings?.logo_url;
-
   const handleSelect = (id: string) => {
     onSelect(id);
-    onClose();
-  };
-
-  const handleNew = () => {
-    onNew();
-    onClose();
   };
 
   return (
     <>
-      {/* Overlay on mobile */}
+      {/* Overlay */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          className="fixed inset-0 bg-black/40 z-40"
           onClick={onClose}
         />
       )}
 
-      <div
+      <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 border-r border-border/50 bg-card flex flex-col h-full transition-transform duration-200 ease-in-out md:relative md:translate-x-0 md:z-0",
-          open ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 right-0 z-50 w-72 border-l border-border/50 bg-card flex flex-col h-full transition-transform duration-200 ease-in-out",
+          open ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="p-4 flex items-center justify-between">
-          <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2">
-            {logoUrl ? (
-              <img src={logoUrl} alt={siteName} className="w-6 h-6 shrink-0 object-contain" />
-            ) : (
-              <Shield className="w-6 h-6 text-primary shrink-0" />
-            )}
-            <span className="text-lg font-bold gradient-text">{siteName}</span>
-          </button>
+        <div className="p-3 flex items-center justify-between border-b border-border/50">
+          <span className="text-sm font-semibold">Conversations</span>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="md:hidden shrink-0 h-8 w-8"
+            className="shrink-0 h-8 w-8"
           >
             <X className="w-4 h-4" />
           </Button>
         </div>
 
-        <div className="px-3 pb-3">
+        <div className="px-3 py-3">
           <Button
-            onClick={handleNew}
+            onClick={onNew}
             variant="outline"
             className="w-full justify-start gap-2 text-sm"
           >
@@ -117,7 +97,7 @@ export const ChatSidebar = ({
             </p>
           )}
         </div>
-      </div>
+      </aside>
     </>
   );
 };
