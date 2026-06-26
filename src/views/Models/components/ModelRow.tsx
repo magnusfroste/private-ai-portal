@@ -12,7 +12,6 @@ const formatTokenCount = (tokens: number | null): string => {
 
 const formatCost = (cost: number | null): string => {
   if (cost === null || cost === undefined) return "—";
-  if (cost === 0) return "Gratis";
   return `$${cost}`;
 };
 
