@@ -1,4 +1,4 @@
-import { Activity, ScrollText, CreditCard, Key, Shield, User, Settings } from "lucide-react";
+import { Activity, ScrollText, CreditCard, Key, Shield, MessageSquare } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +19,7 @@ import {
 
 const mainNav = [
   { title: "Activity", url: "/dashboard", icon: Activity },
+  { title: "Chat", url: "/dashboard/chat", icon: MessageSquare },
   { title: "Logs", url: "/dashboard/logs", icon: ScrollText },
   { title: "Credits", url: "/dashboard/credits", icon: CreditCard },
   { title: "API Keys", url: "/dashboard/keys", icon: Key },
