@@ -47,7 +47,7 @@ export const EditUserDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Redigera användare</DialogTitle>
+          <DialogTitle>Edit user</DialogTitle>
           <DialogDescription>
             {user.full_name || user.email}
           </DialogDescription>
@@ -61,19 +61,19 @@ export const EditUserDialog = ({
 
           {user.litellm_budget ? (
             <div className="text-sm text-muted-foreground space-y-1">
-              <div>Nuvarande budget: <span className="font-semibold text-foreground">${user.litellm_budget.max_budget.toFixed(2)}</span></div>
-              <div>Förbrukat: <span className="font-semibold text-foreground">${user.litellm_budget.spend.toFixed(4)}</span></div>
-              <div>Kvar: <span className="font-semibold text-accent">${(user.litellm_budget.max_budget - user.litellm_budget.spend).toFixed(2)}</span></div>
+              <div>Current budget: <span className="font-semibold text-foreground">${user.litellm_budget.max_budget.toFixed(2)}</span></div>
+              <div>Spent: <span className="font-semibold text-foreground">${user.litellm_budget.spend.toFixed(4)}</span></div>
+              <div>Remaining: <span className="font-semibold text-accent">${(user.litellm_budget.max_budget - user.litellm_budget.spend).toFixed(2)}</span></div>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              {user.litellm_user_id ? "Kunde inte hämta budget" : "Ingen LiteLLM-användare skapad"}
+              {user.litellm_user_id ? "Could not fetch budget" : "No LiteLLM user created"}
             </p>
           )}
 
           {user.litellm_user_id && (
             <div className="space-y-2">
-              <Label>Ny budget (USD)</Label>
+              <Label>New budget (USD)</Label>
               <Input
                 type="number"
                 min={0}
@@ -87,11 +87,11 @@ export const EditUserDialog = ({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Avbryt
+            Cancel
           </Button>
           {user.litellm_user_id && (
             <Button onClick={handleUpdateBudget} disabled={isUpdating}>
-              {isUpdating ? "Sparar..." : "Uppdatera budget"}
+              {isUpdating ? "Saving..." : "Update budget"}
             </Button>
           )}
         </DialogFooter>

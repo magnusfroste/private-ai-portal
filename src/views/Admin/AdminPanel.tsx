@@ -41,7 +41,7 @@ export const AdminPanel = () => {
   if (isAdminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Laddar...</div>
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
       </div>
     );
   }
@@ -50,11 +50,11 @@ export const AdminPanel = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <Shield className="w-12 h-12 text-destructive" />
-        <h1 className="text-2xl font-bold">Åtkomst nekad</h1>
-        <p className="text-muted-foreground">Du har inte admin-behörighet.</p>
+        <h1 className="text-2xl font-bold">Access denied</h1>
+        <p className="text-muted-foreground">You don't have admin permissions.</p>
         <Button onClick={() => navigate("/dashboard")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Tillbaka till Dashboard
+          Back to Dashboard
         </Button>
       </div>
     );
@@ -81,27 +81,27 @@ export const AdminPanel = () => {
           <TabsList>
             <TabsTrigger value="users" className="flex items-center gap-1.5">
               <Users className="w-4 h-4" />
-              Användare
+              Users
             </TabsTrigger>
             <TabsTrigger value="models" className="flex items-center gap-1.5">
               <Cpu className="w-4 h-4" />
-              Modeller
+              Models
             </TabsTrigger>
             <TabsTrigger value="config" className="flex items-center gap-1.5">
               <Settings className="w-4 h-4" />
-              Konfiguration
+              Configuration
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-6">
             {isLoading && (
               <div className="text-center py-12 text-muted-foreground">
-                Laddar användare...
+                Loading users...
               </div>
             )}
             {isError && (
               <div className="text-center py-12 text-destructive">
-                Kunde inte ladda användare. Försök igen.
+                Failed to load users. Please try again.
               </div>
             )}
             {!isLoading && !isError && (

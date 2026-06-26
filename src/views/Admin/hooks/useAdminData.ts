@@ -20,10 +20,10 @@ export const useAdminData = () => {
       adminService.updateLitellmBudget(userId, maxBudget),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-      toast.success("Budget uppdaterat");
+      toast.success("Budget updated");
     },
     onError: (error: Error) => {
-      toast.error(`Kunde inte uppdatera budget: ${error.message}`);
+      toast.error(`Failed to update budget: ${error.message}`);
     },
   });
 

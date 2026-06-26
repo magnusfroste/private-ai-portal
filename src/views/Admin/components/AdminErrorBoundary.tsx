@@ -29,11 +29,11 @@ export class AdminErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center gap-4">
           <Shield className="w-12 h-12 text-destructive" />
-          <h1 className="text-2xl font-bold">Något gick fel</h1>
-          <p className="text-muted-foreground">Admin-panelen kunde inte laddas.</p>
+          <h1 className="text-2xl font-bold">Something went wrong</h1>
+          <p className="text-muted-foreground">The admin panel failed to load.</p>
           <Button onClick={() => this.setState({ hasError: false })}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            Försök igen
+            Try again
           </Button>
         </div>
       );

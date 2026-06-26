@@ -27,12 +27,12 @@ export const CreditOverviewPanel = () => {
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-primary" />
-            Total intäkt
+            Total revenue
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-3xl font-bold">${data?.totalRevenue?.toFixed(2) || "0.00"}</p>
-          <p className="text-sm text-muted-foreground">{data?.transactions?.length || 0} transaktioner</p>
+          <p className="text-sm text-muted-foreground">{data?.transactions?.length || 0} transactions</p>
         </CardContent>
       </Card>
 
@@ -40,10 +40,10 @@ export const CreditOverviewPanel = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Användare</TableHead>
-              <TableHead>Belopp</TableHead>
+              <TableHead>User</TableHead>
+              <TableHead>Amount</TableHead>
               <TableHead>Credits</TableHead>
-              <TableHead>Datum</TableHead>
+              <TableHead>Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -65,7 +65,7 @@ export const CreditOverviewPanel = () => {
             {(!data?.transactions || data.transactions.length === 0) && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                  Inga transaktioner ännu
+                  No transactions yet
                 </TableCell>
               </TableRow>
             )}

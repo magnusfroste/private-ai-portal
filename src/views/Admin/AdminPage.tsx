@@ -65,19 +65,19 @@ export const AdminPage = () => {
         <Users className="w-8 h-8 text-primary" />
         <div>
           <h1 className="text-3xl font-bold">Admin</h1>
-          <p className="text-muted-foreground text-sm">Hantera användare, modeller, krediter och inställningar</p>
+          <p className="text-muted-foreground text-sm">Manage users, models, credits and settings</p>
         </div>
       </div>
 
       <Tabs defaultValue="users">
         <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="users">Användare</TabsTrigger>
-          <TabsTrigger value="credits">Krediter</TabsTrigger>
-          <TabsTrigger value="keys">API-nycklar</TabsTrigger>
-          <TabsTrigger value="usage">Användning</TabsTrigger>
-          <TabsTrigger value="models">Modeller</TabsTrigger>
-          <TabsTrigger value="website">Webbplats</TabsTrigger>
-          <TabsTrigger value="settings">Inställningar</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="credits">Credits</TabsTrigger>
+          <TabsTrigger value="keys">API Keys</TabsTrigger>
+          <TabsTrigger value="usage">Usage</TabsTrigger>
+          <TabsTrigger value="models">Models</TabsTrigger>
+          <TabsTrigger value="website">Website</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-6 space-y-6">

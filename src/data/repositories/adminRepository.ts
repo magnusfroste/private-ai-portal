@@ -64,13 +64,13 @@ export class AdminRepository {
         }
 
         if (err instanceof DOMException && err.name === "AbortError") {
-          throw new Error("Anropet tog för lång tid. Försök igen.");
+          throw new Error("The request took too long. Please try again.");
         }
         throw err;
       }
     }
 
-    throw new Error("Alla försök misslyckades");
+    throw new Error("All attempts failed");
   }
 
   async checkIsAdmin(): Promise<boolean> {

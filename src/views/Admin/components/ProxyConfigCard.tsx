@@ -42,7 +42,7 @@ export const ProxyConfigCard = () => {
       setStatus(data as ProxyStatus);
     } catch (err) {
       console.error("Proxy check error:", err);
-      setStatus({ has_key: false, key_prefix: null, connected: false, error: "Kunde inte köra kontrollen" });
+      setStatus({ has_key: false, key_prefix: null, connected: false, error: "Could not run the check" });
     } finally {
       setChecking(false);
     }
@@ -54,7 +54,7 @@ export const ProxyConfigCard = () => {
     save({ ...settings, api_base_url: trimmed });
     setEditingUrl(false);
     setStatus(null); // Reset so user re-checks with new URL
-    toast.success("API URL sparad — klicka 'Kontrollera' för att testa");
+    toast.success("API URL saved — click 'Check' to test");
   };
 
   return (
@@ -62,10 +62,10 @@ export const ProxyConfigCard = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Server className="w-5 h-5" />
-          LLM Proxy-konfiguration
+          LLM Proxy configuration
         </CardTitle>
         <CardDescription>
-          Anslutning till LiteLLM proxy. Stöd för fler proxies kommer snart.
+          Connection to the LiteLLM proxy. Support for more proxies coming soon.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -82,16 +82,16 @@ export const ProxyConfigCard = () => {
               />
               <Button size="sm" onClick={handleSaveUrl} disabled={isSaving}>
                 <Save className="w-3.5 h-3.5 mr-1.5" />
-                Spara
+                Save
               </Button>
               <Button size="sm" variant="ghost" onClick={() => { setEditingUrl(false); setUrlDraft(settings?.api_base_url || ""); }}>
-                Avbryt
+                Cancel
               </Button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <code className="text-sm bg-muted px-2 py-1 rounded font-mono flex-1 truncate">
-                {settings?.api_base_url || "Ej konfigurerad"}
+                {settings?.api_base_url || "Not configured"}
               </code>
               <Button size="sm" variant="ghost" onClick={() => setEditingUrl(true)}>
                 <Pencil className="w-3.5 h-3.5" />
@@ -105,18 +105,18 @@ export const ProxyConfigCard = () => {
         {!status && !checking ? (
           <Button onClick={checkStatus} variant="outline" className="w-full md:w-auto">
             <RefreshCw className="w-4 h-4 mr-2" />
-            Kontrollera proxy-anslutning
+            Check proxy connection
           </Button>
         ) : checking ? (
           <div className="flex items-center gap-2 text-muted-foreground">
             <RefreshCw className="w-4 h-4 animate-spin" />
-            Kontrollerar...
+            Checking...
           </div>
         ) : status && (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">LiteLLM</Badge>
-              <span className="text-xs text-muted-foreground">Aktiv proxy</span>
+              <span className="text-xs text-muted-foreground">Active proxy</span>
             </div>
 
             {/* Key status */}
@@ -124,17 +124,17 @@ export const ProxyConfigCard = () => {
               {status.has_key ? (
                 <Badge variant="default" className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  Master Key konfigurerad
+                  Master Key configured
                 </Badge>
               ) : (
                 <Badge variant="destructive" className="flex items-center gap-1.5">
                   <XCircle className="w-3.5 h-3.5" />
-                  Master Key saknas
+                  Master Key missing
                 </Badge>
               )}
               {status.key_prefix && (
                 <span className="text-xs text-muted-foreground font-mono">
-                  Nyckel: {status.key_prefix}
+                  Key: {status.key_prefix}
                 </span>
               )}
             </div>
@@ -145,9 +145,9 @@ export const ProxyConfigCard = () => {
                 <Separator />
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <p className="text-muted-foreground text-xs">Anslutning</p>
+                    <p className="text-muted-foreground text-xs">Connection</p>
                     <p className={status.connected ? "text-emerald-500 font-medium" : "text-destructive font-medium"}>
-                      {status.connected ? "Ansluten ✓" : "Kunde inte nå proxy"}
+                      {status.connected ? "Connected ✓" : "Could not reach proxy"}
                     </p>
                   </div>
                   {status.litellm_version && (
@@ -158,13 +158,13 @@ export const ProxyConfigCard = () => {
                   )}
                   {status.model_count !== undefined && (
                     <div>
-                      <p className="text-muted-foreground text-xs">Modeller</p>
-                      <p className="font-medium">{status.model_count} aktiva</p>
+                      <p className="text-muted-foreground text-xs">Models</p>
+                      <p className="font-medium">{status.model_count} active</p>
                     </div>
                   )}
                   {status.health_response && (
                     <div className="col-span-2">
-                      <p className="text-muted-foreground text-xs">Health-svar</p>
+                      <p className="text-muted-foreground text-xs">Health response</p>
                       <p className="font-mono text-xs text-muted-foreground truncate">{status.health_response}</p>
                     </div>
                   )}
@@ -186,15 +186,15 @@ export const ProxyConfigCard = () => {
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
                   <div className="space-y-2 text-sm">
-                    <p className="font-medium text-destructive">LITELLM_MASTER_KEY är inte konfigurerad</p>
+                    <p className="font-medium text-destructive">LITELLM_MASTER_KEY is not configured</p>
                     <p className="text-muted-foreground">
-                      Portalen behöver en master key för att kommunicera med din LiteLLM-proxy.
+                      The portal needs a master key to communicate with your LiteLLM proxy.
                     </p>
                     <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                      <li>Hitta din LiteLLM master key i din <code className="text-xs bg-muted px-1 py-0.5 rounded">config.yaml</code></li>
-                      <li>Gå till <strong>Lovable Cloud → Secrets</strong></li>
-                      <li>Lägg till en secret med namn <code className="text-xs bg-muted px-1 py-0.5 rounded">LITELLM_MASTER_KEY</code></li>
-                      <li>Klistra in din master key som värde</li>
+                      <li>Find your LiteLLM master key in your <code className="text-xs bg-muted px-1 py-0.5 rounded">config.yaml</code></li>
+                      <li>Go to <strong>Lovable Cloud → Secrets</strong></li>
+                      <li>Add a secret named <code className="text-xs bg-muted px-1 py-0.5 rounded">LITELLM_MASTER_KEY</code></li>
+                      <li>Paste your master key as the value</li>
                     </ol>
                   </div>
                 </div>
@@ -205,14 +205,14 @@ export const ProxyConfigCard = () => {
             <div className="flex flex-wrap gap-2">
               <Button onClick={checkStatus} disabled={checking} variant="outline" size="sm">
                 <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${checking ? "animate-spin" : ""}`} />
-                Kontrollera igen
+                Check again
               </Button>
             </div>
 
             <div className="rounded-lg border border-border/50 bg-muted/30 p-3 mt-2">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Plus className="w-3.5 h-3.5" />
-                <span>Stöd för fler LLM-proxies (OpenRouter, Custom OpenAI-compatible) kommer i framtida versioner.</span>
+                <span>Support for more LLM proxies (OpenRouter, custom OpenAI-compatible) coming in future versions.</span>
               </div>
             </div>
           </div>

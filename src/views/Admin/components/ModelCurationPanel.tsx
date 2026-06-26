@@ -49,22 +49,22 @@ export const ModelCurationPanel = () => {
         <div>
           <CardTitle className="flex items-center gap-2">
             <Cpu className="w-5 h-5 text-primary" />
-            Modellkurering
+            Model curation
           </CardTitle>
           <CardDescription>
-            {enabledCount} av {models.length} modeller aktiverade · Synka från LiteLLM och välj vilka som syns i portalen
+            {enabledCount} of {models.length} models enabled · Sync from LiteLLM and choose which appear in the portal
           </CardDescription>
         </div>
         <Button variant="outline" size="sm" onClick={() => syncModels()} disabled={isSyncing}>
           <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
-          {isSyncing ? "Synkar..." : "Synka modeller"}
+          {isSyncing ? "Syncing..." : "Sync models"}
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Sök modeller..."
+            placeholder="Search models..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 h-9"
@@ -72,12 +72,12 @@ export const ModelCurationPanel = () => {
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-muted-foreground py-4">Laddar modeller...</p>
+          <p className="text-sm text-muted-foreground py-4">Loading models...</p>
         ) : filtered.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4">
             {models.length === 0
-              ? 'Inga modeller — klicka "Synka modeller" för att hämta från LiteLLM'
-              : "Inga modeller matchar sökningen"}
+              ? 'No models — click "Sync models" to fetch from LiteLLM'
+              : "No models match the search"}
           </p>
         ) : (
           <div className="divide-y divide-border/50">
@@ -105,7 +105,7 @@ export const ModelCurationPanel = () => {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {model.is_default ? "Standardmodell" : "Sätt som standard"}
+                      {model.is_default ? "Default model" : "Set as default"}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -143,7 +143,7 @@ export const ModelCurationPanel = () => {
                         onKeyDown={(e) => e.key === "Enter" && handleHfSave(model.id)}
                       />
                       <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => handleHfSave(model.id)}>
-                        Spara
+                        Save
                       </Button>
                       <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setEditingHf(null)}>
                         ✕
@@ -177,8 +177,8 @@ export const ModelCurationPanel = () => {
                         </TooltipTrigger>
                         <TooltipContent>
                           {model.huggingface_url
-                            ? "Öppna HuggingFace (dubbelklicka för att redigera)"
-                            : "Lägg till HuggingFace-länk"}
+                            ? "Open HuggingFace (double-click to edit)"
+                            : "Add HuggingFace link"}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>

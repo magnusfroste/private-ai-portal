@@ -51,10 +51,10 @@ export const AdminSettingsPanel = () => {
         .update({ value: settings.default_user_budget_usd as never, updated_at: new Date().toISOString() })
         .eq("key", "default_user_budget_usd");
       if (error) throw error;
-      toast.success("Inställningar sparade");
+      toast.success("Settings saved");
     } catch (error) {
       console.error("Error saving settings:", error);
-      toast.error("Kunde inte spara inställningar");
+      toast.error("Failed to save settings");
     } finally {
       setSaving(false);
     }
@@ -64,7 +64,7 @@ export const AdminSettingsPanel = () => {
     return (
       <Card className="glass-card">
         <CardContent className="py-8 text-center text-muted-foreground">
-          Laddar inställningar...
+          Loading settings...
         </CardContent>
       </Card>
     );
@@ -75,15 +75,15 @@ export const AdminSettingsPanel = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="w-5 h-5" />
-          Standardinställningar
+          Default settings
         </CardTitle>
         <CardDescription>
-          Dessa värden påverkar nya användare
+          These values apply to new users
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="budget">Startbudget (USD)</Label>
+          <Label htmlFor="budget">Starting budget (USD)</Label>
           <Input
             id="budget"
             type="number"
@@ -98,13 +98,13 @@ export const AdminSettingsPanel = () => {
             }
           />
           <p className="text-xs text-muted-foreground">
-            LiteLLM user max_budget vid registrering
+            LiteLLM user max_budget at sign-up
           </p>
         </div>
 
         <Button onClick={handleSave} disabled={saving} className="w-full md:w-auto">
           <Save className="w-4 h-4 mr-2" />
-          {saving ? "Sparar..." : "Spara inställningar"}
+          {saving ? "Saving..." : "Save settings"}
         </Button>
       </CardContent>
     </Card>

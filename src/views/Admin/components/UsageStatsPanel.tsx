@@ -25,7 +25,7 @@ export const UsageStatsPanel = () => {
       <div className="grid grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Total kostnad</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Total cost</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">${data?.totalCost?.toFixed(4) || "0"}</p>
@@ -33,7 +33,7 @@ export const UsageStatsPanel = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Totala tokens</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Total tokens</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{(data?.totalTokens || 0).toLocaleString()}</p>
@@ -52,14 +52,14 @@ export const UsageStatsPanel = () => {
       <div>
         <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-primary" />
-          Topp-modeller
+          Top models
         </h3>
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Modell</TableHead>
-                <TableHead>Kostnad</TableHead>
+                <TableHead>Model</TableHead>
+                <TableHead>Cost</TableHead>
                 <TableHead>Tokens</TableHead>
                 <TableHead>Requests</TableHead>
               </TableRow>
@@ -76,7 +76,7 @@ export const UsageStatsPanel = () => {
               {(!data?.topModels || data.topModels.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                    Ingen användning registrerad
+                    No usage recorded
                   </TableCell>
                 </TableRow>
               )}
@@ -86,13 +86,13 @@ export const UsageStatsPanel = () => {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold mb-3">Topp-användare</h3>
+        <h3 className="text-lg font-semibold mb-3">Top users</h3>
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Användare</TableHead>
-                <TableHead>Kostnad</TableHead>
+                <TableHead>User</TableHead>
+                <TableHead>Cost</TableHead>
                 <TableHead>Requests</TableHead>
               </TableRow>
             </TableHeader>
@@ -112,7 +112,7 @@ export const UsageStatsPanel = () => {
               {(!data?.topUsers || data.topUsers.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                    Ingen användning registrerad
+                    No usage recorded
                   </TableCell>
                 </TableRow>
               )}

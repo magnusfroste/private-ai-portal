@@ -26,28 +26,28 @@ export const ApiKeyOverviewPanel = () => {
     <div className="space-y-6">
       <div className="flex gap-4">
         <div className="rounded-lg border p-4 flex-1">
-          <p className="text-sm text-muted-foreground">Aktiva nycklar</p>
+          <p className="text-sm text-muted-foreground">Active keys</p>
           <p className="text-2xl font-bold text-primary">{activeCount}</p>
         </div>
         <div className="rounded-lg border p-4 flex-1">
-          <p className="text-sm text-muted-foreground">Revokerade</p>
+          <p className="text-sm text-muted-foreground">Revoked</p>
           <p className="text-2xl font-bold text-destructive">{revokedCount}</p>
         </div>
         <div className="rounded-lg border p-4 flex-1">
-          <p className="text-sm text-muted-foreground">Totalt</p>
+          <p className="text-sm text-muted-foreground">Total</p>
           <p className="text-2xl font-bold">{data?.keys?.length || 0}</p>
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold mb-3">Tokens per användare</h3>
+        <h3 className="text-lg font-semibold mb-3">Tokens per user</h3>
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Användare</TableHead>
-                <TableHead>Nycklar (aktiva/totalt)</TableHead>
-                <TableHead>Totala tokens</TableHead>
+                <TableHead>User</TableHead>
+                <TableHead>Keys (active/total)</TableHead>
+                <TableHead>Total tokens</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -70,7 +70,7 @@ export const ApiKeyOverviewPanel = () => {
               {(!data?.userSummary || data.userSummary.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                    Inga användare med nycklar
+                    No users with keys
                   </TableCell>
                 </TableRow>
               )}

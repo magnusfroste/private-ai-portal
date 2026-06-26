@@ -22,7 +22,7 @@ export const useCuratedModels = (enabledOnly = false) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
-    onError: () => toast.error("Kunde inte uppdatera modell"),
+    onError: () => toast.error("Failed to update model"),
   });
 
   const hfUrlMutation = useMutation({
@@ -31,25 +31,25 @@ export const useCuratedModels = (enabledOnly = false) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
     },
-    onError: () => toast.error("Kunde inte spara HuggingFace-länk"),
+    onError: () => toast.error("Failed to save HuggingFace link"),
   });
 
   const syncMutation = useMutation({
     mutationFn: () => curatedModelService.syncModels(),
     onSuccess: (count) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success(`${count} modeller synkade från LiteLLM`);
+      toast.success(`${count} models synced from LiteLLM`);
     },
-    onError: () => toast.error("Kunde inte synka modeller"),
+    onError: () => toast.error("Failed to sync models"),
   });
 
   const setDefaultMutation = useMutation({
     mutationFn: (id: string) => curatedModelService.setDefault(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success("Standardmodell uppdaterad");
+      toast.success("Default model updated");
     },
-    onError: () => toast.error("Kunde inte sätta standardmodell"),
+    onError: () => toast.error("Failed to set default model"),
   });
 
   return {

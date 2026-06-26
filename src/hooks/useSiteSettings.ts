@@ -17,10 +17,10 @@ export const useSiteSettings = () => {
     mutationFn: (settings: SiteSettings) => siteSettingsService.saveSettings(settings),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["site-settings"] });
-      toast.success("Inställningar sparade");
+      toast.success("Settings saved");
     },
     onError: (error: Error) => {
-      toast.error(`Kunde inte spara: ${error.message}`);
+      toast.error(`Failed to save: ${error.message}`);
     },
   });
 

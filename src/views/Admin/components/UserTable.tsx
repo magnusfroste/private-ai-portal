@@ -23,13 +23,13 @@ export const UserTable = ({ users, onEdit, isUpdating }: UserTableProps) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Namn</TableHead>
-            <TableHead>E-post</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
             <TableHead>Budget</TableHead>
             <TableHead>Spend</TableHead>
-            <TableHead>Kvar</TableHead>
-            <TableHead>Registrerad</TableHead>
-            <TableHead className="text-right">Åtgärder</TableHead>
+            <TableHead>Remaining</TableHead>
+            <TableHead>Registered</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -92,7 +92,7 @@ export const UserTable = ({ users, onEdit, isUpdating }: UserTableProps) => {
           {users.length === 0 && (
             <TableRow>
               <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                Inga användare hittades
+                No users found
               </TableCell>
             </TableRow>
           )}

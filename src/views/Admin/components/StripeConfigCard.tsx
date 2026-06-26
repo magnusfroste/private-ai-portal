@@ -38,8 +38,8 @@ export const StripeConfigCard = () => {
       setStatus(data as StripeStatus);
     } catch (err) {
       console.error("Stripe status error:", err);
-      toast.error("Kunde inte hämta Stripe-status");
-      setStatus({ connected: false, error: "Kunde inte ansluta", has_customers: false });
+      toast.error("Could not fetch Stripe status");
+      setStatus({ connected: false, error: "Could not connect", has_customers: false });
     } finally {
       setLoading(false);
     }
@@ -50,17 +50,17 @@ export const StripeConfigCard = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CreditCard className="w-5 h-5" />
-          Stripe-konfiguration
+          Stripe configuration
         </CardTitle>
         <CardDescription>
-          Kontrollera anslutning och kontostatus för Stripe
+          Check connection and account status for Stripe
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {!status ? (
           <Button onClick={checkStatus} disabled={loading} variant="outline" className="w-full md:w-auto">
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            {loading ? "Kontrollerar..." : "Kontrollera Stripe-anslutning"}
+            {loading ? "Checking..." : "Check Stripe connection"}
           </Button>
         ) : (
           <div className="space-y-4">
@@ -69,17 +69,17 @@ export const StripeConfigCard = () => {
               {status.connected ? (
                 <Badge variant="default" className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  Ansluten
+                  Connected
                 </Badge>
               ) : (
                 <Badge variant="destructive" className="flex items-center gap-1.5">
                   <XCircle className="w-3.5 h-3.5" />
-                  Ej ansluten
+                  Not connected
                 </Badge>
               )}
               {status.key_prefix && (
                 <span className="text-xs text-muted-foreground font-mono">
-                  Nyckel: {status.key_prefix}
+                  Key: {status.key_prefix}
                 </span>
               )}
             </div>
@@ -93,24 +93,24 @@ export const StripeConfigCard = () => {
                 <Separator />
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <p className="text-muted-foreground text-xs">Konto-ID</p>
+                    <p className="text-muted-foreground text-xs">Account ID</p>
                     <p className="font-mono text-xs">{status.account.id}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Företagsnamn</p>
+                    <p className="text-muted-foreground text-xs">Business name</p>
                     <p className="font-medium">{status.account.business_name}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Land</p>
+                    <p className="text-muted-foreground text-xs">Country</p>
                     <p>{status.account.country}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Valuta</p>
+                    <p className="text-muted-foreground text-xs">Currency</p>
                     <p>{status.account.default_currency}</p>
                   </div>
                   {status.account.email && (
                     <div className="col-span-2">
-                      <p className="text-muted-foreground text-xs">E-post</p>
+                      <p className="text-muted-foreground text-xs">Email</p>
                       <p>{status.account.email}</p>
                     </div>
                   )}
@@ -121,13 +121,13 @@ export const StripeConfigCard = () => {
                     <Separator />
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-muted-foreground text-xs">Tillgängligt saldo</p>
+                        <p className="text-muted-foreground text-xs">Available balance</p>
                         <p className="font-bold text-primary">
                           ${status.balance.available.toFixed(2)} {status.balance.currency}
                         </p>
                       </div>
                       <div>
-                        <p className="text-muted-foreground text-xs">Väntande</p>
+                        <p className="text-muted-foreground text-xs">Pending</p>
                         <p className="font-medium">
                           ${status.balance.pending.toFixed(2)} {status.balance.currency}
                         </p>
@@ -143,7 +143,7 @@ export const StripeConfigCard = () => {
             <div className="flex flex-wrap gap-2">
               <Button onClick={checkStatus} disabled={loading} variant="outline" size="sm">
                 <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
-                Uppdatera
+                Refresh
               </Button>
               <Button
                 variant="outline"
@@ -156,7 +156,7 @@ export const StripeConfigCard = () => {
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Behöver du byta Stripe-konto? Uppdatera STRIPE_SECRET_KEY via Lovable Cloud-inställningarna.
+              Need to switch Stripe account? Update STRIPE_SECRET_KEY in the Lovable Cloud settings.
             </p>
           </div>
         )}
