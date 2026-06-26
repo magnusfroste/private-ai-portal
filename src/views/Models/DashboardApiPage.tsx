@@ -7,7 +7,10 @@ export const DashboardApiPage = () => {
   const { models } = useCuratedModels(true);
   const { settings } = useSiteSettings();
 
-  const defaultModel = models.find((m) => m.is_default)?.id || models[0]?.id || "gpt-4o";
+  const defaultModel =
+    models.find((m) => m.is_default)?.model_name ||
+    models[0]?.model_name ||
+    "gpt-4o";
   const baseUrl = settings?.api_base_url || "https://your-lite-llm-proxy.example.com";
 
   return (
